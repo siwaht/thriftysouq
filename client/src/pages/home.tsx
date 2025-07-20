@@ -24,6 +24,7 @@ export default function Home() {
   const [showFilters, setShowFilters] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("featured");
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
@@ -34,10 +35,28 @@ export default function Home() {
     ? products 
     : products.filter(product => product.category === categoryFilter);
 
-  // Use smart-filtered products or category-filtered products
-  const displayProducts = filteredProducts.length > 0 || showFilters 
+  // Sort products based on selected sort option
+  const sortProducts = (products: Product[]) => {
+    const sorted = [...products];
+    switch (sortBy) {
+      case "price-low":
+        return sorted.sort((a, b) => a.discountedPrice - b.discountedPrice);
+      case "price-high":
+        return sorted.sort((a, b) => b.discountedPrice - a.discountedPrice);
+      case "newest":
+        return sorted.sort((a, b) => b.id - a.id);
+      case "featured":
+      default:
+        return sorted.sort((a, b) => b.discountPercentage - a.discountPercentage);
+    }
+  };
+
+  // Use smart-filtered products or category-filtered products, then sort
+  const baseProducts = filteredProducts.length > 0 || showFilters 
     ? filteredProducts 
     : categoryFilteredProducts;
+  
+  const displayProducts = sortProducts(baseProducts);
 
   // Listen for category filter changes from navigation
   useEffect(() => {
@@ -110,8 +129,9 @@ export default function Home() {
               
               <div className="flex items-center gap-2">
                 <select 
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
                   className="text-sm bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                  defaultValue="featured"
                 >
                   <option value="featured">Featured</option>
                   <option value="price-low">Price: Low to High</option>

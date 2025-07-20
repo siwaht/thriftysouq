@@ -46,31 +46,16 @@ export default function ProductGrid({ products, isLoading, onProductClick, onExp
   }
 
   return (
-    <section id="products" className="py-8 sm:py-12 bg-white">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div>
-            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-              Curated <span className="text-emerald-600">Collection</span>
-            </h3>
-            <p className="text-slate-600">Exceptional luxury brands</p>
-          </div>
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="discount-desc">Best Deals</SelectItem>
-              <SelectItem value="price-asc">Price: Low</SelectItem>
-              <SelectItem value="price-desc">Price: High</SelectItem>
-              <SelectItem value="name-asc">Name A-Z</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <section id="products" className="pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Clean product grid with subtle fade-in animation */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {sortedProducts.map((product, index) => (
-            <div key={product.id} style={{ animationDelay: `${index * 0.1}s` }}>
+            <div 
+              key={product.id} 
+              className="opacity-0 animate-fade-in"
+              style={{ animationDelay: `${index * 0.05}s`, animationFillMode: 'forwards' }}
+            >
               <ProductCard 
                 product={product} 
                 onProductClick={onProductClick}
@@ -80,11 +65,17 @@ export default function ProductGrid({ products, isLoading, onProductClick, onExp
           ))}
         </div>
 
+        {/* Enhanced empty state */}
         {products.length === 0 && !isLoading && (
-          <div className="text-center py-12 sm:py-16">
-            <div className="max-w-md mx-auto">
-              <h3 className="text-2xl font-light text-gray-600 mb-4">No products found</h3>
-              <p className="text-gray-500 mb-6">Check back later for new luxury arrivals.</p>
+          <div className="text-center py-16">
+            <div className="max-w-sm mx-auto">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-slate-100 flex items-center justify-center">
+                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-medium text-slate-900 mb-2">No products found</h3>
+              <p className="text-slate-500">Try adjusting your filters or check back later for new arrivals</p>
             </div>
           </div>
         )}
