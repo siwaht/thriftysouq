@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Eye, RotateCcw } from "lucide-react";
+import { Save, Eye, RotateCcw, Brain, Sparkles, Zap } from "lucide-react";
 import type { HeroBanner, InsertHeroBanner } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -98,6 +98,67 @@ export function HeroBannerAdmin() {
       isActive: true,
     });
   };
+
+  // AI auto-fill mutations
+  const aiOpenAIMutation = useMutation({
+    mutationFn: () => apiRequest("/api/admin/ai-marketing/generate-banner", { 
+      method: "POST", 
+      body: JSON.stringify({ aiProvider: "openai" }) 
+    }),
+    onSuccess: (data: { content: any }) => {
+      setFormData(prev => ({
+        ...prev,
+        badgeText: data.content.badgeText || prev.badgeText,
+        mainTitle: data.content.mainTitle || prev.mainTitle,
+        highlightTitle: data.content.highlightTitle || prev.highlightTitle,
+        subtitle: data.content.subtitle || prev.subtitle,
+        description: data.content.description || prev.description,
+        buttonText: data.content.buttonText || prev.buttonText,
+        footerText: data.content.footerText || prev.footerText,
+      }));
+      toast({
+        title: "OpenAI Content Generated",
+        description: "Form auto-filled with AI-generated sales pitch based on your products.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "AI Generation Failed",
+        description: "Could not generate content with OpenAI.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const aiGeminiMutation = useMutation({
+    mutationFn: () => apiRequest("/api/admin/ai-marketing/generate-banner", { 
+      method: "POST", 
+      body: JSON.stringify({ aiProvider: "gemini" }) 
+    }),
+    onSuccess: (data: { content: any }) => {
+      setFormData(prev => ({
+        ...prev,
+        badgeText: data.content.badgeText || prev.badgeText,
+        mainTitle: data.content.mainTitle || prev.mainTitle,
+        highlightTitle: data.content.highlightTitle || prev.highlightTitle,
+        subtitle: data.content.subtitle || prev.subtitle,
+        description: data.content.description || prev.description,
+        buttonText: data.content.buttonText || prev.buttonText,
+        footerText: data.content.footerText || prev.footerText,
+      }));
+      toast({
+        title: "Gemini Content Generated",
+        description: "Form auto-filled with AI-generated sales pitch based on your products.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "AI Generation Failed",
+        description: "Could not generate content with Gemini.",
+        variant: "destructive",
+      });
+    },
+  });
 
   if (isLoading) {
     return (
@@ -253,7 +314,44 @@ export function HeroBannerAdmin() {
                 />
               </div>
 
-              <div className="flex justify-end space-x-4">
+              {/* AI Auto-fill Buttons */}
+              <div className="border-t pt-6">
+                <Label className="text-sm font-medium mb-3 block">AI-Powered Auto-Fill</Label>
+                <p className="text-sm text-gray-600 mb-4">Generate compelling sales content based on your current product catalog</p>
+                <div className="flex gap-3 mb-4">
+                  <Button
+                    type="button"
+                    onClick={() => aiOpenAIMutation.mutate()}
+                    disabled={aiOpenAIMutation.isPending}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Brain className="w-4 h-4 mr-2" />
+                    {aiOpenAIMutation.isPending ? "Generating..." : "Auto-fill with OpenAI"}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => aiGeminiMutation.mutate()}
+                    disabled={aiGeminiMutation.isPending}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    {aiGeminiMutation.isPending ? "Generating..." : "Auto-fill with Gemini"}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex justify-between">
+                <Button
+                  type="button"
+                  onClick={resetToDefaults}
+                  variant="outline"
+                  className="text-gray-600"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Reset to Defaults
+                </Button>
                 <Button
                   type="submit"
                   disabled={updateMutation.isPending}
