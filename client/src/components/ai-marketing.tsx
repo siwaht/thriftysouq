@@ -49,7 +49,7 @@ export function AIMarketing() {
 
   // Analyze products
   const analyzeProductsMutation = useMutation({
-    mutationFn: () => apiRequest("/api/admin/ai-marketing/analyze", "POST", {}),
+    mutationFn: () => apiRequest("/api/admin/ai-marketing/analyze", { method: "POST" }),
     onSuccess: (data: ProductAnalysis) => {
       setProductAnalysis(data);
       toast({
@@ -58,6 +58,7 @@ export function AIMarketing() {
       });
     },
     onError: (error) => {
+      console.error("Analysis error:", error);
       toast({
         title: "Analysis Failed",
         description: "Could not analyze products with AI.",
@@ -69,7 +70,10 @@ export function AIMarketing() {
   // Generate banner content
   const generateBannerMutation = useMutation({
     mutationFn: ({ aiProvider }: { aiProvider: string }) =>
-      apiRequest("/api/admin/ai-marketing/generate-banner", "POST", { aiProvider }),
+      apiRequest("/api/admin/ai-marketing/generate-banner", { 
+        method: "POST", 
+        body: JSON.stringify({ aiProvider }) 
+      }),
     onSuccess: (data: { content: MarketingContent; provider: string }) => {
       setGeneratedContent(data.content);
       toast({
@@ -88,7 +92,7 @@ export function AIMarketing() {
 
   // Generate dual AI content
   const generateDualAIMutation = useMutation({
-    mutationFn: () => apiRequest("/api/admin/ai-marketing/generate-dual", "POST", {}),
+    mutationFn: () => apiRequest("/api/admin/ai-marketing/generate-dual", { method: "POST" }),
     onSuccess: (data: DualAIResult) => {
       setDualAIResult(data);
       toast({
@@ -108,7 +112,10 @@ export function AIMarketing() {
   // Apply content to banner
   const applyBannerMutation = useMutation({
     mutationFn: (content: MarketingContent) =>
-      apiRequest("/api/admin/ai-marketing/apply-banner", "POST", { content }),
+      apiRequest("/api/admin/hero-banner", { 
+        method: "PUT", 
+        body: JSON.stringify(content) 
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/hero-banner"] });
       toast({
