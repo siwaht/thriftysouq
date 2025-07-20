@@ -8,13 +8,15 @@ import type { Product } from "@/lib/types";
 
 interface ProductCardProps {
   product: Product;
+  onProductClick?: (product: Product) => void;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, onProductClick }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when clicking the button
     addToCart(product);
     toast({
       title: "Added to cart",
@@ -23,8 +25,17 @@ export default function ProductCard({ product }: ProductCardProps) {
     });
   };
 
+  const handleCardClick = () => {
+    if (onProductClick) {
+      onProductClick(product);
+    }
+  };
+
   return (
-    <Card className="group card-modern card-hover overflow-hidden mobile-tap will-change-transform animate-scale-in">
+    <Card 
+      className="group card-modern card-hover overflow-hidden mobile-tap will-change-transform animate-scale-in cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="relative overflow-hidden">
         <img 
           src={product.image} 

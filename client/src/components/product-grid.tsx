@@ -6,9 +6,10 @@ import type { Product } from "@/lib/types";
 interface ProductGridProps {
   products: Product[];
   isLoading: boolean;
+  onProductClick?: (product: Product) => void;
 }
 
-export default function ProductGrid({ products, isLoading }: ProductGridProps) {
+export default function ProductGrid({ products, isLoading, onProductClick }: ProductGridProps) {
   const [sortBy, setSortBy] = useState("discount-desc");
 
   // Sort products
@@ -77,7 +78,7 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
           {sortedProducts.map((product, index) => (
             <div key={product.id} style={{ animationDelay: `${index * 0.1}s` }}>
-              <ProductCard product={product} />
+              <ProductCard product={product} onProductClick={onProductClick} />
             </div>
           ))}
         </div>
