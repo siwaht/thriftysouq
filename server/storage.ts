@@ -1,4 +1,4 @@
-import { products, orders, orderItems, menuItems, webhooks, type Product, type Order, type OrderItem, type MenuItem, type Webhook, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem, type InsertWebhook } from "@shared/schema";
+import { products, orders, orderItems, menuItems, webhooks, adminUsers, type Product, type Order, type OrderItem, type MenuItem, type Webhook, type AdminUser, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem, type InsertWebhook, type InsertAdminUser } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
 
@@ -30,6 +30,9 @@ export interface IStorage {
   updateWebhook(id: number, webhook: InsertWebhook): Promise<Webhook | undefined>;
   deleteWebhook(id: number): Promise<boolean>;
   getActiveWebhooksForEvent(event: string): Promise<Webhook[]>;
+  // Admin authentication methods
+  getAdminByUsername(username: string): Promise<AdminUser | undefined>;
+  createAdminUser(user: InsertAdminUser): Promise<AdminUser>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -230,6 +233,20 @@ export class DatabaseStorage implements IStorage {
   async getActiveWebhooksForEvent(event: string): Promise<Webhook[]> {
     const allWebhooks = await db.select().from(webhooks).where(eq(webhooks.isActive, true));
     return allWebhooks.filter(webhook => webhook.events.includes(event));
+  }
+
+  // Admin authentication methods
+  async getAdminByUsername(username: string): Promise<AdminUser | undefined> {
+    const [admin] = await db.select().from(adminUsers).where(eq(adminUsers.username, username));
+    return admin || undefined;
+  }
+
+  async createAdminUser(user: InsertAdminUser): Promise<AdminUser> {
+    const [newAdmin] = await db
+      .insert(adminUsers)
+      .values(user)
+      .returning();
+    return newAdmin;
   }
 }
 
@@ -836,6 +853,27 @@ export class MemStorage implements IStorage {
 
   async getActiveWebhooksForEvent(event: string): Promise<Webhook[]> {
     return [];
+  }
+
+  // Admin authentication methods for MemStorage (simplified for memory storage)
+  async getAdminByUsername(username: string): Promise<AdminUser | undefined> {
+    // For memory storage, return a default admin user if username is "admin"
+    if (username === "admin") {
+      return {
+        id: 1,
+        username: "admin",
+        passwordHash: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi" // "password"
+      };
+    }
+    return undefined;
+  }
+
+  async createAdminUser(user: InsertAdminUser): Promise<AdminUser> {
+    return {
+      id: Date.now(),
+      username: user.username,
+      passwordHash: user.passwordHash
+    };
   }
 }
 

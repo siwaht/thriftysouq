@@ -72,6 +72,12 @@ export const menuItems = pgTable("menu_items", {
   isActive: boolean("is_active").notNull().default(true),
 });
 
+export const adminUsers = pgTable("admin_users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+});
+
 export const webhooks = pgTable("webhooks", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -104,3 +110,10 @@ export const insertWebhookSchema = createInsertSchema(webhooks).omit({
 
 export type Webhook = typeof webhooks.$inferSelect;
 export type InsertWebhook = z.infer<typeof insertWebhookSchema>;
+
+export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
+  id: true,
+});
+
+export type AdminUser = typeof adminUsers.$inferSelect;
+export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;

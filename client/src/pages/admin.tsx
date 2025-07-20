@@ -10,13 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube, LogOut } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/navigation";
+import { useAdminAuth } from "@/hooks/use-admin-auth";
 import type { Product, MenuItem, Webhook as WebhookType } from "@shared/schema";
 
 const productFormSchema = z.object({
@@ -50,6 +51,7 @@ type MenuItemFormData = z.infer<typeof menuItemFormSchema>;
 type WebhookFormData = z.infer<typeof webhookFormSchema>;
 
 export default function AdminPage() {
+  const { isAuthenticated, isLoading } = useAdminAuth();
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null);
   const [editingWebhook, setEditingWebhook] = useState<WebhookType | null>(null);
@@ -477,6 +479,46 @@ export default function AdminPage() {
     testWebhookMutation.mutate(webhookId);
   };
 
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("/api/admin/logout", {
+        method: "POST",
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out",
+      });
+      window.location.href = "/admin-login";
+    },
+    onError: () => {
+      toast({
+        title: "Logout Error",
+        description: "There was an error logging out",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
+  // Show loading screen while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 flex items-center justify-center">
+        <div className="text-white text-xl">Checking authentication...</div>
+      </div>
+    );
+  }
+
+  // If not authenticated, the useAdminAuth hook will redirect to login
+  if (!isAuthenticated) {
+    return null;
+  }
+
   if (productsLoading || menuLoading || webhooksLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50/50 via-white to-violet-50/30">
@@ -500,11 +542,22 @@ export default function AdminPage() {
       
       <div className="pt-24 p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-light text-luxury-black mb-2">
-              Admin <span className="text-luxury-purple font-normal">Dashboard</span>
-            </h1>
-            <p className="text-gray-600">Manage your luxury store, navigation, and orders</p>
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-light text-luxury-black mb-2">
+                Admin <span className="text-luxury-purple font-normal">Dashboard</span>
+              </h1>
+              <p className="text-gray-600">Manage your luxury store, navigation, and orders</p>
+            </div>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50"
+              disabled={logoutMutation.isPending}
+            >
+              <LogOut className="w-4 h-4" />
+              {logoutMutation.isPending ? "Logging out..." : "Logout"}
+            </Button>
           </div>
 
           <Tabs defaultValue="products" className="w-full">

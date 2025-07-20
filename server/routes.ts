@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { insertOrderSchema, insertProductSchema, insertMenuItemSchema, insertWebhookSchema } from "@shared/schema";
 import { z } from "zod";
 import { webhookService } from "./webhook-service";
+import bcrypt from "bcryptjs";
+import session from "express-session";
 
 const createOrderRequest = z.object({
   customerName: z.string(),
@@ -18,7 +20,71 @@ const createOrderRequest = z.object({
   }))
 });
 
+// Middleware to check if user is authenticated as admin
+const requireAdminAuth = (req: any, res: any, next: any) => {
+  if (req.session?.isAdmin) {
+    next();
+  } else {
+    res.status(401).json({ message: "Admin authentication required" });
+  }
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure session middleware
+  app.use(session({
+    secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // Set to true if using HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+  }));
+
+  // Admin authentication routes
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password required" });
+      }
+
+      const admin = await storage.getAdminByUsername(username);
+      if (!admin) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Set session
+      (req.session as any).isAdmin = true;
+      (req.session as any).adminId = admin.id;
+      
+      res.json({ message: "Login successful", admin: { id: admin.id, username: admin.username } });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post("/api/admin/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.json({ message: "Logout successful" });
+    });
+  });
+
+  app.get("/api/admin/auth-status", (req, res) => {
+    const isAuthenticated = !!(req.session as any)?.isAdmin;
+    res.json({ isAuthenticated });
+  });
   // Get all products
   app.get("/api/products", async (req, res) => {
     try {
@@ -137,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all orders (admin only)
-  app.get("/api/orders", async (req, res) => {
+  app.get("/api/orders", requireAdminAuth, async (req, res) => {
     try {
       const orders = await storage.getOrdersWithItems();
       res.json(orders);
@@ -147,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single order (admin only)
-  app.get("/api/orders/:id", async (req, res) => {
+  app.get("/api/orders/:id", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const order = await storage.getOrderById(id);
@@ -164,7 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update order status (admin only)
-  app.patch("/api/orders/:id/status", async (req, res) => {
+  app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
@@ -212,7 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Admin API routes
   // Create product
-  app.post("/api/admin/products", async (req, res) => {
+  app.post("/api/admin/products", requireAdminAuth, async (req, res) => {
     try {
       const productData = insertProductSchema.parse(req.body);
       const product = await storage.createProduct(productData);
@@ -226,7 +292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update product
-  app.put("/api/admin/products/:id", async (req, res) => {
+  app.put("/api/admin/products/:id", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -250,7 +316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete product
-  app.delete("/api/admin/products/:id", async (req, res) => {
+  app.delete("/api/admin/products/:id", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -271,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Admin Menu Items API routes
   // Create menu item
-  app.post("/api/admin/menu-items", async (req, res) => {
+  app.post("/api/admin/menu-items", requireAdminAuth, async (req, res) => {
     try {
       const menuData = insertMenuItemSchema.parse(req.body);
       const menuItem = await storage.createMenuItem(menuData);
@@ -285,7 +351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update menu item
-  app.put("/api/admin/menu-items/:id", async (req, res) => {
+  app.put("/api/admin/menu-items/:id", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -309,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete menu item
-  app.delete("/api/admin/menu-items/:id", async (req, res) => {
+  app.delete("/api/admin/menu-items/:id", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -329,7 +395,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update menu item order
-  app.put("/api/admin/menu-items/:id/order", async (req, res) => {
+  app.put("/api/admin/menu-items/:id/order", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { newOrder } = req.body;
@@ -347,7 +413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Webhook management API routes
   // Get all webhooks
-  app.get("/api/admin/webhooks", async (req, res) => {
+  app.get("/api/admin/webhooks", requireAdminAuth, async (req, res) => {
     try {
       const webhooks = await storage.getWebhooks();
       res.json(webhooks);
@@ -357,7 +423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create webhook
-  app.post("/api/admin/webhooks", async (req, res) => {
+  app.post("/api/admin/webhooks", requireAdminAuth, async (req, res) => {
     try {
       const webhookData = insertWebhookSchema.parse(req.body);
       const webhook = await storage.createWebhook(webhookData);
@@ -371,7 +437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update webhook
-  app.put("/api/admin/webhooks/:id", async (req, res) => {
+  app.put("/api/admin/webhooks/:id", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -395,7 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete webhook
-  app.delete("/api/admin/webhooks/:id", async (req, res) => {
+  app.delete("/api/admin/webhooks/:id", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -415,7 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Test webhook endpoint
-  app.post("/api/admin/webhooks/:id/test", async (req, res) => {
+  app.post("/api/admin/webhooks/:id/test", requireAdminAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const webhooks = await storage.getWebhooks();
