@@ -2,14 +2,13 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, Edit, Plus, Package, Menu, ArrowUp, ArrowDown } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Menu } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -86,8 +85,8 @@ export default function AdminPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      setIsDialogOpen(false);
-      form.reset();
+      setIsProductDialogOpen(false);
+      productForm.reset();
       toast({
         title: "Product created successfully",
         description: "The new product has been added to your inventory.",
@@ -109,9 +108,9 @@ export default function AdminPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      setIsDialogOpen(false);
+      setIsProductDialogOpen(false);
       setEditingProduct(null);
-      form.reset();
+      productForm.reset();
       toast({
         title: "Product updated successfully",
         description: "The product has been updated.",

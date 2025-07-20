@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ProductCard from "./product-card";
 import type { Product } from "@/lib/types";
@@ -9,44 +9,25 @@ interface ProductGridProps {
 }
 
 export default function ProductGrid({ products, isLoading }: ProductGridProps) {
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [currentFilter, setCurrentFilter] = useState("all");
   const [sortBy, setSortBy] = useState("discount-desc");
 
-  // Filter products based on category
-  useEffect(() => {
-    const handleFilterChange = (event: CustomEvent) => {
-      setCurrentFilter(event.detail);
-    };
-
-    window.addEventListener('filterProducts', handleFilterChange as EventListener);
-    return () => window.removeEventListener('filterProducts', handleFilterChange as EventListener);
-  }, []);
-
-  // Apply filtering and sorting
-  useEffect(() => {
-    let filtered = currentFilter === "all" 
-      ? products 
-      : products.filter(p => p.category === currentFilter);
-
-    // Sort products
-    filtered.sort((a, b) => {
-      switch(sortBy) {
-        case 'discount-desc':
-          return b.discount - a.discount;
-        case 'discount-asc':
-          return a.discount - b.discount;
-        case 'price-asc':
-          return parseFloat(a.discountedPrice) - parseFloat(b.discountedPrice);
-        case 'price-desc':
-          return parseFloat(b.discountedPrice) - parseFloat(a.discountedPrice);
-        default:
-          return 0;
-      }
-    });
-
-    setFilteredProducts(filtered);
-  }, [products, currentFilter, sortBy]);
+  // Sort products
+  const sortedProducts = [...products].sort((a, b) => {
+    switch(sortBy) {
+      case 'discount-desc':
+        return b.discount - a.discount;
+      case 'discount-asc':
+        return a.discount - b.discount;
+      case 'price-asc':
+        return parseFloat(a.discountedPrice) - parseFloat(b.discountedPrice);
+      case 'price-desc':
+        return parseFloat(b.discountedPrice) - parseFloat(a.discountedPrice);
+      case 'name-asc':
+        return a.name.localeCompare(b.name);
+      default:
+        return 0;
+    }
+  });
 
   if (isLoading) {
     return (
@@ -85,10 +66,19 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-          {filteredProducts.map((product) => (
+          {sortedProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
+
+        {products.length === 0 && !isLoading && (
+          <div className="text-center py-12 sm:py-16">
+            <div className="max-w-md mx-auto">
+              <h3 className="text-2xl font-light text-gray-600 mb-4">No products found</h3>
+              <p className="text-gray-500 mb-6">Check back later for new luxury arrivals.</p>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
