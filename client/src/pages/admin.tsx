@@ -21,6 +21,7 @@ import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { HeroBannerAdmin } from "@/components/hero-banner-admin";
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
 import { MarketingTools } from "@/components/marketing-tools";
+import { WebhookTester } from "@/components/webhook-tester";
 
 import type { Product, MenuItem, Webhook as WebhookType } from "@shared/schema";
 
@@ -1500,7 +1501,9 @@ export default function AdminPage() {
             </TabsContent>
 
             <TabsContent value="webhooks">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
+              <WebhookTester />
+              
+              <div className="mt-12 flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
                 <div>
                   <h2 className="text-2xl font-light text-luxury-black mb-2">
                     Webhook <span className="text-luxury-purple font-normal">Management</span>

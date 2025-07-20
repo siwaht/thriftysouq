@@ -409,6 +409,214 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Webhook endpoints for external product management
+  
+  // Add product via webhook
+  app.post("/webhook/products", async (req, res) => {
+    try {
+      // Validate webhook signature if secret is provided
+      const webhookSecret = req.headers['x-webhook-secret'];
+      if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+        return res.status(401).json({ message: "Invalid webhook signature" });
+      }
+
+      const productData = insertProductSchema.parse(req.body);
+      const product = await storage.createProduct(productData);
+      
+      res.status(201).json({ 
+        success: true, 
+        message: "Product created successfully",
+        product 
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid product data", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Failed to create product" });
+    }
+  });
+
+  // Update product via webhook
+  app.put("/webhook/products/:id", async (req, res) => {
+    try {
+      // Validate webhook signature if secret is provided
+      const webhookSecret = req.headers['x-webhook-secret'];
+      if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+        return res.status(401).json({ message: "Invalid webhook signature" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+      }
+
+      const productData = insertProductSchema.partial().parse(req.body);
+      const product = await storage.updateProduct(id, productData);
+      
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "Product updated successfully",
+        product 
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid product data", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Failed to update product" });
+    }
+  });
+
+  // Delete product via webhook
+  app.delete("/webhook/products/:id", async (req, res) => {
+    try {
+      // Validate webhook signature if secret is provided
+      const webhookSecret = req.headers['x-webhook-secret'];
+      if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+        return res.status(401).json({ message: "Invalid webhook signature" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+      }
+
+      const success = await storage.deleteProduct(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "Product deleted successfully" 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
+  // Get all products via webhook (for external systems to sync)
+  app.get("/webhook/products", async (req, res) => {
+    try {
+      // Validate webhook signature if secret is provided
+      const webhookSecret = req.headers['x-webhook-secret'];
+      if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+        return res.status(401).json({ message: "Invalid webhook signature" });
+      }
+
+      const products = await storage.getAllProducts();
+      res.json({ 
+        success: true, 
+        products,
+        count: products.length 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
+  // Bulk operations via webhook
+  app.post("/webhook/products/bulk", async (req, res) => {
+    try {
+      // Validate webhook signature if secret is provided
+      const webhookSecret = req.headers['x-webhook-secret'];
+      if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+        return res.status(401).json({ message: "Invalid webhook signature" });
+      }
+
+      const { operation, products } = req.body;
+      
+      if (!operation || !Array.isArray(products)) {
+        return res.status(400).json({ 
+          message: "Operation and products array are required" 
+        });
+      }
+
+      const results = {
+        success: 0,
+        errors: [] as string[]
+      };
+
+      switch (operation) {
+        case 'create':
+          for (let i = 0; i < products.length; i++) {
+            try {
+              const productData = insertProductSchema.parse(products[i]);
+              await storage.createProduct(productData);
+              results.success++;
+            } catch (error) {
+              results.errors.push(`Product ${i + 1}: ${error instanceof Error ? error.message : 'Failed to create'}`);
+            }
+          }
+          break;
+
+        case 'update':
+          for (let i = 0; i < products.length; i++) {
+            try {
+              const { id, ...productData } = products[i];
+              if (!id) {
+                results.errors.push(`Product ${i + 1}: ID is required for updates`);
+                continue;
+              }
+              const validData = insertProductSchema.partial().parse(productData);
+              const updated = await storage.updateProduct(id, validData);
+              if (updated) {
+                results.success++;
+              } else {
+                results.errors.push(`Product ${i + 1}: Not found`);
+              }
+            } catch (error) {
+              results.errors.push(`Product ${i + 1}: ${error instanceof Error ? error.message : 'Failed to update'}`);
+            }
+          }
+          break;
+
+        case 'delete':
+          for (let i = 0; i < products.length; i++) {
+            try {
+              const { id } = products[i];
+              if (!id) {
+                results.errors.push(`Product ${i + 1}: ID is required for deletion`);
+                continue;
+              }
+              const deleted = await storage.deleteProduct(id);
+              if (deleted) {
+                results.success++;
+              } else {
+                results.errors.push(`Product ${i + 1}: Not found`);
+              }
+            } catch (error) {
+              results.errors.push(`Product ${i + 1}: ${error instanceof Error ? error.message : 'Failed to delete'}`);
+            }
+          }
+          break;
+
+        default:
+          return res.status(400).json({ 
+            message: "Invalid operation. Use 'create', 'update', or 'delete'" 
+          });
+      }
+
+      res.json({
+        success: true,
+        message: `Bulk ${operation} completed`,
+        results
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to process bulk operation" });
+    }
+  });
+
   // Admin Menu Items API routes
   // Create menu item
   app.post("/api/admin/menu-items", requireAdminAuth, async (req, res) => {
