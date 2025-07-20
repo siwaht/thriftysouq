@@ -23,27 +23,27 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden luxury-card-shadow bg-white border-0">
+    <Card className="group hover:shadow-2xl hover:-translate-y-3 transition-all duration-700 overflow-hidden luxury-card-shadow-purple bg-white border border-purple-100/50">
       <div className="relative overflow-hidden">
         <img 
           src={product.image} 
           alt={product.name}
           className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
-        <Badge className="absolute top-4 left-4 bg-luxury-gold text-black text-xs font-semibold px-3 py-1 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-t from-purple-900/30 via-transparent to-transparent"></div>
+        <Badge className="absolute top-4 left-4 luxury-gradient-gold-purple text-white text-xs font-bold px-4 py-2 shadow-2xl border border-purple-300/30">
           {product.discount}% OFF
         </Badge>
       </div>
       
-      <CardContent className="p-6">
-        <div className="text-xs font-medium text-luxury-gold mb-2 tracking-wider uppercase">{product.brand}</div>
-        <h4 className="text-lg font-semibold text-luxury-dark mb-4 line-clamp-2 leading-tight">
+      <CardContent className="p-6 bg-gradient-to-b from-white to-purple-50/30">
+        <div className="text-xs font-bold text-luxury-purple mb-2 tracking-widest uppercase">{product.brand}</div>
+        <h4 className="text-lg font-bold text-luxury-black mb-4 line-clamp-2 leading-tight">
           {product.name}
         </h4>
         
         <div className="flex items-baseline space-x-3 mb-6">
-          <span className="text-2xl font-bold text-luxury-dark">
+          <span className="text-2xl font-black text-luxury-purple">
             ${parseFloat(product.discountedPrice).toLocaleString()}
           </span>
           <span className="text-sm text-gray-400 line-through">
@@ -53,7 +53,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         
         <Button 
           onClick={handleAddToCart}
-          className="w-full bg-luxury-dark text-white hover:bg-gray-800 font-medium py-3 rounded-xl transition-all duration-300 hover:shadow-lg group"
+          className="w-full luxury-gradient-purple text-white hover:scale-105 font-bold py-3 rounded-xl transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/30 group border border-purple-400/30"
           disabled={product.stock === 0}
         >
           <ShoppingBag className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />

@@ -24,8 +24,13 @@
   --ring: hsl(240, 10%, 3.9%);
   --radius: 0.75rem;
   --luxury-gold: hsl(43, 96%, 56%);
-  --luxury-silver: hsl(240, 4.8%, 85.9%);
-  --luxury-dark: hsl(240, 10%, 3.9%);
+  --luxury-purple: hsl(260, 85%, 57%);
+  --luxury-purple-dark: hsl(260, 100%, 25%);
+  --luxury-violet: hsl(280, 75%, 45%);
+  --luxury-black: hsl(0, 0%, 0%);
+  --luxury-charcoal: hsl(220, 13%, 8%);
+  --luxury-silver: hsl(0, 0%, 85%);
+  --luxury-rose-gold: hsl(15, 80%, 65%);
 }
 
 .dark {
@@ -75,20 +80,52 @@
     border-color: var(--luxury-gold);
   }
 
-  .text-luxury-silver {
-    color: var(--luxury-silver);
+  .text-luxury-purple {
+    color: var(--luxury-purple);
   }
   
-  .bg-luxury-silver {
-    background-color: var(--luxury-silver);
+  .bg-luxury-purple {
+    background-color: var(--luxury-purple);
   }
 
-  .text-luxury-dark {
-    color: var(--luxury-dark);
+  .text-luxury-purple-dark {
+    color: var(--luxury-purple-dark);
   }
   
-  .bg-luxury-dark {
-    background-color: var(--luxury-dark);
+  .bg-luxury-purple-dark {
+    background-color: var(--luxury-purple-dark);
+  }
+
+  .text-luxury-violet {
+    color: var(--luxury-violet);
+  }
+  
+  .bg-luxury-violet {
+    background-color: var(--luxury-violet);
+  }
+
+  .text-luxury-black {
+    color: var(--luxury-black);
+  }
+  
+  .bg-luxury-black {
+    background-color: var(--luxury-black);
+  }
+
+  .text-luxury-charcoal {
+    color: var(--luxury-charcoal);
+  }
+  
+  .bg-luxury-charcoal {
+    background-color: var(--luxury-charcoal);
+  }
+
+  .text-luxury-rose-gold {
+    color: var(--luxury-rose-gold);
+  }
+  
+  .bg-luxury-rose-gold {
+    background-color: var(--luxury-rose-gold);
   }
 
   .line-clamp-2 {
@@ -99,14 +136,31 @@
   }
 
   .luxury-gradient {
-    background: linear-gradient(135deg, hsl(240, 10%, 3.9%) 0%, hsl(240, 15%, 8%) 100%);
+    background: linear-gradient(135deg, var(--luxury-black) 0%, var(--luxury-charcoal) 50%, var(--luxury-purple-dark) 100%);
+  }
+
+  .luxury-gradient-purple {
+    background: linear-gradient(135deg, var(--luxury-purple-dark) 0%, var(--luxury-violet) 50%, var(--luxury-purple) 100%);
+  }
+
+  .luxury-gradient-gold-purple {
+    background: linear-gradient(135deg, var(--luxury-gold) 0%, var(--luxury-rose-gold) 50%, var(--luxury-purple) 100%);
   }
 
   .luxury-card-shadow {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
+  .luxury-card-shadow-purple {
+    box-shadow: 0 25px 50px -12px rgba(147, 51, 234, 0.25), 0 0 0 1px rgba(147, 51, 234, 0.1);
   }
 
   .luxury-border {
-    border: 1px solid hsl(240, 5.9%, 90%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .luxury-backdrop {
+    backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(0, 0, 0, 0.7);
   }
 }

@@ -30,12 +30,12 @@ export default function Header({ onCartToggle }: HeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md shadow-lg z-50 border-b border-gray-100">
+    <header className="fixed top-0 left-0 right-0 luxury-backdrop shadow-2xl z-50 border-b border-purple-500/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <div className="flex items-center">
-            <h1 className="text-3xl font-bold tracking-tight text-luxury-dark">
+            <h1 className="text-3xl font-bold tracking-tight text-white">
               LuxDeal <span className="text-luxury-gold font-light">Quick</span>
             </h1>
           </div>
@@ -50,8 +50,8 @@ export default function Header({ onCartToggle }: HeaderProps) {
                 onClick={() => handleFilterChange(category.value)}
                 className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
                   activeFilter === category.value 
-                    ? "bg-luxury-dark text-white shadow-lg" 
-                    : "text-gray-600 hover:text-luxury-dark hover:bg-gray-50"
+                    ? "bg-luxury-purple text-white shadow-lg shadow-purple-500/25" 
+                    : "text-white/80 hover:text-white hover:bg-purple-500/20"
                 }`}
               >
                 {category.label}
@@ -65,9 +65,9 @@ export default function Header({ onCartToggle }: HeaderProps) {
               variant="ghost"
               size="icon"
               onClick={onCartToggle}
-              className="relative hover:bg-gray-50 transition-colors p-3"
+              className="relative hover:bg-purple-500/20 transition-colors p-3"
             >
-              <ShoppingBag className="h-6 w-6 text-luxury-dark" />
+              <ShoppingBag className="h-6 w-6 text-white" />
               {totalItems > 0 && (
                 <Badge className="absolute -top-1 -right-1 bg-luxury-gold text-black px-2 min-w-[1.25rem] h-6 rounded-full text-xs font-semibold shadow-lg">
                   {totalItems}

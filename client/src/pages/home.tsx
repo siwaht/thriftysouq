@@ -29,7 +29,7 @@ export default function Home() {
 
   return (
     <CartProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-100 via-purple-50 to-violet-100">
         <Header onCartToggle={() => setIsCartOpen(!isCartOpen)} />
         <HeroBanner />
         <ProductGrid products={products} isLoading={isLoading} />

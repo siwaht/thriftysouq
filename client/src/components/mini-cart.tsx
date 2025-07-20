@@ -89,7 +89,7 @@ export default function MiniCart({ isOpen, onClose, onCheckout }: MiniCartProps)
               </span>
             </div>
             <Button 
-              className="w-full bg-luxury-dark text-white hover:bg-gray-800 py-3 text-lg font-medium rounded-xl transition-all duration-300 hover:shadow-lg"
+              className="w-full luxury-gradient-purple text-white hover:scale-105 py-4 text-lg font-bold rounded-xl transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/30 border border-purple-400/30"
               onClick={handleCheckout}
               disabled={cartItems.length === 0}
             >

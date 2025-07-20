@@ -63,15 +63,15 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
   }
 
   return (
-    <section id="products" className="py-20 bg-gradient-to-b from-white to-gray-50">
+    <section id="products" className="py-20 bg-gradient-to-b from-purple-50/50 via-white to-violet-50/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 space-y-4 md:space-y-0">
           <div>
-            <h3 className="text-4xl font-light text-luxury-dark mb-2">Curated Collection</h3>
-            <p className="text-gray-600 font-light">Discover exceptional pieces from the world's finest brands</p>
+            <h3 className="text-5xl font-light text-luxury-black mb-3">Curated <span className="text-luxury-purple font-normal">Collection</span></h3>
+            <p className="text-gray-700 font-light text-lg">Discover exceptional pieces from the world's finest brands</p>
           </div>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-48 border-gray-200 rounded-xl">
+            <SelectTrigger className="w-48 border-purple-200 rounded-xl bg-white/80 backdrop-blur-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

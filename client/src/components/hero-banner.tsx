@@ -33,26 +33,27 @@ export default function HeroBanner() {
 
   return (
     <section className="relative pt-20 luxury-gradient text-white overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/30"></div>
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-900/50 via-transparent to-violet-900/30"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-purple-500/10 to-gold/5"></div>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         <div className="text-center">
-          <h2 className="text-5xl lg:text-7xl font-light tracking-tight mb-6">
-            Exceptional <span className="text-luxury-gold font-normal">Luxury</span>
+          <h2 className="text-6xl lg:text-8xl font-light tracking-tight mb-8">
+            Exceptional <span className="luxury-gradient-gold-purple bg-clip-text text-transparent font-normal">Luxury</span>
           </h2>
-          <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto font-light leading-relaxed">
+          <p className="text-2xl text-purple-100 mb-10 max-w-3xl mx-auto font-light leading-relaxed">
             Discover premium brands at unprecedented discounts. 
-            <span className="block mt-2 text-luxury-gold font-medium">Up to 70% off authentic luxury pieces</span>
+            <span className="block mt-3 text-luxury-gold font-medium text-xl">Up to 70% off authentic luxury pieces</span>
           </p>
-          <div className="flex justify-center items-center space-x-4 mb-10">
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-3 rounded-full font-medium flex items-center space-x-2 shadow-xl">
-              <Clock className="h-4 w-4 text-luxury-gold" />
-              <span className="text-lg">{timeLeft}</span>
-              <span className="text-sm text-gray-300">remaining</span>
+          <div className="flex justify-center items-center space-x-4 mb-12">
+            <div className="bg-purple-900/30 backdrop-blur-lg border border-purple-400/30 text-white px-8 py-4 rounded-full font-medium flex items-center space-x-3 shadow-2xl">
+              <Clock className="h-5 w-5 text-luxury-gold" />
+              <span className="text-xl font-semibold">{timeLeft}</span>
+              <span className="text-purple-200">remaining</span>
             </div>
           </div>
           <Button 
             onClick={scrollToProducts}
-            className="bg-luxury-gold hover:bg-yellow-400 text-black font-semibold px-10 py-4 text-lg rounded-full transition-all duration-300 shadow-2xl hover:shadow-xl hover:scale-105"
+            className="luxury-gradient-gold-purple hover:scale-110 text-white font-bold px-12 py-5 text-xl rounded-full transition-all duration-500 shadow-2xl hover:shadow-purple-500/25 border border-purple-400/30"
           >
             Explore Collection
           </Button>

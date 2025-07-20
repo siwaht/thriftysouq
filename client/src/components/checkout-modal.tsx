@@ -205,8 +205,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             </div>
 
             {/* Order Summary */}
-            <div className="bg-luxury-dark text-white p-6 rounded-xl">
-              <h4 className="text-xl font-medium mb-6">Order Summary</h4>
+            <div className="luxury-gradient-purple text-white p-8 rounded-2xl border border-purple-400/30">
+              <h4 className="text-2xl font-medium mb-8">Order Summary</h4>
               <div className="space-y-3">
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex justify-between text-gray-200">
@@ -230,7 +230,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             {/* Submit Button */}
             <Button 
               type="submit" 
-              className="w-full bg-luxury-gold hover:bg-yellow-400 text-black font-semibold py-4 text-lg rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105"
+              className="w-full luxury-gradient-gold-purple text-white font-bold py-5 text-xl rounded-xl transition-all duration-500 hover:shadow-2xl hover:scale-105 border border-purple-400/30"
               disabled={createOrderMutation.isPending}
             >
               {createOrderMutation.isPending ? (
