@@ -145,18 +145,7 @@ export default function PrivacyPolicy() {
             </p>
           </section>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">12. Contact Information</h2>
-            <p className="text-slate-700 leading-relaxed mb-4">
-              If you have any questions about this Privacy Policy or our data practices, please contact us:
-            </p>
-            <div className="bg-slate-50 p-6 rounded-lg">
-              <p className="text-slate-700 mb-2"><strong>ThriftySouq</strong></p>
-              <p className="text-slate-700 mb-2">Email: <a href="mailto:privacy@thriftysouq.com" className="text-emerald-600 hover:text-emerald-700">privacy@thriftysouq.com</a></p>
-              <p className="text-slate-700 mb-2">Phone: <a href="tel:+971-4-THRIFTY" className="text-emerald-600 hover:text-emerald-700">+971-4-THRIFTY</a></p>
-              <p className="text-slate-700">General Support: <a href="mailto:support@thriftysouq.com" className="text-emerald-600 hover:text-emerald-700">support@thriftysouq.com</a></p>
-            </div>
-          </section>
+
 
         </div>
       </div>
