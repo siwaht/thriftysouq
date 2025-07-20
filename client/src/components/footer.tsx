@@ -1,6 +1,11 @@
 import { Instagram, Linkedin, Mail, Phone } from "lucide-react";
+import { useState } from "react";
+import PrivacyModal from "./privacy-modal";
+import TermsModal from "./terms-modal";
 
 export default function Footer() {
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
   return (
     <footer className="bg-slate-900 text-white py-12">
       <div className="max-w-7xl mx-auto px-4">
@@ -22,12 +27,18 @@ export default function Footer() {
               <a href="#" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
                 Features
               </a>
-              <a href="/privacy-policy" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
+              <button 
+                onClick={() => setPrivacyOpen(true)}
+                className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm text-left"
+              >
                 Privacy Policy
-              </a>
-              <a href="/terms-of-service" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
+              </button>
+              <button 
+                onClick={() => setTermsOpen(true)}
+                className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm text-left"
+              >
                 Terms of Service
-              </a>
+              </button>
             </div>
           </div>
 
@@ -58,6 +69,9 @@ export default function Footer() {
           </p>
         </div>
       </div>
+      
+      <PrivacyModal open={privacyOpen} onOpenChange={setPrivacyOpen} />
+      <TermsModal open={termsOpen} onOpenChange={setTermsOpen} />
     </footer>
   );
 }
