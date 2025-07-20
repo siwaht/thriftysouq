@@ -28,12 +28,13 @@ export default function HeroBanner() {
   };
 
   return (
-    <section className="relative pt-20 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white overflow-hidden min-h-[95vh] flex items-center">
-      {/* Enhanced Background Effects */}
+    <section className="relative pt-20 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white overflow-hidden min-h-[100vh] flex items-center">
+      {/* Ultra-Modern Background Effects */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-radial from-emerald-900/20 via-slate-900/50 to-slate-950"></div>
-        <div className="absolute top-0 left-0 w-full h-full opacity-30" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        <div className="absolute inset-0 bg-gradient-radial from-emerald-900/30 via-slate-900/60 to-slate-950"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+        <div className="absolute top-0 left-0 w-full h-full opacity-20" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grain' width='100' height='100' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='50' cy='50' r='1' fill='%23ffffff' opacity='0.1'/%3E%3Ccircle cx='25' cy='25' r='1' fill='%23ffffff' opacity='0.05'/%3E%3Ccircle cx='75' cy='75' r='1' fill='%23ffffff' opacity='0.08'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grain)'/%3E%3C/svg%3E")`
         }}></div>
       </div>
       
@@ -47,31 +48,31 @@ export default function HeroBanner() {
       {/* Main Content */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
         <div className="text-center animate-fade-in">
-          {/* Premium Badge */}
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-md border border-white/10 rounded-full px-6 py-3 mb-10 text-sm font-medium shadow-xl">
+          {/* Ultra-Premium Badge */}
+          <div className="inline-flex items-center gap-3 glass-dark-luxury rounded-full px-8 py-4 mb-12 text-sm font-medium shadow-xl animate-fade-in">
             <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-            <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-            <span className="text-white/90 font-semibold tracking-wide">{bannerData.badgeText}</span>
+            <Sparkles className="w-5 h-5 text-amber-400 animate-pulse" />
+            <span className="text-white font-semibold tracking-wide text-base">{bannerData.badgeText}</span>
             <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
           </div>
           
-          {/* Hero Title */}
-          <div className="mb-8 space-y-4">
-            <h1 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tight">
-              <span className="block bg-gradient-to-r from-white via-white to-slate-300 bg-clip-text text-transparent drop-shadow-sm">
+          {/* Ultra-Dramatic Hero Title */}
+          <div className="mb-12 space-y-6">
+            <h1 className="text-luxury-title text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] font-black tracking-tighter leading-[0.85]">
+              <span className="block bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent drop-shadow-2xl">
                 {bannerData.mainTitle}
               </span>
-              <span className="block bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-400 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-emerald-300 via-emerald-400 to-teal-300 bg-clip-text text-transparent animate-gradient">
                 {bannerData.highlightTitle}
               </span>
             </h1>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light tracking-wide text-slate-300/90">
+            <h2 className="text-luxury-subtitle text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-wide text-slate-200/80 italic">
               {bannerData.subtitle}
             </h2>
           </div>
           
-          {/* Description */}
-          <p className="text-xl sm:text-2xl text-slate-300/80 mb-14 max-w-4xl mx-auto font-light leading-relaxed tracking-wide">
+          {/* Enhanced Description */}
+          <p className="text-luxury-body text-2xl sm:text-3xl text-slate-200/70 mb-16 max-w-5xl mx-auto font-light leading-relaxed tracking-wide">
             {bannerData.description}
           </p>
 

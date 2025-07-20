@@ -63,13 +63,13 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
   const isAdminPage = location.includes('/admin');
 
   return (
-    <nav className="fixed top-0 left-0 right-0 glass-dark shadow-modern-lg z-50 border-b border-white/10">
+    <nav className="fixed top-0 left-0 right-0 glass-dark-luxury shadow-2xl z-50 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
-            <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white hover:text-emerald-100 transition-colors duration-300">
-              LuxDeal <span className="text-emerald-400 font-light">Quick</span>
+          {/* Enhanced Logo */}
+          <div className="flex items-center cursor-pointer group" onClick={handleLogoClick}>
+            <h1 className="text-luxury-title text-3xl sm:text-4xl font-bold tracking-tight text-white hover:text-emerald-100 transition-all duration-300 group-hover:scale-105">
+              LuxDeal <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent font-light">Quick</span>
             </h1>
           </div>
 
