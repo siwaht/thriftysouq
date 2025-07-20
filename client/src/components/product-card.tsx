@@ -67,10 +67,10 @@ export default function ProductCard({ product, onProductClick, onExpressCheckout
         
         <div className="flex items-baseline space-x-3 mb-6">
           <span className="text-2xl font-black text-slate-900">
-            ${parseFloat(product.discountedPrice).toLocaleString()}
+            AED {parseFloat(product.discountedPrice).toLocaleString()}
           </span>
           <span className="text-sm text-slate-400 line-through">
-            ${parseFloat(product.originalPrice).toLocaleString()}
+            AED {parseFloat(product.originalPrice).toLocaleString()}
           </span>
         </div>
         

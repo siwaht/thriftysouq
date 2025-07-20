@@ -83,7 +83,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
   };
 
   const subtotal = getCartTotal();
-  const shipping = subtotal >= 1000 ? 0 : 25;
+  const shipping = subtotal >= 3670 ? 0 : 92; // Updated for AED (25 USD * 3.67)
   const total = subtotal + shipping;
 
   return (
@@ -213,17 +213,17 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex justify-between text-gray-200">
                     <span>{item.name} × {item.quantity}</span>
-                    <span>${(parseFloat(item.discountedPrice) * item.quantity).toLocaleString()}</span>
+                    <span>AED {(parseFloat(item.discountedPrice) * item.quantity).toLocaleString()}</span>
                   </div>
                 ))}
                 <div className="flex justify-between text-gray-200">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? "FREE" : `$${shipping}`}</span>
+                  <span>{shipping === 0 ? "FREE" : `AED ${shipping}`}</span>
                 </div>
                 <div className="border-t border-gray-600 pt-4 mt-4">
                   <div className="flex justify-between items-center text-xl font-semibold">
                     <span>Total:</span>
-                    <span className="text-luxury-gold">${total.toLocaleString()}</span>
+                    <span className="text-luxury-gold">AED {total.toLocaleString()}</span>
                   </div>
                 </div>
               </div>

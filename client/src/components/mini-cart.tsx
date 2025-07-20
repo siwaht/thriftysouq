@@ -47,7 +47,7 @@ export default function MiniCart({ isOpen, onClose, onCheckout }: MiniCartProps)
                       <div className="flex-1 min-w-0">
                         <h5 className="font-semibold text-sm text-slate-900 truncate">{item.name}</h5>
                         <p className="text-slate-600 text-sm">
-                          ${parseFloat(item.discountedPrice).toLocaleString()}
+                          AED {parseFloat(item.discountedPrice).toLocaleString()}
                         </p>
                         <div className="flex items-center space-x-2 mt-2">
                           <Button
@@ -88,7 +88,7 @@ export default function MiniCart({ isOpen, onClose, onCheckout }: MiniCartProps)
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-semibold text-slate-900">Total:</span>
               <span className="text-2xl font-bold text-emerald-600">
-                ${getCartTotal().toLocaleString()}
+                AED {getCartTotal().toLocaleString()}
               </span>
             </div>
             <Button 

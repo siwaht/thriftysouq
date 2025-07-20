@@ -63,7 +63,7 @@ export function ExpressCheckout({ product, isOpen, onClose, onSuccess }: Express
               <h3 className="font-semibold text-slate-900 text-sm">{product.name}</h3>
               <p className="text-emerald-600 text-xs font-medium">{product.brand}</p>
               <div className="flex items-center space-x-2 mt-1">
-                <span className="font-bold text-slate-900">${totalPrice.toFixed(2)}</span>
+                <span className="font-bold text-slate-900">AED {totalPrice.toFixed(2)}</span>
                 <Badge className="bg-gradient-emerald text-white text-xs">
                   -{product.discount}%
                 </Badge>
@@ -111,11 +111,11 @@ export function ExpressCheckout({ product, isOpen, onClose, onSuccess }: Express
           <div className="bg-slate-50 p-4 rounded-xl space-y-2">
             <div className="flex justify-between text-sm">
               <span>Subtotal:</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>AED {totalPrice.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm text-emerald-600">
               <span>You save:</span>
-              <span>-${savings.toFixed(2)}</span>
+              <span>-AED {savings.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Shipping:</span>
@@ -123,7 +123,7 @@ export function ExpressCheckout({ product, isOpen, onClose, onSuccess }: Express
             </div>
             <div className="border-t pt-2 flex justify-between font-bold">
               <span>Total:</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>AED {totalPrice.toFixed(2)}</span>
             </div>
           </div>
 
@@ -133,7 +133,7 @@ export function ExpressCheckout({ product, isOpen, onClose, onSuccess }: Express
             className="w-full btn-emerald py-4 text-lg font-semibold rounded-xl"
             disabled={isProcessing}
           >
-            {isProcessing ? "Processing..." : `Pay $${totalPrice.toFixed(2)}`}
+            {isProcessing ? "Processing..." : `Pay AED ${totalPrice.toFixed(2)}`}
           </Button>
 
           <p className="text-xs text-center text-slate-500">

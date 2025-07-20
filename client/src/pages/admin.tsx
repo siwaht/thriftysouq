@@ -1145,8 +1145,8 @@ export default function AdminPage() {
                   
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-lg font-bold text-luxury-purple">${parseFloat(product.discountedPrice).toLocaleString()}</p>
-                      <p className="text-xs text-gray-400 line-through">${parseFloat(product.originalPrice).toLocaleString()}</p>
+                      <p className="text-lg font-bold text-luxury-purple">AED {parseFloat(product.discountedPrice).toLocaleString()}</p>
+                      <p className="text-xs text-gray-400 line-through">AED {parseFloat(product.originalPrice).toLocaleString()}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-gray-500">Stock</p>

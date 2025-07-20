@@ -116,14 +116,14 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
             <div className="space-y-2">
               <div className="flex items-baseline space-x-4">
                 <span className="text-4xl font-black text-slate-900">
-                  ${parseFloat(product.discountedPrice).toLocaleString()}
+                  AED {parseFloat(product.discountedPrice).toLocaleString()}
                 </span>
                 <span className="text-xl text-slate-400 line-through">
-                  ${parseFloat(product.originalPrice).toLocaleString()}
+                  AED {parseFloat(product.originalPrice).toLocaleString()}
                 </span>
               </div>
               <div className="text-emerald-600 font-semibold">
-                You save ${(parseFloat(product.originalPrice) - parseFloat(product.discountedPrice)).toLocaleString()}
+                You save AED {(parseFloat(product.originalPrice) - parseFloat(product.discountedPrice)).toLocaleString()}
               </div>
             </div>
 
