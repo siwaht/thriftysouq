@@ -3,12 +3,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, Edit, Plus, Package, Menu } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -52,6 +53,10 @@ export default function AdminPage() {
 
   const { data: menuItems = [], isLoading: menuLoading } = useQuery<MenuItem[]>({
     queryKey: ["/api/menu-items"],
+  });
+
+  const { data: orders = [], isLoading: ordersLoading } = useQuery({
+    queryKey: ["/api/orders"],
   });
 
   const productForm = useForm<ProductFormData>({
@@ -221,6 +226,30 @@ export default function AdminPage() {
     },
   });
 
+  // Order status update mutation
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
+      const response = await apiRequest("PATCH", `/api/orders/${orderId}/status`, { status });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({
+        title: "Order status updated",
+        description: "The order status has been updated successfully.",
+        duration: 2000,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error updating order",
+        description: "There was an error updating the order status.",
+        variant: "destructive",
+        duration: 2000,
+      });
+    },
+  });
+
   const onSubmit = (data: ProductFormData) => {
     if (editingProduct) {
       updateProductMutation.mutate({ ...data, id: editingProduct.id });
@@ -315,14 +344,18 @@ export default function AdminPage() {
             <h1 className="text-3xl sm:text-4xl font-light text-luxury-black mb-2">
               Admin <span className="text-luxury-purple font-normal">Dashboard</span>
             </h1>
-            <p className="text-gray-600">Manage your luxury store and navigation</p>
+            <p className="text-gray-600">Manage your luxury store, navigation, and orders</p>
           </div>
 
           <Tabs defaultValue="products" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="products" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
                 <Package className="w-4 h-4 mr-2" />
                 Products
+              </TabsTrigger>
+              <TabsTrigger value="orders" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
+                <ClipboardList className="w-4 h-4 mr-2" />
+                Orders
               </TabsTrigger>
               <TabsTrigger value="menu" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
                 <Menu className="w-4 h-4 mr-2" />
@@ -771,6 +804,130 @@ export default function AdminPage() {
                     <Plus className="w-4 h-4 mr-2" />
                     Add Your First Menu Item
                   </Button>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="orders">
+              <div className="mb-8">
+                <h2 className="text-2xl font-light text-luxury-black mb-2">
+                  Order <span className="text-luxury-purple font-normal">Management</span>
+                </h2>
+                <p className="text-gray-600">View and manage customer orders</p>
+              </div>
+
+              {ordersLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="h-32 bg-purple-100 rounded-lg animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {orders.length === 0 ? (
+                    <Card className="p-8 text-center">
+                      <ClipboardList className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
+                      <p className="text-gray-500">Orders will appear here when customers make purchases.</p>
+                    </Card>
+                  ) : (
+                    orders.map((order: any) => (
+                      <Card key={order.id} className="luxury-card-shadow-purple border border-purple-100/50">
+                        <CardHeader className="pb-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
+                            <div className="flex items-center space-x-3">
+                              <div className="bg-purple-100 p-2 rounded-lg">
+                                <ClipboardList className="h-5 w-5 text-purple-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-luxury-black">{order.orderNumber}</h3>
+                                <p className="text-sm text-gray-500">{order.customerName}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <div className="text-right">
+                                <p className="font-bold text-luxury-purple">${parseFloat(order.total).toLocaleString()}</p>
+                                <p className="text-xs text-gray-500">{order.items?.length || 0} items</p>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
+                                  order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                  order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                                  order.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                                  order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {order.status === 'pending' && <Clock className="h-3 w-3" />}
+                                  {order.status === 'processing' && <Clock className="h-3 w-3" />}
+                                  {order.status === 'shipped' && <Package className="h-3 w-3" />}
+                                  {order.status === 'delivered' && <CheckCircle className="h-3 w-3" />}
+                                  {order.status === 'cancelled' && <XCircle className="h-3 w-3" />}
+                                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                </div>
+                                <Select 
+                                  value={order.status} 
+                                  onValueChange={(newStatus) => updateOrderStatusMutation.mutate({ orderId: order.id, status: newStatus })}
+                                >
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="processing">Processing</SelectItem>
+                                    <SelectItem value="shipped">Shipped</SelectItem>
+                                    <SelectItem value="delivered">Delivered</SelectItem>
+                                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <h4 className="font-semibold text-sm text-gray-700 mb-2">Customer Information</h4>
+                              <div className="space-y-1 text-sm">
+                                <p><span className="text-gray-500">Email:</span> {order.customerEmail}</p>
+                                <p><span className="text-gray-500">Phone:</span> {order.customerPhone}</p>
+                                <p><span className="text-gray-500">Payment:</span> {order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</p>
+                              </div>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-sm text-gray-700 mb-2">Shipping Address</h4>
+                              <p className="text-sm text-gray-600">{order.shippingAddress}</p>
+                            </div>
+                          </div>
+                          
+                          {order.items && order.items.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-sm text-gray-700 mb-3">Order Items</h4>
+                              <div className="space-y-2">
+                                {order.items.map((item: any, index: number) => (
+                                  <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                    <img 
+                                      src={item.product?.image || '/placeholder.jpg'} 
+                                      alt={item.product?.name || 'Product'} 
+                                      className="w-12 h-12 object-cover rounded"
+                                    />
+                                    <div className="flex-1">
+                                      <p className="font-medium text-sm">{item.product?.name || 'Unknown Product'}</p>
+                                      <p className="text-xs text-gray-500">{item.product?.brand || 'Unknown Brand'}</p>
+                                      <p className="text-xs text-gray-500">Qty: {item.quantity} × ${parseFloat(item.price).toFixed(2)}</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="font-semibold text-sm">${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
                 </div>
               )}
             </TabsContent>

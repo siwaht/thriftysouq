@@ -18,6 +18,12 @@ export interface IStorage {
   updateMenuItem(id: number, menuItem: InsertMenuItem): Promise<MenuItem | undefined>;
   deleteMenuItem(id: number): Promise<boolean>;
   updateMenuItemOrder(id: number, newOrder: number): Promise<void>;
+  // Order management methods
+  getOrders(): Promise<Order[]>;
+  getOrderById(id: number): Promise<Order | undefined>;
+  getOrderItems(orderId: number): Promise<OrderItem[]>;
+  updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
+  getOrdersWithItems(): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -127,6 +133,63 @@ export class DatabaseStorage implements IStorage {
       .update(menuItems)
       .set({ order: newOrder })
       .where(eq(menuItems.id, id));
+  }
+
+  // Order management methods
+  async getOrders(): Promise<Order[]> {
+    return await db.select().from(orders).orderBy(asc(orders.id));
+  }
+
+  async getOrderById(id: number): Promise<Order | undefined> {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order || undefined;
+  }
+
+  async getOrderItems(orderId: number): Promise<OrderItem[]> {
+    return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+  }
+
+  async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
+    const [updatedOrder] = await db
+      .update(orders)
+      .set({ status })
+      .where(eq(orders.id, id))
+      .returning();
+    return updatedOrder || undefined;
+  }
+
+  async getOrdersWithItems(): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
+    const allOrders = await db.select().from(orders).orderBy(asc(orders.id));
+    const result = [];
+
+    for (const order of allOrders) {
+      const items = await db
+        .select({
+          id: orderItems.id,
+          orderId: orderItems.orderId,
+          productId: orderItems.productId,
+          quantity: orderItems.quantity,
+          price: orderItems.price,
+          product: products
+        })
+        .from(orderItems)
+        .innerJoin(products, eq(orderItems.productId, products.id))
+        .where(eq(orderItems.orderId, order.id));
+
+      result.push({
+        ...order,
+        items: items.map(item => ({
+          id: item.id,
+          orderId: item.orderId,
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.price,
+          product: item.product
+        }))
+      });
+    }
+
+    return result;
   }
 }
 
@@ -650,6 +713,53 @@ export class MemStorage implements IStorage {
 
   async updateMenuItemOrder(id: number, newOrder: number): Promise<void> {
     // For memory storage, no-op
+  }
+
+  // Order management methods
+  async getOrders(): Promise<Order[]> {
+    return Array.from(this.orders.values());
+  }
+
+  async getOrderById(id: number): Promise<Order | undefined> {
+    return this.orders.get(id);
+  }
+
+  async getOrderItems(orderId: number): Promise<OrderItem[]> {
+    return Array.from(this.orderItems.values()).filter(item => item.orderId === orderId);
+  }
+
+  async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
+    const order = this.orders.get(id);
+    if (order) {
+      order.status = status;
+      this.orders.set(id, order);
+      return order;
+    }
+    return undefined;
+  }
+
+  async getOrdersWithItems(): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
+    const result = [];
+    const allOrders = Array.from(this.orders.values());
+
+    for (const order of allOrders) {
+      const items = Array.from(this.orderItems.values())
+        .filter(item => item.orderId === order.id)
+        .map(item => {
+          const product = this.products.get(item.productId);
+          return {
+            ...item,
+            product: product!
+          };
+        });
+
+      result.push({
+        ...order,
+        items
+      });
+    }
+
+    return result;
   }
 }
 

@@ -118,6 +118,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all orders (admin only)
+  app.get("/api/orders", async (req, res) => {
+    try {
+      const orders = await storage.getOrdersWithItems();
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // Get single order (admin only)
+  app.get("/api/orders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const order = await storage.getOrderById(id);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      const items = await storage.getOrderItems(id);
+      res.json({ ...order, items });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  // Update order status (admin only)
+  app.patch("/api/orders/:id/status", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (!status || typeof status !== "string") {
+        return res.status(400).json({ message: "Valid status is required" });
+      }
+      
+      const updatedOrder = await storage.updateOrderStatus(id, status);
+      
+      if (!updatedOrder) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      res.json(updatedOrder);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
   // Get menu items
   app.get("/api/menu-items", async (req, res) => {
     try {
