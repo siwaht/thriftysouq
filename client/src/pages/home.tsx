@@ -78,16 +78,75 @@ export default function Home() {
         <Navigation onCartToggle={() => setIsCartOpen(!isCartOpen)} />
         <HeroBanner />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold text-slate-900">
-              Shop {categoryFilter === "all" ? "All Products" : categoryFilter}
-            </h2>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="text-emerald-600 hover:text-emerald-700 font-medium"
-            >
-              {showFilters ? "Hide Filters" : "Show Smart Filters"}
-            </button>
+          {/* Breadcrumb Navigation */}
+          <div className="py-4 text-sm">
+            <div className="flex items-center space-x-2 text-slate-500">
+              <span className="hover:text-emerald-600 cursor-pointer">Home</span>
+              <span>/</span>
+              <span className="text-slate-900 font-medium">
+                {categoryFilter === "all" ? "All Products" : categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1)}
+              </span>
+            </div>
+          </div>
+
+          {/* Enhanced Section Header */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-slate-200/50 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-1">
+                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
+                  {categoryFilter === "all" ? "Luxury Collection" : categoryFilter.charAt(0).toUpperCase() + categoryFilter.slice(1)}
+                </h2>
+                <p className="text-slate-600 font-medium">
+                  {displayProducts.length} {displayProducts.length === 1 ? 'item' : 'items'} available
+                  {categoryFilter !== "all" && (
+                    <span className="text-emerald-600 ml-2">
+                      • Up to 70% off
+                    </span>
+                  )}
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 ${
+                    showFilters 
+                      ? 'bg-emerald-600 text-white shadow-md hover:bg-emerald-700' 
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+                  </svg>
+                  <span className="hidden sm:inline">
+                    {showFilters ? "Hide Filters" : "Smart Filters"}
+                  </span>
+                  <span className="sm:hidden">
+                    {showFilters ? "Hide" : "Filter"}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Active Filters Display */}
+            {showFilters && (
+              <div className="mt-4 pt-4 border-t border-slate-200">
+                <div className="text-sm text-slate-600 mb-2">Active filters:</div>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-medium">
+                    Category: {categoryFilter === "all" ? "All" : categoryFilter}
+                    {categoryFilter !== "all" && (
+                      <button 
+                        onClick={() => setCategoryFilter("all")}
+                        className="ml-1 hover:text-emerald-900"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
           
           {showFilters && (
