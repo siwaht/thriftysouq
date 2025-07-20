@@ -8,6 +8,10 @@ export interface IStorage {
   getProductsByCategory(category: string): Promise<Product[]>;
   createOrder(order: InsertOrder, items: Omit<InsertOrderItem, 'orderId'>[]): Promise<{ order: Order; orderNumber: string }>;
   updateProductStock(productId: number, newStock: number): Promise<void>;
+  // Admin methods
+  createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, product: InsertProduct): Promise<Product | undefined>;
+  deleteProduct(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -56,6 +60,31 @@ export class DatabaseStorage implements IStorage {
       .update(products)
       .set({ stock: newStock })
       .where(eq(products.id, productId));
+  }
+
+  // Admin methods
+  async createProduct(product: InsertProduct): Promise<Product> {
+    const [newProduct] = await db
+      .insert(products)
+      .values(product)
+      .returning();
+    return newProduct;
+  }
+
+  async updateProduct(id: number, product: InsertProduct): Promise<Product | undefined> {
+    const [updatedProduct] = await db
+      .update(products)
+      .set(product)
+      .where(eq(products.id, id))
+      .returning();
+    return updatedProduct || undefined;
+  }
+
+  async deleteProduct(id: number): Promise<boolean> {
+    const result = await db
+      .delete(products)
+      .where(eq(products.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 }
 
@@ -506,6 +535,36 @@ export class MemStorage implements IStorage {
       product.stock = newStock;
       this.products.set(productId, product);
     }
+  }
+
+  // Admin methods
+  async createProduct(product: InsertProduct): Promise<Product> {
+    const newProduct: Product = {
+      id: this.currentProductId++,
+      ...product,
+      stock: product.stock ?? 0
+    };
+    this.products.set(newProduct.id, newProduct);
+    return newProduct;
+  }
+
+  async updateProduct(id: number, product: InsertProduct): Promise<Product | undefined> {
+    const existingProduct = this.products.get(id);
+    if (!existingProduct) {
+      return undefined;
+    }
+    
+    const updatedProduct: Product = {
+      id,
+      ...product,
+      stock: product.stock ?? 0
+    };
+    this.products.set(id, updatedProduct);
+    return updatedProduct;
+  }
+
+  async deleteProduct(id: number): Promise<boolean> {
+    return this.products.delete(id);
   }
 }
 

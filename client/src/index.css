@@ -215,4 +215,18 @@
       transform: scale(1.05);
     }
   }
+
+  /* Mobile-optimized components */
+  .mobile-optimized {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    min-height: 44px;
+  }
+
+  @media (max-width: 768px) {
+    .mobile-optimized {
+      min-height: 48px;
+      font-size: 16px;
+    }
+  }
 }

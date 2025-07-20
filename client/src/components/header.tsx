@@ -1,8 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Settings } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useState } from "react";
+import { Link } from "wouter";
 
 const categories = [
   { value: "all", label: "All" },
@@ -59,8 +60,18 @@ export default function Header({ onCartToggle }: HeaderProps) {
             ))}
           </div>
 
-          {/* Cart Icon */}
+          {/* Admin & Cart Icons */}
           <div className="flex items-center space-x-4">
+            <Link href="/admin">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white/80 hover:text-white hover:bg-purple-500/20 transition-all duration-300"
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+            </Link>
+            
             <Button
               variant="ghost"
               size="icon"
