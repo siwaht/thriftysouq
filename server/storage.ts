@@ -1,6 +1,6 @@
-import { products, orders, orderItems, type Product, type Order, type OrderItem, type InsertProduct, type InsertOrder, type InsertOrderItem } from "@shared/schema";
+import { products, orders, orderItems, menuItems, type Product, type Order, type OrderItem, type MenuItem, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
 export interface IStorage {
   getProducts(): Promise<Product[]>;
@@ -8,10 +8,16 @@ export interface IStorage {
   getProductsByCategory(category: string): Promise<Product[]>;
   createOrder(order: InsertOrder, items: Omit<InsertOrderItem, 'orderId'>[]): Promise<{ order: Order; orderNumber: string }>;
   updateProductStock(productId: number, newStock: number): Promise<void>;
+  // Menu methods
+  getMenuItems(): Promise<MenuItem[]>;
   // Admin methods
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: number, product: InsertProduct): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
+  createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem>;
+  updateMenuItem(id: number, menuItem: InsertMenuItem): Promise<MenuItem | undefined>;
+  deleteMenuItem(id: number): Promise<boolean>;
+  updateMenuItemOrder(id: number, newOrder: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -85,6 +91,42 @@ export class DatabaseStorage implements IStorage {
       .delete(products)
       .where(eq(products.id, id));
     return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Menu methods
+  async getMenuItems(): Promise<MenuItem[]> {
+    return await db.select().from(menuItems).orderBy(asc(menuItems.order));
+  }
+
+  async createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem> {
+    const [newMenuItem] = await db
+      .insert(menuItems)
+      .values(menuItem)
+      .returning();
+    return newMenuItem;
+  }
+
+  async updateMenuItem(id: number, menuItem: InsertMenuItem): Promise<MenuItem | undefined> {
+    const [updatedMenuItem] = await db
+      .update(menuItems)
+      .set(menuItem)
+      .where(eq(menuItems.id, id))
+      .returning();
+    return updatedMenuItem || undefined;
+  }
+
+  async deleteMenuItem(id: number): Promise<boolean> {
+    const result = await db
+      .delete(menuItems)
+      .where(eq(menuItems.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async updateMenuItemOrder(id: number, newOrder: number): Promise<void> {
+    await db
+      .update(menuItems)
+      .set({ order: newOrder })
+      .where(eq(menuItems.id, id));
   }
 }
 
@@ -565,6 +607,49 @@ export class MemStorage implements IStorage {
 
   async deleteProduct(id: number): Promise<boolean> {
     return this.products.delete(id);
+  }
+
+  // Menu methods
+  async getMenuItems(): Promise<MenuItem[]> {
+    // Return default menu items for memory storage
+    return [
+      { id: 1, label: "Watches", value: "watches", order: 1, isActive: true },
+      { id: 2, label: "Jewelry", value: "jewelry", order: 2, isActive: true },
+      { id: 3, label: "Sunglasses", value: "sunglasses", order: 3, isActive: true },
+      { id: 4, label: "Bags", value: "bags", order: 4, isActive: true },
+      { id: 5, label: "Wallets", value: "wallets", order: 5, isActive: true },
+    ];
+  }
+
+  async createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem> {
+    const newMenuItem: MenuItem = {
+      id: Date.now(), // Simple ID generation for memory storage
+      label: menuItem.label,
+      value: menuItem.value,
+      order: menuItem.order ?? 0,
+      isActive: menuItem.isActive ?? true
+    };
+    return newMenuItem;
+  }
+
+  async updateMenuItem(id: number, menuItem: InsertMenuItem): Promise<MenuItem | undefined> {
+    // For memory storage, just return the updated item
+    return {
+      id,
+      label: menuItem.label,
+      value: menuItem.value,
+      order: menuItem.order ?? 0,
+      isActive: menuItem.isActive ?? true
+    };
+  }
+
+  async deleteMenuItem(id: number): Promise<boolean> {
+    // For memory storage, always return true
+    return true;
+  }
+
+  async updateMenuItemOrder(id: number, newOrder: number): Promise<void> {
+    // For memory storage, no-op
   }
 }
 

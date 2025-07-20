@@ -64,9 +64,21 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
   }),
 }));
 
+export const menuItems = pgTable("menu_items", {
+  id: serial("id").primaryKey(),
+  label: text("label").notNull(),
+  value: text("value").notNull(),
+  order: integer("order").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+});
+
 export const productsRelations = relations(products, ({ many }) => ({
   orderItems: many(orderItems),
 }));
+
+export const insertMenuItemSchema = createInsertSchema(menuItems).omit({
+  id: true,
+});
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -74,3 +86,5 @@ export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+export type MenuItem = typeof menuItems.$inferSelect;
+export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;

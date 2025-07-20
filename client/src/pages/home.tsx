@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import Header from "@/components/header";
+import Navigation from "@/components/navigation";
 import HeroBanner from "@/components/hero-banner";
 import ProductGrid from "@/components/product-grid";
 import MiniCart from "@/components/mini-cart";
@@ -30,7 +30,7 @@ export default function Home() {
   return (
     <CartProvider>
       <div className="min-h-screen bg-gradient-to-br from-gray-100 via-purple-50 to-violet-100">
-        <Header onCartToggle={() => setIsCartOpen(!isCartOpen)} />
+        <Navigation onCartToggle={() => setIsCartOpen(!isCartOpen)} />
         <HeroBanner />
         <ProductGrid products={products} isLoading={isLoading} />
         <Footer />
