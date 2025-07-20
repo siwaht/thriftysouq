@@ -122,13 +122,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize database with seed data on startup
   await initializeDatabase();
   
-  // Configure CORS to allow credentials
+  // Configure CORS to allow credentials - critical for session persistence
   app.use((req, res, next) => {
+    const origin = req.headers.origin;
     res.header('Access-Control-Allow-Credentials', 'true');
-    // Allow all origins for deployment - in production, restrict this
-    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    
+    // Allow requests from same origin and common deployment domains
+    if (origin && (origin.includes('replit') || origin.includes('localhost') || origin === req.protocol + '://' + req.get('host'))) {
+      res.header('Access-Control-Allow-Origin', origin);
+    } else {
+      res.header('Access-Control-Allow-Origin', req.headers.origin || req.protocol + '://' + req.get('host'));
+    }
+    
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, Cookie');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, Cookie, Set-Cookie');
     
     if (req.method === 'OPTIONS') {
       res.sendStatus(200);
@@ -148,15 +155,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(session({
     store: sessionStore,
     secret: process.env.SESSION_SECRET || "thrifty-souq-session-secret-key",
-    resave: false,
+    resave: true, // Force session save on each request for deployment reliability
     saveUninitialized: false,
-    name: 'thrifty.sid', // Custom session name
+    rolling: true, // Reset expiration on each request
+    name: 'admin-session', // Clear session name
     cookie: {
-      secure: false, // Allow cookies over HTTP for Replit deployment
-      httpOnly: false, // Allow JavaScript access to cookie for debugging
+      secure: false, // HTTP compatibility for Replit
+      httpOnly: false, // Allow frontend access for debugging
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'none', // Allow cross-origin cookies for deployment
-      path: '/' // Ensure cookie is available for all paths
+      sameSite: 'lax', // More permissive for single-origin deployment
+      path: '/', // Available for all paths
+      domain: undefined // Let browser set domain automatically
     }
   }));
 

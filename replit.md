@@ -130,15 +130,17 @@ Preferred communication style: Simple, everyday language.
 
 ### Admin Authentication System (January 20, 2025)
 - **Complete Authentication Flow**: Implemented secure username/password authentication for admin panel access
-- **Session Management**: Express-session with PostgreSQL store for maintaining admin login state
+- **Session Management**: Express-session with PostgreSQL store and rolling sessions for deployment reliability
 - **Password Security**: Bcrypt hashing for secure password storage in PostgreSQL database
 - **Admin User Seeding**: Automated admin user creation with default credentials (admin/admin123)
 - **Authentication Middleware**: Protected all admin API routes with session-based authentication
 - **Login/Logout System**: Beautiful admin login page with proper error handling and logout functionality
 - **Route Protection**: Admin panel automatically redirects to login if not authenticated
 - **Database Schema**: Added admin_users table with username and password hash fields
-- **Deployment-Ready Sessions**: Fixed session configuration for production deployment with proper CORS and cookie settings
-- **Cross-Origin Support**: Enhanced CORS configuration to support admin authentication after deployment
+- **Deployment-Ready Sessions**: Enhanced session configuration with custom name 'admin-session', rolling sessions, and deployment-optimized cookie settings
+- **Robust CORS**: Smart origin detection for Replit and localhost environments with credentials support
+- **Enhanced Auth API**: Specialized authentication functions with comprehensive debugging and error handling
+- **Session Persistence**: Rolling sessions with 30-second refresh interval to maintain authentication state after deployment
 
 ### Hero Banner Management System (January 20, 2025)
 - **Dynamic Content Management**: Complete hero banner editing system integrated into admin panel

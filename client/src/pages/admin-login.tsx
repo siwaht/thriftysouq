@@ -7,9 +7,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { logSessionDebug } from "@/lib/session-utils";
+import { loginAdmin } from "@/lib/auth-api";
 import { Lock, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
@@ -33,25 +32,22 @@ export default function AdminLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      return await apiRequest("/api/admin/login", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return await loginAdmin(data.username, data.password);
     },
     onSuccess: (data) => {
       console.log("Login response:", data);
-      logSessionDebug();
       
       toast({
         title: "Login Successful",
         description: "Welcome to the admin panel!",
       });
       
-      // Force a brief delay to ensure session is set, then redirect
+      // Use window.location.replace to prevent back navigation to login
       setTimeout(() => {
-        logSessionDebug();
-        window.location.href = "/admin";
-      }, 1000); // Increased delay for deployment
+        console.log("Redirecting to admin panel...");
+        console.log("Current cookies before redirect:", document.cookie);
+        window.location.replace("/admin");
+      }, 1500); // Extended delay for session persistence
     },
     onError: (error: any) => {
       toast({

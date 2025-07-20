@@ -1,13 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { logSessionDebug } from "@/lib/session-utils";
+import { checkAuthStatus } from "@/lib/auth-api";
 
 export function useAdminAuth() {
   const { data: authStatus, isLoading, error, refetch } = useQuery({
-    queryKey: ["/api/admin/auth-status"],
-    retry: false,
+    queryKey: ['admin-auth-status'],
+    queryFn: checkAuthStatus,
+    retry: 1, // Retry once on failure
     refetchOnWindowFocus: true, // Check auth when user returns to tab
     staleTime: 0, // Always check auth status fresh
+    refetchInterval: 30000, // Check every 30 seconds to maintain session
   });
 
   const isAuthenticated = authStatus?.isAuthenticated || false;
@@ -19,8 +21,9 @@ export function useAdminAuth() {
       if (window.location.pathname === "/admin") {
         console.log("Admin auth failed, redirecting to login");
         console.log("Auth status:", authStatus);
-        logSessionDebug();
-        window.location.href = "/admin-login";
+        console.log("Current cookies:", document.cookie);
+        // Use replace to prevent back navigation issues
+        window.location.replace("/admin-login");
       }
     }
   }, [isAuthenticated, isLoading, authStatus]);
