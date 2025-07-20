@@ -172,13 +172,76 @@ Products must include these required fields:
 - `image`: String - Valid image URL
 - `stock`: Number - Stock quantity (0 or higher)
 
+## Order Management Endpoints
+
+### 1. Get All Orders
+
+**GET** `/webhook/orders`
+
+```bash
+curl -X GET http://localhost:5000/webhook/orders \
+  -H "X-Webhook-Secret: your-secret-key"
+```
+
+### 2. Get Specific Order
+
+**GET** `/webhook/orders/:id`
+
+```bash
+curl -X GET http://localhost:5000/webhook/orders/1 \
+  -H "X-Webhook-Secret: your-secret-key"
+```
+
+### 3. Update Order Status
+
+**PUT** `/webhook/orders/:id/status`
+
+```bash
+curl -X PUT http://localhost:5000/webhook/orders/1/status \
+  -H "Content-Type: application/json" \
+  -H "X-Webhook-Secret: your-secret-key" \
+  -d '{
+    "status": "shipped"
+  }'
+```
+
+**Valid Status Values:**
+- `pending` - Order is pending
+- `processing` - Order is being processed
+- `shipped` - Order has been shipped
+- `delivered` - Order has been delivered
+- `cancelled` - Order has been cancelled
+
+### 4. Bulk Order Status Update
+
+**POST** `/webhook/orders/bulk-status`
+
+```bash
+curl -X POST http://localhost:5000/webhook/orders/bulk-status \
+  -H "Content-Type: application/json" \
+  -H "X-Webhook-Secret: your-secret-key" \
+  -d '{
+    "orders": [
+      {
+        "id": 1,
+        "status": "shipped"
+      },
+      {
+        "id": 2,
+        "status": "delivered"
+      }
+    ]
+  }'
+```
+
 ## Error Handling
 
 The API provides detailed error messages for:
 - Invalid authentication
 - Missing required fields
 - Invalid data types
-- Product not found
+- Product/Order not found
+- Invalid status values
 - Server errors
 
 Always check the response status code and message for proper error handling in your integration.

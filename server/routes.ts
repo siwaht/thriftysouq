@@ -617,6 +617,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Order Management Webhooks
+  
+  // Get all orders via webhook
+  app.get("/webhook/orders", async (req, res) => {
+    try {
+      // Validate webhook signature if secret is provided
+      const webhookSecret = req.headers['x-webhook-secret'];
+      if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+        return res.status(401).json({ message: "Invalid webhook signature" });
+      }
+
+      const orders = await storage.getAllOrders();
+      res.json({ 
+        success: true, 
+        orders,
+        count: orders.length 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // Update order status via webhook
+  app.put("/webhook/orders/:id/status", async (req, res) => {
+    try {
+      // Validate webhook signature if secret is provided
+      const webhookSecret = req.headers['x-webhook-secret'];
+      if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+        return res.status(401).json({ message: "Invalid webhook signature" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid order ID" });
+      }
+
+      const { status } = req.body;
+      if (!status) {
+        return res.status(400).json({ message: "Status is required" });
+      }
+
+      // Validate status values
+      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ 
+          message: "Invalid status. Must be one of: " + validStatuses.join(', ')
+        });
+      }
+
+      const order = await storage.updateOrderStatus(id, status);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "Order status updated successfully",
+        order 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
+  // Get specific order via webhook
+  app.get("/webhook/orders/:id", async (req, res) => {
+    try {
+      // Validate webhook signature if secret is provided
+      const webhookSecret = req.headers['x-webhook-secret'];
+      if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+        return res.status(401).json({ message: "Invalid webhook signature" });
+      }
+
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid order ID" });
+      }
+
+      const order = await storage.getOrder(id);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      res.json({ 
+        success: true, 
+        order 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  // Bulk order status update via webhook
+  app.post("/webhook/orders/bulk-status", async (req, res) => {
+    try {
+      // Validate webhook signature if secret is provided
+      const webhookSecret = req.headers['x-webhook-secret'];
+      if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+        return res.status(401).json({ message: "Invalid webhook signature" });
+      }
+
+      const { orders } = req.body;
+      
+      if (!Array.isArray(orders)) {
+        return res.status(400).json({ 
+          message: "Orders array is required" 
+        });
+      }
+
+      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+      const results = {
+        success: 0,
+        errors: [] as string[]
+      };
+
+      for (let i = 0; i < orders.length; i++) {
+        try {
+          const { id, status } = orders[i];
+          
+          if (!id) {
+            results.errors.push(`Order ${i + 1}: ID is required`);
+            continue;
+          }
+          
+          if (!status) {
+            results.errors.push(`Order ${i + 1}: Status is required`);
+            continue;
+          }
+          
+          if (!validStatuses.includes(status)) {
+            results.errors.push(`Order ${i + 1}: Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+            continue;
+          }
+
+          const updated = await storage.updateOrderStatus(id, status);
+          if (updated) {
+            results.success++;
+          } else {
+            results.errors.push(`Order ${i + 1}: Not found`);
+          }
+        } catch (error) {
+          results.errors.push(`Order ${i + 1}: ${error instanceof Error ? error.message : 'Failed to update'}`);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Bulk status update completed`,
+        results
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to process bulk status update" });
+    }
+  });
+
   // Admin Menu Items API routes
   // Create menu item
   app.post("/api/admin/menu-items", requireAdminAuth, async (req, res) => {

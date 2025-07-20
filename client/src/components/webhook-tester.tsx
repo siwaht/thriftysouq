@@ -74,6 +74,43 @@ export function WebhookTester() {
           }
         ]
       }
+    },
+    {
+      method: "GET",
+      path: "/webhook/orders",
+      description: "Get all orders",
+      example: {}
+    },
+    {
+      method: "GET", 
+      path: "/webhook/orders/:id",
+      description: "Get specific order",
+      example: {}
+    },
+    {
+      method: "PUT",
+      path: "/webhook/orders/:id/status", 
+      description: "Update order status",
+      example: {
+        status: "shipped"
+      }
+    },
+    {
+      method: "POST",
+      path: "/webhook/orders/bulk-status",
+      description: "Bulk update order statuses",
+      example: {
+        orders: [
+          {
+            id: 1,
+            status: "shipped"
+          },
+          {
+            id: 2,
+            status: "delivered"
+          }
+        ]
+      }
     }
   ];
 
