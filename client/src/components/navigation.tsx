@@ -47,6 +47,19 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
     }, 100);
   };
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Scroll to top of page
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    // Reset filter to "all" when clicking logo
+    if (activeFilter !== "all") {
+      handleFilterChange("all");
+    }
+  };
+
   const isAdminPage = location.includes('/admin');
 
   return (
@@ -54,13 +67,11 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link href="/">
-            <div className="flex items-center cursor-pointer">
-              <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                LuxDeal <span className="text-emerald-400 font-light">Quick</span>
-              </h1>
-            </div>
-          </Link>
+          <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white hover:text-emerald-100 transition-colors duration-300">
+              LuxDeal <span className="text-emerald-400 font-light">Quick</span>
+            </h1>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-1">
