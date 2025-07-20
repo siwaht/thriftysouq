@@ -65,6 +65,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
       toast({
         title: "Order placed successfully!",
         description: `Your order number is ${data.orderNumber}`,
+        duration: 2000,
       });
     },
     onError: (error) => {
@@ -72,6 +73,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
         title: "Order failed",
         description: "There was an error processing your order. Please try again.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });

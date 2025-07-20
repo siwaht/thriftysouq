@@ -90,6 +90,7 @@ export default function AdminPage() {
       toast({
         title: "Product created successfully",
         description: "The new product has been added to your inventory.",
+        duration: 2000,
       });
     },
     onError: () => {
@@ -97,6 +98,7 @@ export default function AdminPage() {
         title: "Error creating product",
         description: "There was an error creating the product. Please try again.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -114,6 +116,7 @@ export default function AdminPage() {
       toast({
         title: "Product updated successfully",
         description: "The product has been updated.",
+        duration: 2000,
       });
     },
     onError: () => {
@@ -121,6 +124,7 @@ export default function AdminPage() {
         title: "Error updating product",
         description: "There was an error updating the product. Please try again.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -134,6 +138,7 @@ export default function AdminPage() {
       toast({
         title: "Product deleted successfully",
         description: "The product has been removed from your inventory.",
+        duration: 2000,
       });
     },
     onError: () => {
@@ -141,6 +146,7 @@ export default function AdminPage() {
         title: "Error deleting product",
         description: "There was an error deleting the product. Please try again.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
@@ -158,6 +164,7 @@ export default function AdminPage() {
       toast({
         title: "Success",
         description: "Menu item created successfully",
+        duration: 2000,
       });
     },
     onError: () => {
