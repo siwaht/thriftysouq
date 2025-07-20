@@ -23,47 +23,38 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+    <Card className="group hover:shadow-md transition-shadow duration-200 overflow-hidden">
       <div className="relative">
         <img 
           src={product.image} 
           alt={product.name}
-          className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-48 object-cover"
         />
-        <Badge className="absolute top-4 left-4 bg-red-600 text-white">
+        <Badge className="absolute top-2 left-2 bg-red-600 text-white text-xs">
           {product.discount}% OFF
-        </Badge>
-        <Badge 
-          variant="secondary" 
-          className="absolute top-4 right-4 bg-white bg-opacity-90"
-        >
-          {product.stock} left
         </Badge>
       </div>
       
-      <CardContent className="p-6">
-        <div className="text-sm text-gray-600 mb-1">{product.brand}</div>
-        <h4 className="text-lg font-semibold text-black mb-3 line-clamp-2">
+      <CardContent className="p-4">
+        <div className="text-xs text-gray-600 mb-1">{product.brand}</div>
+        <h4 className="text-sm font-semibold text-black mb-2 line-clamp-2">
           {product.name}
         </h4>
         
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-luxury-gold">
-              ${parseFloat(product.discountedPrice).toLocaleString()}
-            </span>
-            <span className="text-lg text-gray-500 line-through">
-              ${parseFloat(product.originalPrice).toLocaleString()}
-            </span>
-          </div>
+        <div className="flex items-center space-x-2 mb-3">
+          <span className="text-lg font-bold text-luxury-gold">
+            ${parseFloat(product.discountedPrice).toLocaleString()}
+          </span>
+          <span className="text-sm text-gray-500 line-through">
+            ${parseFloat(product.originalPrice).toLocaleString()}
+          </span>
         </div>
         
         <Button 
           onClick={handleAddToCart}
-          className="w-full bg-black text-white hover:bg-gray-800"
+          className="w-full bg-black text-white hover:bg-gray-800 text-sm py-2"
           disabled={product.stock === 0}
         >
-          <ShoppingBag className="w-4 h-4 mr-2" />
           {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
         </Button>
       </CardContent>

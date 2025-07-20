@@ -88,15 +88,14 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold">Quick Checkout</DialogTitle>
-          <p className="text-gray-600">Complete your purchase in under 2 minutes</p>
+          <DialogTitle className="text-xl font-semibold">Checkout</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Customer Information */}
             <div>
-              <h4 className="text-lg font-semibold mb-4">Contact Information</h4>
+              <h4 className="font-semibold mb-3">Contact Information</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -142,7 +141,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
 
             {/* Shipping Address */}
             <div>
-              <h4 className="text-lg font-semibold mb-4">Shipping Address</h4>
+              <h4 className="font-semibold mb-3">Shipping Address</h4>
               <FormField
                 control={form.control}
                 name="shippingAddress"
@@ -160,7 +159,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
 
             {/* Payment Method */}
             <div>
-              <h4 className="text-lg font-semibold mb-4">Payment Method</h4>
+              <h4 className="font-semibold mb-3">Payment Method</h4>
               <FormField
                 control={form.control}
                 name="paymentMethod"
@@ -205,8 +204,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             </div>
 
             {/* Order Summary */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-semibold mb-4">Order Summary</h4>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-semibold mb-3">Order Summary</h4>
               <div className="space-y-2">
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex justify-between">
@@ -230,7 +229,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             {/* Submit Button */}
             <Button 
               type="submit" 
-              className="w-full bg-luxury-gold hover:bg-yellow-500 text-black font-semibold py-4 text-lg h-auto"
+              className="w-full bg-luxury-gold hover:bg-yellow-500 text-black font-semibold py-3"
               disabled={createOrderMutation.isPending}
             >
               {createOrderMutation.isPending ? (
@@ -239,10 +238,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
                   Processing...
                 </>
               ) : (
-                <>
-                  <Lock className="w-4 h-4 mr-2" />
-                  Place Order Securely
-                </>
+                "Place Order"
               )}
             </Button>
           </form>

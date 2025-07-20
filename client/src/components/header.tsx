@@ -38,9 +38,6 @@ export default function Header({ onCartToggle }: HeaderProps) {
             <h1 className="text-2xl font-bold text-black">
               LuxDeal <span className="text-luxury-gold">Quick</span>
             </h1>
-            <span className="ml-3 text-sm text-gray-600 hidden sm:block">
-              Luxury at Lightning Speed
-            </span>
           </div>
 
           {/* Category Filters - Desktop */}

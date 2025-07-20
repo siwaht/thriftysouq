@@ -23,12 +23,7 @@ export default function MiniCart({ isOpen, onClose, onCheckout }: MiniCartProps)
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-96 sm:max-w-md">
         <SheetHeader>
-          <div className="flex items-center justify-between">
-            <SheetTitle className="text-xl font-semibold">Shopping Cart</SheetTitle>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
+          <SheetTitle className="text-lg font-semibold">Cart</SheetTitle>
         </SheetHeader>
 
         <div className="flex flex-col h-full">
@@ -41,31 +36,31 @@ export default function MiniCart({ isOpen, onClose, onCheckout }: MiniCartProps)
             ) : (
               <div className="space-y-4">
                 {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-4 py-4 border-b border-gray-200">
+                  <div key={item.id} className="flex items-center space-x-3 py-3 border-b border-gray-200">
                     <img 
                       src={item.image} 
                       alt={item.name}
-                      className="w-16 h-16 object-cover rounded-lg"
+                      className="w-12 h-12 object-cover rounded"
                     />
-                    <div className="flex-1">
-                      <h5 className="font-semibold text-sm">{item.name}</h5>
+                    <div className="flex-1 min-w-0">
+                      <h5 className="font-semibold text-sm truncate">{item.name}</h5>
                       <p className="text-gray-600 text-sm">
                         ${parseFloat(item.discountedPrice).toLocaleString()}
                       </p>
-                      <div className="flex items-center space-x-2 mt-2">
+                      <div className="flex items-center space-x-1 mt-1">
                         <Button
                           variant="outline"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-6 w-6"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="font-semibold px-2">{item.quantity}</span>
+                        <span className="text-sm px-2">{item.quantity}</span>
                         <Button
                           variant="outline"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-6 w-6"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         >
                           <Plus className="h-3 w-3" />
@@ -76,9 +71,9 @@ export default function MiniCart({ isOpen, onClose, onCheckout }: MiniCartProps)
                       variant="ghost"
                       size="icon"
                       onClick={() => removeFromCart(item.id)}
-                      className="text-gray-400 hover:text-red-500"
+                      className="text-gray-400 hover:text-red-500 h-6 w-6"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
                 ))}
@@ -86,10 +81,10 @@ export default function MiniCart({ isOpen, onClose, onCheckout }: MiniCartProps)
             )}
           </ScrollArea>
 
-          <div className="border-t border-gray-200 pt-6 mt-6">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-lg font-semibold">Total:</span>
-              <span className="text-2xl font-bold text-luxury-gold">
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <div className="flex justify-between items-center mb-3">
+              <span className="font-semibold">Total:</span>
+              <span className="text-lg font-bold text-luxury-gold">
                 ${getCartTotal().toLocaleString()}
               </span>
             </div>
@@ -98,7 +93,7 @@ export default function MiniCart({ isOpen, onClose, onCheckout }: MiniCartProps)
               onClick={handleCheckout}
               disabled={cartItems.length === 0}
             >
-              {cartItems.length === 0 ? "Cart is Empty" : "Proceed to Checkout"}
+              {cartItems.length === 0 ? "Cart is Empty" : "Checkout"}
             </Button>
           </div>
         </div>

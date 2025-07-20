@@ -29,7 +29,7 @@ export default function Home() {
 
   return (
     <CartProvider>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <Header onCartToggle={() => setIsCartOpen(!isCartOpen)} />
         <HeroBanner />
         <ProductGrid products={products} isLoading={isLoading} />
