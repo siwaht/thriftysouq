@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navigation from "@/components/navigation";
 import HeroBanner from "@/components/hero-banner";
 import ProductGrid from "@/components/product-grid";
@@ -15,10 +15,28 @@ export default function Home() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
   });
+
+  // Filter products based on selected category
+  const filteredProducts = categoryFilter === "all" 
+    ? products 
+    : products.filter(product => product.category === categoryFilter);
+
+  // Listen for category filter changes from navigation
+  useEffect(() => {
+    const handleFilterChange = (event: CustomEvent) => {
+      setCategoryFilter(event.detail);
+    };
+
+    window.addEventListener('filterProducts', handleFilterChange as EventListener);
+    return () => {
+      window.removeEventListener('filterProducts', handleFilterChange as EventListener);
+    };
+  }, []);
 
   const handleOrderSuccess = (orderNum: string) => {
     setOrderNumber(orderNum);
@@ -32,7 +50,7 @@ export default function Home() {
       <div className="min-h-screen bg-gradient-to-br from-gray-100 via-purple-50 to-violet-100">
         <Navigation onCartToggle={() => setIsCartOpen(!isCartOpen)} />
         <HeroBanner />
-        <ProductGrid products={products} isLoading={isLoading} />
+        <ProductGrid products={filteredProducts} isLoading={isLoading} />
         <Footer />
         
         <MiniCart 
