@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { insertOrderSchema, insertProductSchema, insertMenuItemSchema, insertWebhookSchema, insertHeroBannerSchema } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -133,87 +133,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Ultra-simple session-based authentication using database storage
-  const generateSessionId = (): string => {
-    return crypto.randomBytes(32).toString('hex');
-  };
+  // Import simple authentication system
+  const {
+    createAdminSession,
+    validateAdminSession,
+    deleteAdminSession,
+    getActiveSessionCount
+  } = await import("./simple-auth");
 
-  const storeAdminSession = async (sessionId: string, adminData: { adminId: number; username: string }): Promise<void> => {
-    try {
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-      const sessionData = JSON.stringify({
-        adminId: adminData.adminId,
-        username: adminData.username,
-        loginTime: new Date().toISOString()
-      });
-
-      await db.execute(
-        'INSERT INTO sessions (sid, sess, expire) VALUES ($1, $2, $3) ON CONFLICT (sid) DO UPDATE SET sess = EXCLUDED.sess, expire = EXCLUDED.expire',
-        [`admin_session_${sessionId}`, sessionData, expiresAt]
-      );
-      console.log("Admin session stored:", sessionId.substring(0, 8) + '...');
-    } catch (error) {
-      console.error("Failed to store admin session:", error);
-      throw error;
-    }
-  };
-
-  const validateAdminSession = async (sessionId: string): Promise<{ adminId: number; username: string } | null> => {
-    try {
-      const result = await db.execute(
-        'SELECT sess FROM sessions WHERE sid = $1 AND expire > NOW()',
-        [`admin_session_${sessionId}`]
-      );
-      
-      if (result.rows.length === 0) {
-        return null;
-      }
-      
-      const sessionData = JSON.parse(result.rows[0].sess as string);
-      console.log("Admin session validated:", sessionData.username);
-      return {
-        adminId: sessionData.adminId,
-        username: sessionData.username
-      };
-    } catch (error) {
-      console.error("Session validation failed:", error);
-      return null;
-    }
-  };
-
-  const deleteAdminSession = async (sessionId: string): Promise<void> => {
-    try {
-      await db.execute(
-        'DELETE FROM sessions WHERE sid = $1',
-        [`admin_session_${sessionId}`]
-      );
-      console.log("Admin session deleted:", sessionId.substring(0, 8) + '...');
-    } catch (error) {
-      console.error("Failed to delete admin session:", error);
-    }
-  };
-
-  // Session-based authentication middleware
-  const requireAdminAuth = async (req: any, res: any, next: any) => {
+  // Simple session-based authentication middleware
+  const requireAdminAuth = (req: any, res: any, next: any) => {
     const sessionId = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminSessionId;
     
-    console.log("Auth check - Session:", sessionId ? sessionId.substring(0, 8) + '...' : 'missing');
-    
     if (sessionId) {
-      try {
-        const adminData = await validateAdminSession(sessionId);
-        if (adminData) {
-          console.log("Admin authentication successful for:", req.path);
-          req.adminAuth = adminData;
-          next();
-          return;
-        }
-      } catch (error) {
-        console.error("Authentication error:", error);
+      const adminData = validateAdminSession(sessionId);
+      if (adminData) {
+        req.adminAuth = adminData;
+        next();
+        return;
       }
     }
     
-    console.log("Admin authentication failed for:", req.path);
+    console.log("Admin auth failed for:", req.path);
     res.status(401).json({ message: "Admin authentication required" });
   };
 
@@ -236,14 +177,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Generate session data
-      const adminData = {
-        adminId: admin.id,
-        username: admin.username
-      };
-      
-      const sessionId = generateSessionId();
-      await storeAdminSession(sessionId, adminData);
+      // Generate session
+      const sessionId = createAdminSession(admin.id, admin.username);
       console.log("Admin login successful:", admin.username);
       
       // Set session cookie
@@ -265,33 +200,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/logout", async (req, res) => {
+  app.post("/api/admin/logout", (req, res) => {
     const sessionId = req.cookies?.adminSessionId;
     if (sessionId) {
-      await deleteAdminSession(sessionId);
+      deleteAdminSession(sessionId);
     }
     console.log("Admin logout - clearing session");
     res.clearCookie('adminSessionId');
     res.json({ message: "Logout successful" });
   });
 
-  app.get("/api/admin/auth-status", async (req, res) => {
+  app.get("/api/admin/auth-status", (req, res) => {
     const sessionId = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminSessionId;
     let isAuthenticated = false;
     let adminData = null;
     
     if (sessionId) {
-      try {
-        adminData = await validateAdminSession(sessionId);
-        isAuthenticated = !!adminData;
-      } catch (error) {
-        console.error("Auth status check error:", error);
-      }
+      adminData = validateAdminSession(sessionId);
+      isAuthenticated = !!adminData;
     }
-    
-    console.log("Auth status check - Session:", sessionId ? sessionId.substring(0, 8) + '...' : 'missing');
-    console.log("Auth status check - Valid:", isAuthenticated);
-    console.log("Auth status check - Admin:", adminData?.username || 'none');
     
     res.json({ 
       isAuthenticated,
@@ -300,8 +227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       debug: {
         hasSession: !!sessionId,
         sessionValid: isAuthenticated,
-        rawCookies: req.headers.cookie,
-        parsedCookies: req.cookies
+        activeSessions: getActiveSessionCount()
       }
     });
   });
