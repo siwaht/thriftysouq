@@ -32,6 +32,7 @@ export class AIMarketingGenerator {
   
   async generateWithGemini(prompt: string, systemPrompt: string): Promise<any> {
     try {
+      console.log("Generating with Gemini...");
       const response = await gemini.models.generateContent({
         model: "gemini-2.5-flash",
         config: {
@@ -42,6 +43,7 @@ export class AIMarketingGenerator {
       });
 
       const rawJson = response.text;
+      console.log("Gemini response received:", rawJson ? "Success" : "Empty");
       return rawJson ? JSON.parse(rawJson) : {};
     } catch (error) {
       console.error("Gemini generation error:", error);
@@ -156,6 +158,8 @@ Return the optimal combination in the same JSON format.`;
   }
   
   async analyzeProducts(products: Product[]): Promise<ProductAnalysis> {
+    console.log("Starting product analysis for", products.length, "products");
+    
     const productData = products.map(p => ({
       name: p.name,
       brand: p.brand,
@@ -183,6 +187,7 @@ Please analyze and respond with JSON in this exact format:
 Focus on luxury psychology, urgency creation, and conversion optimization.`;
 
     try {
+      console.log("Calling OpenAI for product analysis...");
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
@@ -200,6 +205,7 @@ Focus on luxury psychology, urgency creation, and conversion optimization.`;
         max_tokens: 1000
       });
 
+      console.log("OpenAI analysis completed successfully");
       return JSON.parse(response.choices[0].message.content || "{}");
     } catch (error) {
       console.error("Error analyzing products:", error);

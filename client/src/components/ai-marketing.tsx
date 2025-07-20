@@ -49,7 +49,7 @@ export function AIMarketing() {
 
   // Analyze products
   const analyzeProductsMutation = useMutation({
-    mutationFn: () => apiRequest("/api/admin/ai-marketing/analyze", "POST"),
+    mutationFn: () => apiRequest("/api/admin/ai-marketing/analyze", "POST", {}),
     onSuccess: (data: ProductAnalysis) => {
       setProductAnalysis(data);
       toast({
@@ -88,7 +88,7 @@ export function AIMarketing() {
 
   // Generate dual AI content
   const generateDualAIMutation = useMutation({
-    mutationFn: () => apiRequest("/api/admin/ai-marketing/generate-dual", "POST"),
+    mutationFn: () => apiRequest("/api/admin/ai-marketing/generate-dual", "POST", {}),
     onSuccess: (data: DualAIResult) => {
       setDualAIResult(data);
       toast({
