@@ -21,76 +21,78 @@ export default function MiniCart({ isOpen, onClose, onCheckout }: MiniCartProps)
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:w-96 sm:max-w-md bg-white mobile-optimized">
-        <SheetHeader className="border-b border-gray-100 pb-4">
-          <SheetTitle className="text-xl sm:text-2xl font-light text-luxury-dark">Shopping Cart</SheetTitle>
+      <SheetContent className="w-full sm:w-96 sm:max-w-md bg-white flex flex-col h-full mobile-tap">
+        <SheetHeader className="border-b border-slate-200 pb-4 flex-shrink-0">
+          <SheetTitle className="font-display text-xl sm:text-2xl font-bold text-slate-900">Shopping Cart</SheetTitle>
         </SheetHeader>
 
-        <div className="flex flex-col h-full">
-          <ScrollArea className="flex-1 pr-2 sm:pr-4">
-            {cartItems.length === 0 ? (
-              <div className="text-center py-6 sm:py-8">
-                <ShoppingBag className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-300 mb-4" />
-                <p className="text-gray-500 text-sm sm:text-base">Your cart is empty</p>
-              </div>
-            ) : (
-              <div className="space-y-3 sm:space-y-4">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-3 py-2 sm:py-3 border-b border-gray-200">
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
-                      className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded"
-                      loading="lazy"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h5 className="font-semibold text-xs sm:text-sm truncate">{item.name}</h5>
-                      <p className="text-gray-600 text-xs sm:text-sm">
-                        ${parseFloat(item.discountedPrice).toLocaleString()}
-                      </p>
-                      <div className="flex items-center space-x-1 mt-1">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-5 w-5 sm:h-6 sm:w-6 mobile-optimized"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        >
-                          <Minus className="h-2 w-2 sm:h-3 sm:w-3" />
-                        </Button>
-                        <span className="text-xs sm:text-sm px-2 font-medium min-w-[24px] text-center">{item.quantity}</span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-5 w-5 sm:h-6 sm:w-6 mobile-optimized"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        >
-                          <Plus className="h-2 w-2 sm:h-3 sm:w-3" />
-                        </Button>
+        <div className="flex flex-col flex-1 min-h-0">
+          <ScrollArea className="flex-1 py-4">
+            <div className="pr-4">
+              {cartItems.length === 0 ? (
+                <div className="text-center py-8">
+                  <ShoppingBag className="mx-auto h-12 w-12 text-slate-300 mb-4" />
+                  <p className="text-slate-500">Your cart is empty</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex items-center space-x-3 py-3 border-b border-slate-100 last:border-b-0">
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        className="w-12 h-12 object-cover rounded-lg"
+                        loading="lazy"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h5 className="font-semibold text-sm text-slate-900 truncate">{item.name}</h5>
+                        <p className="text-slate-600 text-sm">
+                          ${parseFloat(item.discountedPrice).toLocaleString()}
+                        </p>
+                        <div className="flex items-center space-x-2 mt-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-6 w-6 rounded-full mobile-tap"
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="text-sm px-2 font-medium min-w-[28px] text-center">{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-6 w-6 rounded-full mobile-tap"
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-slate-400 hover:text-red-500 h-6 w-6 mobile-tap"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-gray-400 hover:text-red-500 h-5 w-5 sm:h-6 sm:w-6 mobile-optimized"
-                    >
-                      <Trash2 className="h-2 w-2 sm:h-3 sm:w-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </ScrollArea>
 
-          <div className="border-t border-gray-100 pt-4 sm:pt-6 mt-4 sm:mt-6">
-            <div className="flex justify-between items-center mb-4 sm:mb-6">
-              <span className="text-base sm:text-lg font-medium text-luxury-dark">Total:</span>
-              <span className="text-xl sm:text-2xl font-bold text-luxury-gold">
+          <div className="border-t border-slate-200 pt-4 pb-4 flex-shrink-0 bg-white">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-lg font-semibold text-slate-900">Total:</span>
+              <span className="text-2xl font-bold text-emerald-600">
                 ${getCartTotal().toLocaleString()}
               </span>
             </div>
             <Button 
-              className="w-full luxury-gradient-purple text-white hover:scale-105 py-3 sm:py-4 text-base sm:text-lg font-bold rounded-xl transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/30 border border-purple-400/30 mobile-optimized"
+              className="w-full btn-emerald py-3 text-base font-semibold rounded-lg mobile-tap"
               onClick={handleCheckout}
               disabled={cartItems.length === 0}
             >
