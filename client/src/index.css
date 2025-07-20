@@ -1,6 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,23 +6,10 @@
 
 /* Performance Optimizations */
 @layer base {
-  /* GPU Acceleration for smooth animations */
+  /* Optimize rendering performance */
   * {
-    backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-  }
-
-  /* Optimize font loading */
-  @font-face {
-    font-family: 'Inter';
-    font-display: swap;
-    src: url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  }
-
-  @font-face {
-    font-family: 'Playfair Display';
-    font-display: swap;
-    src: url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+    backface-visibility: hidden;
   }
 
   /* Reduce motion for accessibility and performance */
@@ -187,94 +172,18 @@
 }
 
 @layer utilities {
-  /* Modern Color Utilities */
-  .bg-slate-900 { background-color: var(--slate-900); }
-  .bg-slate-800 { background-color: var(--slate-800); }
-  .bg-slate-700 { background-color: var(--slate-700); }
-  .bg-slate-600 { background-color: var(--slate-600); }
-  .bg-slate-500 { background-color: var(--slate-500); }
-  .text-slate-900 { color: var(--slate-900); }
-  .text-slate-800 { color: var(--slate-800); }
-  .text-slate-700 { color: var(--slate-700); }
-  .text-slate-600 { color: var(--slate-600); }
-  .text-slate-500 { color: var(--slate-500); }
-  
-  .bg-emerald-600 { background-color: var(--emerald-600); }
-  .bg-emerald-500 { background-color: var(--emerald-500); }
-  .text-emerald-600 { color: var(--emerald-600); }
-  .text-emerald-500 { color: var(--emerald-500); }
-  
-  .bg-amber-500 { background-color: var(--amber-500); }
-  .bg-amber-400 { background-color: var(--amber-400); }
-  .text-amber-500 { color: var(--amber-500); }
-  .text-amber-400 { color: var(--amber-400); }
-  
-  .bg-rose-500 { background-color: var(--rose-500); }
-  .text-rose-500 { color: var(--rose-500); }
-  
-  .bg-indigo-600 { background-color: var(--indigo-600); }
-  .text-indigo-600 { color: var(--indigo-600); }
-  
-  .bg-teal-500 { background-color: var(--teal-500); }
-  .text-teal-500 { color: var(--teal-500); }
+  /* Essential color utilities only */
 
-  /* Modern Gradients */
-  .bg-gradient-modern {
-    background: linear-gradient(135deg, 
-      var(--slate-900) 0%, 
-      var(--slate-800) 50%, 
-      var(--indigo-600) 100%);
-  }
-
+  /* Essential gradients only */
   .bg-gradient-emerald {
-    background: linear-gradient(135deg, 
-      var(--emerald-600) 0%, 
-      var(--emerald-500) 100%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   }
 
-  .bg-gradient-slate {
-    background: linear-gradient(135deg, 
-      var(--slate-800) 0%, 
-      var(--slate-700) 100%);
-  }
-
-  .bg-gradient-radial {
-    background: radial-gradient(ellipse at center, var(--tw-gradient-stops));
-  }
-
-  /* Performance Optimizations */
-  .will-change-transform {
-    will-change: transform;
-  }
-
-  .will-change-opacity {
-    will-change: opacity;
-  }
-
-  .gpu-accelerated {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
-  }
-
-  /* Mobile Optimizations */
-  .mobile-optimized {
-    touch-action: manipulation;
+  /* Mobile touch optimization */
+  .mobile-tap {
     -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-
-  .mobile-touch-target {
+    touch-action: manipulation;
     min-height: 44px;
-    min-width: 44px;
-  }
-
-  .mobile-tap-safe {
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   }
 
   /* Responsive Typography */
@@ -501,128 +410,7 @@
   @apply transition-all duration-300 hover:shadow-modern-lg hover:-translate-y-1;
 }
 
-/* Enhanced Luxury Gradients with Shadows */
-.luxury-gradient-purple {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 30%, #6366f1 70%, #4f46e5 100%);
-  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.25), 0 4px 12px rgba(124, 58, 237, 0.15);
-}
-
-.luxury-gradient-gold {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 30%, #b45309 70%, #92400e 100%);
-  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25), 0 4px 12px rgba(217, 119, 6, 0.15);
-}
-
-.luxury-gradient-emerald {
-  background: linear-gradient(135deg, #10b981 0%, #059669 30%, #047857 70%, #065f46 100%);
-  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.25), 0 4px 12px rgba(5, 150, 105, 0.15);
-}
-
-.luxury-gradient-rose {
-  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 30%, #be123c 70%, #9f1239 100%);
-  box-shadow: 0 10px 25px rgba(244, 63, 94, 0.25), 0 4px 12px rgba(225, 29, 72, 0.15);
-}
-
-.luxury-gradient-dark {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #334155 70%, #475569 100%);
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.4), 0 4px 12px rgba(30, 41, 59, 0.2);
-}
-
-/* Modern Card Shadows for Luxury Appeal */
-.luxury-card-shadow {
-  box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.luxury-card-shadow-purple {
-  box-shadow: 
-    0 25px 50px -12px rgba(139, 92, 246, 0.15),
-    0 10px 20px -8px rgba(124, 58, 237, 0.1),
-    0 0 0 1px rgba(139, 92, 246, 0.1);
-}
-
-.luxury-card-shadow-emerald {
-  box-shadow: 
-    0 25px 50px -12px rgba(16, 185, 129, 0.15),
-    0 10px 20px -8px rgba(5, 150, 105, 0.1),
-    0 0 0 1px rgba(16, 185, 129, 0.1);
-}
-
-/* Advanced Glass Morphism */
-.glass-luxury {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.1) 100%);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.glass-dark-luxury {
-  background: linear-gradient(135deg, 
-    rgba(0, 0, 0, 0.2) 0%, 
-    rgba(0, 0, 0, 0.1) 100%);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-/* Ultra-modern Button Styles */
-.btn-luxury {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateZ(0);
-}
-
-.btn-luxury::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s ease;
-}
-
-.btn-luxury:hover::before {
-  left: 100%;
-}
-
-.btn-luxury:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-}
-
-/* Enhanced Typography */
-.text-luxury-title {
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.1;
-}
-
-.text-luxury-subtitle {
-  font-family: 'Crimson Text', serif;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  line-height: 1.6;
-}
-
-.text-luxury-body {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  line-height: 1.7;
-}
+/* Essential styles only */
 
 /* Enhanced Modal Styles for Better UX */
 .modal-content {
@@ -677,36 +465,4 @@
   100% { background-position: 0% 50%; }
 }
 
-/* Enhanced Product Card Styles */
-.product-card-luxury {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.product-card-luxury::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.product-card-luxury:hover::before {
-  opacity: 1;
-}
-
-.product-card-luxury:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(16, 185, 129, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
+/* Optimized product card styles */

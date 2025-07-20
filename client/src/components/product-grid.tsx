@@ -33,19 +33,11 @@ export default function ProductGrid({ products, isLoading, onProductClick, onExp
 
   if (isLoading) {
     return (
-      <section id="products" className="py-20 sm:py-24 lg:py-32 bg-gradient-to-b from-slate-50 via-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 lg:gap-10">
+      <section className="py-8 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="product-card-luxury rounded-3xl h-[420px] animate-pulse">
-                <div className="bg-gradient-to-br from-slate-200 to-slate-300 h-72 rounded-t-3xl"></div>
-                <div className="p-6 space-y-4">
-                  <div className="bg-slate-200 h-4 w-24 rounded-full"></div>
-                  <div className="bg-slate-200 h-6 w-full rounded-lg"></div>
-                  <div className="bg-slate-200 h-4 w-3/4 rounded-lg"></div>
-                  <div className="bg-slate-200 h-12 w-full rounded-xl"></div>
-                </div>
-              </div>
+              <div key={i} className="bg-slate-100 rounded-lg h-64 animate-pulse"></div>
             ))}
           </div>
         </div>
@@ -54,17 +46,17 @@ export default function ProductGrid({ products, isLoading, onProductClick, onExp
   }
 
   return (
-    <section id="products" className="py-20 sm:py-24 lg:py-32 bg-gradient-to-b from-slate-50 via-white to-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-16 sm:mb-18 lg:mb-20 space-y-8 lg:space-y-0">
-          <div className="animate-slide-up">
-            <h3 className="text-luxury-title text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 mb-4 sm:mb-6 text-balance">
-              Curated <span className="bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">Collection</span>
+    <section id="products" className="py-8 sm:py-12 bg-white">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <div>
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
+              Curated <span className="text-emerald-600">Collection</span>
             </h3>
-            <p className="text-luxury-body text-slate-600 text-xl sm:text-2xl font-light leading-relaxed">Discover exceptional pieces from the world's finest brands</p>
+            <p className="text-slate-600">Exceptional luxury brands</p>
           </div>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full sm:w-56 card-modern border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20 mobile-tap">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -76,7 +68,7 @@ export default function ProductGrid({ products, isLoading, onProductClick, onExp
           </Select>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {sortedProducts.map((product, index) => (
             <div key={product.id} style={{ animationDelay: `${index * 0.1}s` }}>
               <ProductCard 

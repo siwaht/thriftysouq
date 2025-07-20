@@ -63,28 +63,24 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
   const isAdminPage = location.includes('/admin');
 
   return (
-    <nav className="fixed top-0 left-0 right-0 glass-dark-luxury shadow-2xl z-50 border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Enhanced Logo */}
-          <div className="flex items-center cursor-pointer group" onClick={handleLogoClick}>
-            <h1 className="text-luxury-title text-3xl sm:text-4xl font-bold tracking-tight text-white hover:text-emerald-100 transition-all duration-300 group-hover:scale-105">
-              LuxDeal <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent font-light">Quick</span>
+    <nav className="fixed top-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm shadow-lg z-50 border-b border-slate-700">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">
+              LuxDeal <span className="text-emerald-400 font-normal">Quick</span>
             </h1>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
-            {!isAdminPage && allCategories.map((category) => (
+          <div className="hidden md:flex items-center space-x-1">
+            {!isAdminPage && allCategories.slice(0, 6).map((category) => (
               <Button
                 key={category.value}
                 variant={activeFilter === category.value ? "default" : "ghost"}
                 size="sm"
                 onClick={() => handleFilterChange(category.value)}
-                className={`px-4 py-2 rounded-full font-medium transition-all duration-300 mobile-tap ${
-                  activeFilter === category.value 
-                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25" 
-                    : "text-white/80 hover:text-white hover:bg-emerald-500/20"
+                className={`text-white text-sm px-3 py-1 transition-colors ${
+                  activeFilter === category.value ? 'bg-emerald-600' : 'hover:bg-slate-800'
                 }`}
               >
                 {category.label}
@@ -131,22 +127,18 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
               </Button>
             </Link>
             
-            {/* Cart Button */}
             {!isAdminPage && (
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={onCartToggle}
-                className="relative text-white/80 hover:text-white hover:bg-emerald-500/20 transition-all duration-300"
+                className="relative text-white hover:bg-slate-800 mobile-tap"
               >
                 <ShoppingBag className="h-5 w-5" />
                 {totalItems > 0 && (
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-bold bg-amber-500 text-slate-900 border-0"
-                  >
+                  <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
                     {totalItems}
-                  </Badge>
+                  </span>
                 )}
               </Button>
             )}

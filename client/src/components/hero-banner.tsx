@@ -28,103 +28,63 @@ export default function HeroBanner() {
   };
 
   return (
-    <section className="relative pt-20 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white overflow-hidden min-h-[100vh] flex items-center">
-      {/* Ultra-Modern Background Effects */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-radial from-emerald-900/30 via-slate-900/60 to-slate-950"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
-        <div className="absolute top-0 left-0 w-full h-full opacity-20" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grain' width='100' height='100' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='50' cy='50' r='1' fill='%23ffffff' opacity='0.1'/%3E%3Ccircle cx='25' cy='25' r='1' fill='%23ffffff' opacity='0.05'/%3E%3Ccircle cx='75' cy='75' r='1' fill='%23ffffff' opacity='0.08'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23grain)'/%3E%3C/svg%3E")`
-        }}></div>
-      </div>
+    <section className="relative pt-16 bg-gradient-to-br from-slate-900 to-slate-800 text-white min-h-[80vh] flex items-center">
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/20 to-slate-900/60"></div>
       
-      {/* Floating Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/6 w-96 h-96 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/3 right-1/6 w-80 h-80 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-emerald-500/5 to-cyan-500/5 rounded-full blur-3xl animate-pulse"></div>
-      </div>
-      
-      {/* Main Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36">
-        <div className="text-center animate-fade-in">
-          {/* Ultra-Premium Badge */}
-          <div className="inline-flex items-center gap-3 glass-dark-luxury rounded-full px-8 py-4 mb-12 text-sm font-medium shadow-xl animate-fade-in">
-            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-            <Sparkles className="w-5 h-5 text-amber-400 animate-pulse" />
-            <span className="text-white font-semibold tracking-wide text-base">{bannerData.badgeText}</span>
-            <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+      <div className="relative max-w-7xl mx-auto px-4 py-12 sm:py-20">
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 bg-emerald-600/20 rounded-full px-4 py-2 mb-6">
+            <Sparkles className="w-4 h-4 text-emerald-400" />
+            <span className="text-white text-sm font-medium">{bannerData.badgeText}</span>
           </div>
           
-          {/* Ultra-Dramatic Hero Title */}
-          <div className="mb-12 space-y-6">
-            <h1 className="text-luxury-title text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] font-black tracking-tighter leading-[0.85]">
-              <span className="block bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent drop-shadow-2xl">
-                {bannerData.mainTitle}
-              </span>
-              <span className="block bg-gradient-to-r from-emerald-300 via-emerald-400 to-teal-300 bg-clip-text text-transparent animate-gradient">
-                {bannerData.highlightTitle}
-              </span>
+          <div className="mb-8">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-4">
+              <span className="block text-white">{bannerData.mainTitle}</span>
+              <span className="block text-emerald-400">{bannerData.highlightTitle}</span>
             </h1>
-            <h2 className="text-luxury-subtitle text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-wide text-slate-200/80 italic">
+            <h2 className="text-xl sm:text-2xl text-slate-300 font-light">
               {bannerData.subtitle}
             </h2>
           </div>
           
-          {/* Enhanced Description */}
-          <p className="text-luxury-body text-2xl sm:text-3xl text-slate-200/70 mb-16 max-w-5xl mx-auto font-light leading-relaxed tracking-wide">
+          <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
             {bannerData.description}
           </p>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <Button 
               onClick={scrollToProducts}
-              className="relative group bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-lg font-bold px-10 py-5 rounded-2xl shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-400/40 hover:scale-105 transform transition-all duration-300 border-0 overflow-hidden"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <span className="relative z-10">{bannerData.buttonText}</span>
-              <ArrowRight className="w-5 h-5 ml-3 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
+              {bannerData.buttonText}
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             
-            <div className="flex items-center gap-3 text-slate-400/80 bg-white/5 backdrop-blur-sm px-6 py-3 rounded-full border border-white/10">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                <div className="w-2 h-2 bg-emerald-400/60 rounded-full animate-pulse"></div>
-                <div className="w-2 h-2 bg-emerald-400/30 rounded-full animate-pulse"></div>
-              </div>
-              <span className="text-sm font-medium">{bannerData.footerText}</span>
+            <div className="flex items-center gap-2 text-slate-300 text-sm">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <span>{bannerData.footerText}</span>
             </div>
           </div>
 
-          {/* Stats or Trust Indicators */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 max-w-3xl mx-auto text-center">
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-emerald-400">70%</div>
-              <div className="text-xs text-slate-400 uppercase tracking-widest">Max Savings</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto text-center">
+            <div>
+              <div className="text-xl font-bold text-emerald-400">70%</div>
+              <div className="text-xs text-slate-400">Max Savings</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-emerald-400">24h</div>
-              <div className="text-xs text-slate-400 uppercase tracking-widest">Fast Delivery</div>
+            <div>
+              <div className="text-xl font-bold text-emerald-400">24h</div>
+              <div className="text-xs text-slate-400">Fast Delivery</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-emerald-400">100%</div>
-              <div className="text-xs text-slate-400 uppercase tracking-widest">Authentic</div>
+            <div>
+              <div className="text-xl font-bold text-emerald-400">100%</div>
+              <div className="text-xs text-slate-400">Authentic</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-emerald-400">10K+</div>
-              <div className="text-xs text-slate-400 uppercase tracking-widest">Happy Clients</div>
+            <div>
+              <div className="text-xl font-bold text-emerald-400">10K+</div>
+              <div className="text-xs text-slate-400">Happy Clients</div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-        <div className="flex flex-col items-center gap-2 animate-bounce">
-          <div className="text-xs text-slate-400 uppercase tracking-widest">Explore</div>
-          <div className="w-6 h-10 border-2 border-slate-400/50 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-slate-400/50 rounded-full mt-2 animate-pulse"></div>
           </div>
         </div>
       </div>
