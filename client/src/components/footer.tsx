@@ -23,13 +23,7 @@ export default function Footer() {
                 Features
               </a>
               <a href="#" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
-                Contact Us
-              </a>
-              <a href="#" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
                 Privacy Policy
-              </a>
-              <a href="#" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
-                Terms of Service
               </a>
             </div>
           </div>
