@@ -86,18 +86,18 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white border-0 shadow-2xl rounded-2xl">
-        <DialogHeader className="border-b border-gray-100 pb-6">
-          <DialogTitle className="text-3xl font-light text-luxury-dark">Secure Checkout</DialogTitle>
-          <p className="text-gray-600 mt-2">Complete your luxury purchase in seconds</p>
+      <DialogContent className="w-[95%] sm:max-w-3xl max-h-[95vh] overflow-y-auto bg-white border-0 shadow-2xl rounded-xl sm:rounded-2xl mobile-optimized">
+        <DialogHeader className="border-b border-gray-100 pb-4 sm:pb-6">
+          <DialogTitle className="text-2xl sm:text-3xl font-light text-luxury-dark">Secure Checkout</DialogTitle>
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">Complete your luxury purchase in seconds</p>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
             {/* Customer Information */}
-            <div className="bg-gray-50 p-6 rounded-xl">
-              <h4 className="text-xl font-medium text-luxury-dark mb-6">Contact Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-xl">
+              <h4 className="text-lg sm:text-xl font-medium text-luxury-dark mb-4 sm:mb-6">Contact Information</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <FormField
                   control={form.control}
                   name="customerName"
@@ -105,7 +105,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
                     <FormItem>
                       <FormLabel>Full Name *</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" {...field} />
+                        <Input placeholder="John Doe" className="mobile-optimized" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -118,7 +118,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
                     <FormItem>
                       <FormLabel>Email *</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="john@example.com" {...field} />
+                        <Input type="email" placeholder="john@example.com" className="mobile-optimized" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

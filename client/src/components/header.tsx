@@ -78,16 +78,18 @@ export default function Header({ onCartToggle }: HeaderProps) {
         </div>
 
         {/* Mobile Category Filters */}
-        <div className="md:hidden pb-3">
-          <div className="flex space-x-2 overflow-x-auto">
+        <div className="md:hidden pb-4">
+          <div className="flex space-x-3 overflow-x-auto scrollbar-hide px-2 -mx-2">
             {categories.map((category) => (
               <Button
                 key={category.value}
-                variant={activeFilter === category.value ? "default" : "outline"}
+                variant={activeFilter === category.value ? "default" : "ghost"}
                 size="sm"
                 onClick={() => handleFilterChange(category.value)}
-                className={`whitespace-nowrap ${
-                  activeFilter === category.value ? "bg-black text-white" : ""
+                className={`whitespace-nowrap mobile-optimized flex-shrink-0 px-4 py-2 rounded-full font-medium transition-all duration-300 ${
+                  activeFilter === category.value 
+                    ? "bg-luxury-purple text-white shadow-lg shadow-purple-500/25" 
+                    : "text-white/80 hover:text-white hover:bg-purple-500/20"
                 }`}
               >
                 {category.label}

@@ -35,25 +35,25 @@ export default function HeroBanner() {
     <section className="relative pt-20 luxury-gradient text-white overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-purple-900/50 via-transparent to-violet-900/30"></div>
       <div className="absolute inset-0 bg-gradient-to-br from-transparent via-purple-500/10 to-gold/5"></div>
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
         <div className="text-center">
-          <h2 className="text-6xl lg:text-8xl font-light tracking-tight mb-8">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light tracking-tight mb-6 sm:mb-8 will-change-transform">
             Exceptional <span className="luxury-gradient-gold-purple bg-clip-text text-transparent font-normal">Luxury</span>
           </h2>
-          <p className="text-2xl text-purple-100 mb-10 max-w-3xl mx-auto font-light leading-relaxed">
+          <p className="text-lg sm:text-xl lg:text-2xl text-purple-100 mb-8 sm:mb-10 max-w-3xl mx-auto font-light leading-relaxed px-4">
             Discover premium brands at unprecedented discounts. 
-            <span className="block mt-3 text-luxury-gold font-medium text-xl">Up to 70% off authentic luxury pieces</span>
+            <span className="block mt-2 sm:mt-3 text-luxury-gold font-medium text-base sm:text-lg lg:text-xl">Up to 70% off authentic luxury pieces</span>
           </p>
-          <div className="flex justify-center items-center space-x-4 mb-12">
-            <div className="bg-purple-900/30 backdrop-blur-lg border border-purple-400/30 text-white px-8 py-4 rounded-full font-medium flex items-center space-x-3 shadow-2xl">
-              <Clock className="h-5 w-5 text-luxury-gold" />
-              <span className="text-xl font-semibold">{timeLeft}</span>
-              <span className="text-purple-200">remaining</span>
+          <div className="flex justify-center items-center mb-8 sm:mb-12 px-4">
+            <div className="bg-purple-900/30 backdrop-blur-lg border border-purple-400/30 text-white px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-full font-medium flex items-center space-x-2 sm:space-x-3 shadow-2xl">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-luxury-gold flex-shrink-0" />
+              <span className="text-lg sm:text-xl font-semibold">{timeLeft}</span>
+              <span className="text-purple-200 text-sm sm:text-base">remaining</span>
             </div>
           </div>
           <Button 
             onClick={scrollToProducts}
-            className="luxury-gradient-gold-purple hover:scale-110 text-white font-bold px-12 py-5 text-xl rounded-full transition-all duration-500 shadow-2xl hover:shadow-purple-500/25 border border-purple-400/30"
+            className="luxury-gradient-gold-purple hover:scale-105 sm:hover:scale-110 text-white font-bold px-8 sm:px-12 py-4 sm:py-5 text-lg sm:text-xl rounded-full transition-all duration-500 shadow-2xl hover:shadow-purple-500/25 border border-purple-400/30 mobile-optimized"
           >
             Explore Collection
           </Button>

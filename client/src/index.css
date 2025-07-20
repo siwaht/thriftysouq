@@ -163,4 +163,56 @@
     backdrop-filter: blur(20px) saturate(180%);
     background: rgba(0, 0, 0, 0.7);
   }
+
+  .mobile-optimized {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .gpu-accelerated {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .transition-all, .transition-transform, .transition-colors {
+      transition: none !important;
+    }
+    
+    .animate-pulse {
+      animation: none !important;
+    }
+  }
+
+  /* Mobile performance optimizations */
+  @media (max-width: 768px) {
+    .luxury-gradient, .luxury-gradient-purple, .luxury-gradient-gold-purple {
+      background-attachment: scroll;
+    }
+    
+    .hover\:scale-105:hover, .hover\:scale-110:hover {
+      transform: scale(1.02);
+    }
+    
+    .group:hover .group-hover\:scale-110 {
+      transform: scale(1.05);
+    }
+  }
 }
