@@ -39,14 +39,14 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
   const isAdminPage = location.includes('/admin');
 
   return (
-    <nav className="fixed top-0 left-0 right-0 luxury-backdrop shadow-2xl z-50 border-b border-purple-500/20">
+    <nav className="fixed top-0 left-0 right-0 glass-dark shadow-modern-lg z-50 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center cursor-pointer">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                LuxDeal <span className="text-luxury-gold font-light">Quick</span>
+              <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                LuxDeal <span className="text-emerald-400 font-light">Quick</span>
               </h1>
             </div>
           </Link>
@@ -59,10 +59,10 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
                 variant={activeFilter === category.value ? "default" : "ghost"}
                 size="sm"
                 onClick={() => handleFilterChange(category.value)}
-                className={`px-4 py-2 rounded-full font-medium transition-all duration-300 ${
+                className={`px-4 py-2 rounded-full font-medium transition-all duration-300 mobile-tap ${
                   activeFilter === category.value 
-                    ? "bg-luxury-purple text-white shadow-lg shadow-purple-500/25" 
-                    : "text-white/80 hover:text-white hover:bg-purple-500/20"
+                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25" 
+                    : "text-white/80 hover:text-white hover:bg-emerald-500/20"
                 }`}
               >
                 {category.label}
@@ -74,7 +74,7 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
                 <Link href="/">
                   <Button
                     variant="ghost"
-                    className="text-white/80 hover:text-white hover:bg-purple-500/20 transition-all duration-300"
+                    className="text-white/80 hover:text-white hover:bg-emerald-500/20 transition-all duration-300"
                   >
                     <Home className="h-4 w-4 mr-2" />
                     Store
