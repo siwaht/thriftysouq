@@ -89,7 +89,7 @@ const sampleProducts = [
     originalPrice: "12000.00",
     discountedPrice: "3600.00",
     discount: 70,
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
+    image: "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
     stock: 1
   },
   {
