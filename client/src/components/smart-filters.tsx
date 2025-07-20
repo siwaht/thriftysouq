@@ -12,14 +12,21 @@ interface SmartFiltersProps {
 }
 
 export function SmartFilters({ products, onFilterChange, className = "" }: SmartFiltersProps) {
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 5000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [minDiscount, setMinDiscount] = useState(0);
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
 
   // Get unique brands and price range from products
   const brands = [...new Set(products.map(p => p.brand))];
-  const maxPrice = Math.max(...products.map(p => parseFloat(p.discountedPrice)));
+  const maxPrice = Math.max(...products.map(p => parseFloat(p.discountedPrice)), 5000);
+  
+  // Initialize price range based on actual product prices
+  useEffect(() => {
+    if (products.length > 0 && priceRange[1] === 5000) {
+      setPriceRange([0, Math.ceil(maxPrice / 100) * 100]); // Round up to nearest 100
+    }
+  }, [products, maxPrice]);
 
   useEffect(() => {
     const filtered = products.filter(product => {
@@ -31,7 +38,7 @@ export function SmartFilters({ products, onFilterChange, className = "" }: Smart
         quickFilters.some(filter => {
           switch(filter) {
             case 'trending': return product.discount > 50;
-            case 'luxury': return parseFloat(product.originalPrice) > 500;
+            case 'luxury': return parseFloat(product.originalPrice) > 1500;
             case 'deals': return product.discount > 60;
             case 'new': return product.id > 10; // Simulate new products
             default: return true;
@@ -126,13 +133,13 @@ export function SmartFilters({ products, onFilterChange, className = "" }: Smart
       {/* Price Range */}
       <div className="mb-6">
         <p className="text-sm font-medium text-slate-700 mb-3">
-          Price Range: ${priceRange[0]} - ${priceRange[1]}
+          Price Range: AED {priceRange[0]} - AED {priceRange[1]}
         </p>
         <Slider
           value={priceRange}
           onValueChange={setPriceRange}
-          max={maxPrice}
-          step={10}
+          max={Math.ceil(maxPrice / 100) * 100}
+          step={50}
           className="w-full"
         />
       </div>
