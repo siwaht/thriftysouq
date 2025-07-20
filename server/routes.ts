@@ -23,9 +23,12 @@ const createOrderRequest = z.object({
 
 // Middleware to check if user is authenticated as admin
 const requireAdminAuth = (req: any, res: any, next: any) => {
+  console.log("Auth check - Session:", req.session);
+  console.log("Auth check - isAdmin:", req.session?.isAdmin);
   if (req.session?.isAdmin) {
     next();
   } else {
+    console.log("Authentication failed for:", req.path);
     res.status(401).json({ message: "Admin authentication required" });
   }
 };
@@ -569,16 +572,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analyze products and generate marketing insights
   app.post("/api/admin/ai-marketing/analyze", requireAdminAuth, async (req, res) => {
     try {
+      console.log("Starting AI analysis...");
       const products = await storage.getProducts();
+      console.log("Found products:", products.length);
+      
       if (products.length === 0) {
         return res.status(400).json({ message: "No products available for analysis" });
       }
 
       const analysis = await aiMarketing.analyzeProducts(products);
+      console.log("Analysis completed:", analysis);
       res.json(analysis);
     } catch (error) {
       console.error("AI analysis error:", error);
-      res.status(500).json({ message: "Failed to analyze products with AI" });
+      res.status(500).json({ message: "Failed to analyze products with AI", error: error.message });
     }
   });
 
