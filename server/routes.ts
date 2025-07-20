@@ -33,7 +33,74 @@ const requireAdminAuth = (req: any, res: any, next: any) => {
   }
 };
 
+// Import all seeding functions
+async function initializeDatabase() {
+  try {
+    console.log("Initializing database with seed data...");
+    
+    // Import and run all seed functions
+    const { seedProducts } = await import("./seed");
+    const { seedAdminUser } = await import("./seed-admin");
+    const { seedMenuItems } = await import("./seed-menu");
+    const { seedHeroBanner } = await import("./seed-hero-banner");
+    
+    // Check if products exist, if not seed them
+    const existingProducts = await storage.getProducts();
+    if (existingProducts.length === 0) {
+      console.log("No products found, seeding products...");
+      await seedProducts();
+    } else {
+      console.log(`Found ${existingProducts.length} existing products`);
+    }
+    
+    // Check and seed admin user
+    try {
+      const admin = await storage.getAdminByUsername("admin");
+      if (!admin) {
+        console.log("No admin found, seeding admin user...");
+        await seedAdminUser();
+      } else {
+        console.log("Admin user already exists");
+      }
+    } catch (error) {
+      console.log("Seeding admin user...");
+      await seedAdminUser();
+    }
+    
+    // Check and seed menu items
+    const menuItems = await storage.getMenuItems();
+    if (menuItems.length === 0) {
+      console.log("No menu items found, seeding menu items...");
+      await seedMenuItems();
+    } else {
+      console.log(`Found ${menuItems.length} existing menu items`);
+    }
+    
+    // Check and seed hero banner
+    try {
+      const heroBanner = await storage.getHeroBanner();
+      if (!heroBanner) {
+        console.log("No hero banner found, seeding hero banner...");
+        await seedHeroBanner();
+      } else {
+        console.log("Hero banner already exists");
+      }
+    } catch (error) {
+      console.log("Seeding hero banner...");
+      await seedHeroBanner();
+    }
+    
+    console.log("Database initialization completed successfully");
+  } catch (error) {
+    console.error("Database initialization failed:", error);
+    // Don't throw the error to prevent server startup failure
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize database with seed data on startup
+  await initializeDatabase();
+  
   // Configure CORS to allow credentials
   app.use((req, res, next) => {
     res.header('Access-Control-Allow-Credentials', 'true');
