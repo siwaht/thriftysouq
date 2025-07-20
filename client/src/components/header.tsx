@@ -30,25 +30,29 @@ export default function Header({ onCartToggle }: HeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 border-b border-gray-200">
+    <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md shadow-lg z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-black">
-              LuxDeal <span className="text-luxury-gold">Quick</span>
+            <h1 className="text-3xl font-bold tracking-tight text-luxury-dark">
+              LuxDeal <span className="text-luxury-gold font-light">Quick</span>
             </h1>
           </div>
 
           {/* Category Filters - Desktop */}
-          <div className="hidden md:flex space-x-4">
+          <div className="hidden md:flex space-x-2">
             {categories.map((category) => (
               <Button
                 key={category.value}
-                variant={activeFilter === category.value ? "default" : "outline"}
+                variant={activeFilter === category.value ? "default" : "ghost"}
                 size="sm"
                 onClick={() => handleFilterChange(category.value)}
-                className={activeFilter === category.value ? "bg-black text-white" : ""}
+                className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
+                  activeFilter === category.value 
+                    ? "bg-luxury-dark text-white shadow-lg" 
+                    : "text-gray-600 hover:text-luxury-dark hover:bg-gray-50"
+                }`}
               >
                 {category.label}
               </Button>
@@ -61,11 +65,11 @@ export default function Header({ onCartToggle }: HeaderProps) {
               variant="ghost"
               size="icon"
               onClick={onCartToggle}
-              className="relative"
+              className="relative hover:bg-gray-50 transition-colors p-3"
             >
-              <ShoppingBag className="h-6 w-6" />
+              <ShoppingBag className="h-6 w-6 text-luxury-dark" />
               {totalItems > 0 && (
-                <Badge className="absolute -top-1 -right-1 bg-luxury-gold text-black px-1 min-w-[1.25rem] h-5 rounded-full text-xs">
+                <Badge className="absolute -top-1 -right-1 bg-luxury-gold text-black px-2 min-w-[1.25rem] h-6 rounded-full text-xs font-semibold shadow-lg">
                   {totalItems}
                 </Badge>
               )}

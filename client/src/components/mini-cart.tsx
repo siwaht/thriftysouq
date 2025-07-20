@@ -21,9 +21,9 @@ export default function MiniCart({ isOpen, onClose, onCheckout }: MiniCartProps)
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-96 sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle className="text-lg font-semibold">Cart</SheetTitle>
+      <SheetContent className="w-96 sm:max-w-md bg-white">
+        <SheetHeader className="border-b border-gray-100 pb-4">
+          <SheetTitle className="text-2xl font-light text-luxury-dark">Shopping Cart</SheetTitle>
         </SheetHeader>
 
         <div className="flex flex-col h-full">
@@ -81,19 +81,19 @@ export default function MiniCart({ isOpen, onClose, onCheckout }: MiniCartProps)
             )}
           </ScrollArea>
 
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <div className="flex justify-between items-center mb-3">
-              <span className="font-semibold">Total:</span>
-              <span className="text-lg font-bold text-luxury-gold">
+          <div className="border-t border-gray-100 pt-6 mt-6">
+            <div className="flex justify-between items-center mb-6">
+              <span className="text-lg font-medium text-luxury-dark">Total:</span>
+              <span className="text-2xl font-bold text-luxury-gold">
                 ${getCartTotal().toLocaleString()}
               </span>
             </div>
             <Button 
-              className="w-full bg-black text-white hover:bg-gray-800"
+              className="w-full bg-luxury-dark text-white hover:bg-gray-800 py-3 text-lg font-medium rounded-xl transition-all duration-300 hover:shadow-lg"
               onClick={handleCheckout}
               disabled={cartItems.length === 0}
             >
-              {cartItems.length === 0 ? "Cart is Empty" : "Checkout"}
+              {cartItems.length === 0 ? "Cart is Empty" : "Proceed to Checkout"}
             </Button>
           </div>
         </div>

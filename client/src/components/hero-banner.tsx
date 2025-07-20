@@ -32,26 +32,29 @@ export default function HeroBanner() {
   };
 
   return (
-    <section className="relative pt-16 bg-black text-white">
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <section className="relative pt-20 luxury-gradient text-white overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/30"></div>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center">
-          <h2 className="text-4xl lg:text-6xl font-bold mb-4">
-            Up to <span className="text-luxury-gold">70% OFF</span>
+          <h2 className="text-5xl lg:text-7xl font-light tracking-tight mb-6">
+            Exceptional <span className="text-luxury-gold font-normal">Luxury</span>
           </h2>
-          <p className="text-lg text-gray-300 mb-6 max-w-xl mx-auto">
-            Luxury brands at unbeatable prices
+          <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto font-light leading-relaxed">
+            Discover premium brands at unprecedented discounts. 
+            <span className="block mt-2 text-luxury-gold font-medium">Up to 70% off authentic luxury pieces</span>
           </p>
-          <div className="flex justify-center items-center space-x-3 mb-6">
-            <div className="bg-red-600 text-white px-3 py-1 rounded font-semibold flex items-center space-x-1">
-              <Clock className="h-3 w-3" />
-              <span className="text-sm">{timeLeft}</span>
+          <div className="flex justify-center items-center space-x-4 mb-10">
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-3 rounded-full font-medium flex items-center space-x-2 shadow-xl">
+              <Clock className="h-4 w-4 text-luxury-gold" />
+              <span className="text-lg">{timeLeft}</span>
+              <span className="text-sm text-gray-300">remaining</span>
             </div>
           </div>
           <Button 
             onClick={scrollToProducts}
-            className="bg-luxury-gold hover:bg-yellow-500 text-black font-semibold px-6 py-3"
+            className="bg-luxury-gold hover:bg-yellow-400 text-black font-semibold px-10 py-4 text-lg rounded-full transition-all duration-300 shadow-2xl hover:shadow-xl hover:scale-105"
           >
-            Shop Now
+            Explore Collection
           </Button>
         </div>
       </div>

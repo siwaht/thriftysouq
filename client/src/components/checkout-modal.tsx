@@ -86,16 +86,17 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Checkout</DialogTitle>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white border-0 shadow-2xl rounded-2xl">
+        <DialogHeader className="border-b border-gray-100 pb-6">
+          <DialogTitle className="text-3xl font-light text-luxury-dark">Secure Checkout</DialogTitle>
+          <p className="text-gray-600 mt-2">Complete your luxury purchase in seconds</p>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {/* Customer Information */}
-            <div>
-              <h4 className="font-semibold mb-3">Contact Information</h4>
+            <div className="bg-gray-50 p-6 rounded-xl">
+              <h4 className="text-xl font-medium text-luxury-dark mb-6">Contact Information</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -140,8 +141,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             </div>
 
             {/* Shipping Address */}
-            <div>
-              <h4 className="font-semibold mb-3">Shipping Address</h4>
+            <div className="bg-gray-50 p-6 rounded-xl">
+              <h4 className="text-xl font-medium text-luxury-dark mb-6">Shipping Address</h4>
               <FormField
                 control={form.control}
                 name="shippingAddress"
@@ -158,8 +159,8 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             </div>
 
             {/* Payment Method */}
-            <div>
-              <h4 className="font-semibold mb-3">Payment Method</h4>
+            <div className="bg-gray-50 p-6 rounded-xl">
+              <h4 className="text-xl font-medium text-luxury-dark mb-6">Payment Method</h4>
               <FormField
                 control={form.control}
                 name="paymentMethod"
@@ -204,21 +205,21 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             </div>
 
             {/* Order Summary */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-semibold mb-3">Order Summary</h4>
-              <div className="space-y-2">
+            <div className="bg-luxury-dark text-white p-6 rounded-xl">
+              <h4 className="text-xl font-medium mb-6">Order Summary</h4>
+              <div className="space-y-3">
                 {cartItems.map((item) => (
-                  <div key={item.id} className="flex justify-between">
+                  <div key={item.id} className="flex justify-between text-gray-200">
                     <span>{item.name} × {item.quantity}</span>
                     <span>${(parseFloat(item.discountedPrice) * item.quantity).toLocaleString()}</span>
                   </div>
                 ))}
-                <div className="flex justify-between">
+                <div className="flex justify-between text-gray-200">
                   <span>Shipping</span>
                   <span>{shipping === 0 ? "FREE" : `$${shipping}`}</span>
                 </div>
-                <div className="border-t border-gray-300 pt-2 mt-2">
-                  <div className="flex justify-between items-center text-lg font-semibold">
+                <div className="border-t border-gray-600 pt-4 mt-4">
+                  <div className="flex justify-between items-center text-xl font-semibold">
                     <span>Total:</span>
                     <span className="text-luxury-gold">${total.toLocaleString()}</span>
                   </div>
@@ -229,7 +230,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             {/* Submit Button */}
             <Button 
               type="submit" 
-              className="w-full bg-luxury-gold hover:bg-yellow-500 text-black font-semibold py-3"
+              className="w-full bg-luxury-gold hover:bg-yellow-400 text-black font-semibold py-4 text-lg rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105"
               disabled={createOrderMutation.isPending}
             >
               {createOrderMutation.isPending ? (

@@ -63,12 +63,15 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
   }
 
   return (
-    <section id="products" className="bg-white py-12">
+    <section id="products" className="py-20 bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-bold text-black">Products</h3>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 space-y-4 md:space-y-0">
+          <div>
+            <h3 className="text-4xl font-light text-luxury-dark mb-2">Curated Collection</h3>
+            <p className="text-gray-600 font-light">Discover exceptional pieces from the world's finest brands</p>
+          </div>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-48 border-gray-200 rounded-xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -79,7 +82,7 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
           </Select>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
