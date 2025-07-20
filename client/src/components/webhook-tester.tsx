@@ -114,13 +114,23 @@ export function WebhookTester() {
     }
   ];
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied to clipboard",
-      description: "The content has been copied to your clipboard.",
-      duration: 2000,
-    });
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied to clipboard",
+        description: "The content has been copied to your clipboard.",
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      toast({
+        title: "Copy failed",
+        description: "Failed to copy to clipboard. Please try again.",
+        variant: "destructive",
+        duration: 2000,
+      });
+    }
   };
 
   const testWebhook = async () => {
@@ -177,6 +187,7 @@ export function WebhookTester() {
   };
 
   const loadExample = (endpoint: typeof webhookEndpoints[0]) => {
+    console.log('Loading example for endpoint:', endpoint);
     const baseUrl = window.location.origin;
     let url = `${baseUrl}${endpoint.path}`;
     
@@ -187,6 +198,12 @@ export function WebhookTester() {
     setTestUrl(url);
     setTestMethod(endpoint.method);
     setTestPayload(JSON.stringify(endpoint.example, null, 2));
+    
+    toast({
+      title: "Example loaded",
+      description: `Loaded ${endpoint.method} ${endpoint.path} example`,
+      duration: 2000,
+    });
   };
 
   return (
@@ -234,7 +251,12 @@ export function WebhookTester() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => loadExample(endpoint)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Button clicked for endpoint:', endpoint);
+                        loadExample(endpoint);
+                      }}
                       className="flex items-center gap-2"
                     >
                       <Code className="w-3 h-3" />
@@ -251,7 +273,11 @@ export function WebhookTester() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => copyToClipboard(JSON.stringify(endpoint.example, null, 2))}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            copyToClipboard(JSON.stringify(endpoint.example, null, 2));
+                          }}
                           className="h-6 px-2 text-xs"
                         >
                           <Copy className="w-3 h-3" />
@@ -329,7 +355,11 @@ export function WebhookTester() {
               )}
 
               <Button
-                onClick={testWebhook}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  testWebhook();
+                }}
                 disabled={isLoading}
                 className="w-full luxury-gradient-purple text-white font-bold py-3 rounded-xl hover:scale-105 transition-all duration-300"
               >
@@ -343,7 +373,11 @@ export function WebhookTester() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => copyToClipboard(testResponse)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        copyToClipboard(testResponse);
+                      }}
                       className="h-6 px-2 text-xs"
                     >
                       <Copy className="w-3 h-3" />
