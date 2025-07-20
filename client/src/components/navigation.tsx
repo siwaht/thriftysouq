@@ -34,6 +34,17 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
     const event = new CustomEvent('filterProducts', { detail: category });
     window.dispatchEvent(event);
     setIsMobileMenuOpen(false);
+    
+    // Scroll to products section after a brief delay to allow filtering
+    setTimeout(() => {
+      const productsSection = document.getElementById('products');
+      if (productsSection) {
+        productsSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }, 100);
   };
 
   const isAdminPage = location.includes('/admin');
@@ -92,7 +103,7 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden text-white/80 hover:text-white hover:bg-purple-500/20 transition-all duration-300"
+              className="lg:hidden text-white/80 hover:text-white hover:bg-emerald-500/20 transition-all duration-300"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -103,7 +114,7 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-white/80 hover:text-white hover:bg-purple-500/20 transition-all duration-300"
+                className="text-white/80 hover:text-white hover:bg-emerald-500/20 transition-all duration-300"
               >
                 <Settings className="h-5 w-5" />
               </Button>
@@ -115,13 +126,13 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
                 variant="ghost"
                 size="icon"
                 onClick={onCartToggle}
-                className="relative text-white/80 hover:text-white hover:bg-purple-500/20 transition-all duration-300"
+                className="relative text-white/80 hover:text-white hover:bg-emerald-500/20 transition-all duration-300"
               >
                 <ShoppingBag className="h-5 w-5" />
                 {totalItems > 0 && (
                   <Badge 
                     variant="destructive" 
-                    className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-bold bg-luxury-gold text-luxury-dark border-0"
+                    className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs font-bold bg-amber-500 text-slate-900 border-0"
                   >
                     {totalItems}
                   </Badge>
@@ -133,14 +144,14 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 right-0 bg-luxury-dark/95 backdrop-blur-xl border-t border-purple-500/20 shadow-2xl">
+          <div className="lg:hidden absolute top-full left-0 right-0 glass-dark border-t border-white/10 shadow-modern-lg">
             <div className="p-4 space-y-2">
               {isAdminPage ? (
                 <div className="space-y-2">
                   <Link href="/">
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-white/80 hover:text-white hover:bg-purple-500/20"
+                      className="w-full justify-start text-white/80 hover:text-white hover:bg-emerald-500/20"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Home className="h-4 w-4 mr-2" />
@@ -156,8 +167,8 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
                       variant={activeFilter === category.value ? "default" : "ghost"}
                       className={`w-full justify-start transition-all duration-300 ${
                         activeFilter === category.value 
-                          ? "bg-luxury-purple text-white shadow-lg" 
-                          : "text-white/80 hover:text-white hover:bg-purple-500/20"
+                          ? "bg-emerald-500 text-white shadow-lg" 
+                          : "text-white/80 hover:text-white hover:bg-emerald-500/20"
                       }`}
                       onClick={() => handleFilterChange(category.value)}
                     >
@@ -165,11 +176,11 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
                     </Button>
                   ))}
                   
-                  <div className="pt-2 border-t border-purple-500/20">
+                  <div className="pt-2 border-t border-white/10">
                     <Link href="/admin">
                       <Button
                         variant="ghost"
-                        className="w-full justify-start text-white/80 hover:text-white hover:bg-purple-500/20"
+                        className="w-full justify-start text-white/80 hover:text-white hover:bg-emerald-500/20"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <Settings className="h-4 w-4 mr-2" />
