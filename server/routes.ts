@@ -353,6 +353,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bulk import products (admin only)
+  app.post("/api/admin/products/bulk-import", requireAdminAuth, async (req, res) => {
+    try {
+      const { products } = req.body;
+      
+      if (!Array.isArray(products) || products.length === 0) {
+        return res.status(400).json({ message: "Products array is required" });
+      }
+
+      const results = {
+        success: 0,
+        errors: [] as string[]
+      };
+
+      for (let i = 0; i < products.length; i++) {
+        try {
+          const productData = products[i];
+          
+          // Validate required fields
+          if (!productData.name || !productData.brand || !productData.category ||
+              !productData.originalPrice || !productData.discountedPrice ||
+              typeof productData.discount !== 'number' || typeof productData.stock !== 'number') {
+            results.errors.push(`Product ${i + 1}: Missing or invalid required fields`);
+            continue;
+          }
+
+          // Validate category
+          if (!["watches", "jewelry", "fashion", "accessories", "beauty"].includes(productData.category)) {
+            results.errors.push(`Product ${i + 1}: Invalid category`);
+            continue;
+          }
+
+          // Create product
+          await storage.createProduct({
+            name: productData.name,
+            brand: productData.brand,
+            category: productData.category,
+            originalPrice: productData.originalPrice,
+            discountedPrice: productData.discountedPrice,
+            discount: productData.discount,
+            image: productData.image || "https://via.placeholder.com/400x400",
+            stock: productData.stock
+          });
+
+          results.success++;
+        } catch (error) {
+          results.errors.push(`Product ${i + 1}: Failed to create product - ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to process bulk import" });
+    }
+  });
+
   // Admin Menu Items API routes
   // Create menu item
   app.post("/api/admin/menu-items", requireAdminAuth, async (req, res) => {

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube, LogOut, BarChart3, Tag } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube, LogOut, BarChart3, Tag, Upload, Download, FileText } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -62,6 +62,9 @@ export default function AdminPage() {
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);
   const [isWebhookDialogOpen, setIsWebhookDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importResults, setImportResults] = useState<{ success: number; errors: string[] } | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -530,6 +533,181 @@ export default function AdminPage() {
     logoutMutation.mutate();
   };
 
+  // Bulk import/export functions
+  const handleExportProducts = () => {
+    if (!products.length) {
+      toast({
+        title: "No products to export",
+        description: "Add some products first before exporting.",
+        variant: "destructive",
+        duration: 2000,
+      });
+      return;
+    }
+
+    const csvHeaders = ["name", "brand", "category", "originalPrice", "discountedPrice", "discount", "image", "stock"];
+    const csvRows = products.map(product => [
+      product.name,
+      product.brand,
+      product.category,
+      product.originalPrice,
+      product.discountedPrice,
+      product.discount,
+      product.image,
+      product.stock
+    ]);
+
+    const csvContent = [csvHeaders, ...csvRows]
+      .map(row => row.map(field => `"${field}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `products-export-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: "Products exported",
+      description: `Successfully exported ${products.length} products to CSV.`,
+      duration: 2000,
+    });
+  };
+
+  const handleImportProducts = async () => {
+    if (!importFile) {
+      toast({
+        title: "No file selected",
+        description: "Please select a CSV file to import.",
+        variant: "destructive",
+        duration: 2000,
+      });
+      return;
+    }
+
+    try {
+      const text = await importFile.text();
+      const lines = text.split("\n").filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        toast({
+          title: "Invalid file",
+          description: "CSV file must contain headers and at least one product row.",
+          variant: "destructive",
+          duration: 2000,
+        });
+        return;
+      }
+
+      const headers = lines[0].split(",").map(h => h.replace(/"/g, "").trim());
+      const expectedHeaders = ["name", "brand", "category", "originalPrice", "discountedPrice", "discount", "image", "stock"];
+      
+      const missingHeaders = expectedHeaders.filter(h => !headers.includes(h));
+      if (missingHeaders.length > 0) {
+        toast({
+          title: "Invalid CSV format",
+          description: `Missing required columns: ${missingHeaders.join(", ")}`,
+          variant: "destructive",
+          duration: 2000,
+        });
+        return;
+      }
+
+      const productData = [];
+      const errors = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        try {
+          const values = lines[i].split(",").map(v => v.replace(/"/g, "").trim());
+          const product: any = {};
+          
+          headers.forEach((header, index) => {
+            product[header] = values[index] || "";
+          });
+
+          // Validate and convert data types
+          product.discount = parseInt(product.discount);
+          product.stock = parseInt(product.stock);
+
+          if (!product.name || !product.brand || !product.category || 
+              !product.originalPrice || !product.discountedPrice ||
+              isNaN(product.discount) || isNaN(product.stock)) {
+            errors.push(`Row ${i + 1}: Invalid or missing required fields`);
+            continue;
+          }
+
+          if (!["watches", "jewelry", "fashion", "accessories", "beauty"].includes(product.category)) {
+            errors.push(`Row ${i + 1}: Invalid category "${product.category}"`);
+            continue;
+          }
+
+          productData.push(product);
+        } catch (error) {
+          errors.push(`Row ${i + 1}: Failed to parse data`);
+        }
+      }
+
+      if (productData.length === 0) {
+        setImportResults({ success: 0, errors });
+        return;
+      }
+
+      // Import products via API
+      const response = await apiRequest("/api/admin/products/bulk-import", {
+        method: "POST",
+        body: JSON.stringify({ products: productData }),
+      });
+
+      const result = await response.json();
+      setImportResults({
+        success: result.success || productData.length,
+        errors: [...errors, ...(result.errors || [])]
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      
+      toast({
+        title: "Import completed",
+        description: `Successfully imported ${result.success || productData.length} products.`,
+        duration: 2000,
+      });
+
+    } catch (error) {
+      toast({
+        title: "Import failed",
+        description: "Failed to process the CSV file. Please check the format and try again.",
+        variant: "destructive",
+        duration: 2000,
+      });
+    }
+  };
+
+  const downloadSampleCSV = () => {
+    const sampleData = [
+      ["name", "brand", "category", "originalPrice", "discountedPrice", "discount", "image", "stock"],
+      ["Sample Watch", "Luxury Brand", "watches", "$2,000", "$800", "60", "https://example.com/watch.jpg", "10"],
+      ["Sample Ring", "Premium Jewelry", "jewelry", "$1,500", "$750", "50", "https://example.com/ring.jpg", "5"]
+    ];
+
+    const csvContent = sampleData
+      .map(row => row.map(field => `"${field}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "products-import-sample.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Show loading screen while checking authentication
   if (isLoading) {
     return (
@@ -637,17 +815,140 @@ export default function AdminPage() {
                   </h2>
                   <p className="text-gray-600">Add, edit, and manage your luxury products</p>
                 </div>
-            
-            <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  onClick={handleAddNew}
-                  className="luxury-gradient-purple text-white font-bold px-6 py-3 rounded-xl hover:scale-105 transition-all duration-300 mobile-optimized"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Product
-                </Button>
-              </DialogTrigger>
+                
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={downloadSampleCSV}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Sample CSV
+                  </Button>
+                  
+                  <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Import CSV
+                      </Button>
+                    </DialogTrigger>
+                    
+                    <DialogContent className="w-[95%] sm:max-w-2xl max-h-[95vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Import Products from CSV</DialogTitle>
+                      </DialogHeader>
+                      
+                      <div className="space-y-6">
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">
+                              Select CSV File
+                            </label>
+                            <Input
+                              type="file"
+                              accept=".csv"
+                              onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                              className="cursor-pointer"
+                            />
+                            <p className="text-sm text-gray-500 mt-1">
+                              Upload a CSV file with product data. Required columns: name, brand, category, originalPrice, discountedPrice, discount, image, stock
+                            </p>
+                          </div>
+                          
+                          {importFile && (
+                            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                              <p className="text-sm text-green-700">
+                                File selected: {importFile.name} ({Math.round(importFile.size / 1024)}KB)
+                              </p>
+                            </div>
+                          )}
+                          
+                          {importResults && (
+                            <div className="space-y-2">
+                              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p className="text-sm text-blue-700 font-medium">
+                                  Import Results:
+                                </p>
+                                <p className="text-sm text-blue-600">
+                                  Successfully imported: {importResults.success} products
+                                </p>
+                              </div>
+                              
+                              {importResults.errors.length > 0 && (
+                                <div className="p-3 bg-red-50 border border-red-200 rounded-lg max-h-40 overflow-y-auto">
+                                  <p className="text-sm text-red-700 font-medium mb-1">Errors:</p>
+                                  <ul className="text-sm text-red-600 space-y-1">
+                                    {importResults.errors.map((error, index) => (
+                                      <li key={index}>• {error}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Button
+                            onClick={handleImportProducts}
+                            disabled={!importFile}
+                            className="flex items-center gap-2"
+                          >
+                            <Upload className="w-4 h-4" />
+                            Import Products
+                          </Button>
+                          
+                          <Button
+                            onClick={downloadSampleCSV}
+                            variant="outline"
+                            className="flex items-center gap-2"
+                          >
+                            <FileText className="w-4 h-4" />
+                            Download Sample
+                          </Button>
+                          
+                          <Button
+                            onClick={() => {
+                              setIsImportDialogOpen(false);
+                              setImportFile(null);
+                              setImportResults(null);
+                            }}
+                            variant="outline"
+                          >
+                            Close
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  <Button
+                    onClick={handleExportProducts}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    disabled={!products.length}
+                  >
+                    <Download className="w-4 h-4" />
+                    Export CSV
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      onClick={handleAddNew}
+                      className="luxury-gradient-purple text-white font-bold px-6 py-3 rounded-xl hover:scale-105 transition-all duration-300 mobile-optimized"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Product
+                    </Button>
+                  </DialogTrigger>
               
               <DialogContent className="w-[95%] sm:max-w-2xl max-h-[95vh] overflow-y-auto mobile-optimized">
                 <DialogHeader>
