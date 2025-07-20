@@ -935,7 +935,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         event: 'webhook.test',
         timestamp: new Date().toISOString(),
         data: {
-          message: 'This is a test webhook from LuxDeal Quick',
+          message: 'This is a test webhook from ThriftySouq',
           webhook_id: webhook.id,
           webhook_name: webhook.name
         }

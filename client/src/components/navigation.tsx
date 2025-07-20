@@ -68,7 +68,7 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
             <h1 className="text-xl sm:text-2xl font-bold text-white">
-              LuxDeal <span className="text-emerald-400 font-normal">Quick</span>
+              thrifty<span className="text-emerald-400 font-normal">souq</span>
             </h1>
           </div>
 

@@ -9,8 +9,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex flex-col md:flex-row justify-between items-start space-y-12 sm:space-y-16 md:space-y-0">
           <div className="space-y-6 sm:space-y-8">
-            <h4 className="text-luxury-title text-3xl sm:text-4xl font-bold tracking-tight">
-              LuxDeal <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent font-light">Quick</span>
+            <h4 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              thrifty<span className="text-emerald-400 font-normal">souq</span>
             </h4>
             <p className="text-luxury-body text-slate-200 max-w-lg leading-relaxed text-lg sm:text-xl font-light">
               Exceptional luxury brands at unprecedented discounts. 
@@ -44,7 +44,7 @@ export default function Footer() {
         
         <div className="border-t border-slate-600/50 mt-16 sm:mt-20 pt-10 sm:pt-12 text-center">
           <p className="text-luxury-body text-slate-300 font-light text-lg sm:text-xl">
-            &copy; 2025 LuxDeal Quick. All rights reserved. | Authentic luxury, verified quality.
+            &copy; 2025 ThriftySouq. All rights reserved. | Authentic luxury, verified quality.
           </p>
         </div>
       </div>

@@ -1,8 +1,8 @@
-# LuxDeal Quick - Luxury E-commerce Platform
+# ThriftySouq - Luxury E-commerce Platform
 
 ## Overview
 
-LuxDeal Quick is a single-page e-commerce application optimized for quick commerce, specializing in high-quality luxury brands offered at steep discounts. The application is built with a modern full-stack architecture using React, Express, and TypeScript, designed for fast loading times and a frictionless shopping experience.
+ThriftySouq is a single-page e-commerce application optimized for quick commerce, specializing in high-quality luxury brands offered at steep discounts. The application is built with a modern full-stack architecture using React, Express, and TypeScript, designed for fast loading times and a frictionless shopping experience for the UAE market.
 
 ## User Preferences
 
@@ -216,6 +216,15 @@ Preferred communication style: Simple, everyday language.
 - **Button Optimization**: Simplified button styles, removed complex gradients and animations for better performance
 - **Responsive Grid**: Improved product grid from xl:grid-cols-4 to responsive 2/3/4 column layout
 - **Touch Optimization**: Enhanced mobile tap targets with minimum 44px height for better usability
+
+### Website Rebranding (January 20, 2025)
+- **Brand Name Update**: Changed from "LuxDeal Quick" to "ThriftySouq" throughout the application
+- **Domain Update**: Updated all references from luxdeal-quick.replit.app to thriftysouq.com
+- **SEO Updates**: Updated HTML meta tags, Open Graph tags, and structured data for new brand
+- **Navigation Updates**: Updated logo and branding in navigation component
+- **Footer Updates**: Updated footer branding and copyright information
+- **Contact Information**: Updated phone number to UAE format (+971-4-THRIFTY) and email to support@thriftysouq.com
+- **Geographic Targeting**: Updated structured data address country to "AE" (United Arab Emirates)
 
 ### Comprehensive Webhook Integration for Product Management (January 20, 2025)
 - **Product Management Webhooks**: Complete set of webhook endpoints for external product management including add, update, and delete operations
