@@ -95,23 +95,44 @@ PRODUCT DATA:
 - Average discount: ${avgDiscount}%
 - Total savings: $${totalSavings.toLocaleString()}
 
-Create high-converting copy that drives immediate luxury purchases.
+CRITICAL DESIGN CONSTRAINTS:
+- Badge text: 2-4 words max (e.g., "Flash Sale", "Limited Time")
+- Main title: 1-2 words max (e.g., "LUXURY", "PREMIUM") 
+- Highlight title: 1-2 words max (e.g., "UNLEASHED", "COLLECTION")
+- Subtitle: 2-3 words max (e.g., "Exceptional Savings", "Made Accessible")
+- Description: Under 100 characters total (e.g., "Authentic luxury brands at up to 70% off. Premium quality, unbeatable prices.")
+- Button text: 2-3 words max (e.g., "Shop Now", "Explore Deals")
+- Footer text: Under 6 words (e.g., "Free worldwide shipping")
 
-Required JSON format:
+EXAMPLE OUTPUT:
 {
-  "badgeText": "urgent badge text (3-5 words)",
-  "mainTitle": "powerful headline (1-2 words)",
-  "highlightTitle": "luxury emphasis (1-2 words)", 
-  "subtitle": "compelling subtitle (2-4 words)",
-  "description": "persuasive 2-3 sentence description",
-  "buttonText": "action button (2-3 words)",
-  "footerText": "incentive text (under 8 words)",
+  "badgeText": "Flash Sale",
+  "mainTitle": "LUXURY",
+  "highlightTitle": "UNLEASHED",
+  "subtitle": "Exceptional Savings", 
+  "description": "Authentic luxury brands at up to 70% off. Premium quality, unbeatable prices.",
+  "buttonText": "Shop Now",
+  "footerText": "Free worldwide shipping",
+  "urgencyTactics": ["limited time", "while supplies last", "exclusive access"],
+  "emotionalTriggers": ["luxury ownership", "smart shopping", "exclusive access"],
+  "salesTechniques": ["scarcity marketing", "value anchoring", "urgency creation"]
+}
+
+Required JSON format with short content:
+{
+  "badgeText": "2-4 words max",
+  "mainTitle": "1-2 words max",
+  "highlightTitle": "1-2 words max", 
+  "subtitle": "2-3 words max",
+  "description": "Under 100 characters emphasizing value and urgency",
+  "buttonText": "2-3 words max",
+  "footerText": "Under 6 words",
   "urgencyTactics": ["tactic1", "tactic2", "tactic3"],
   "emotionalTriggers": ["trigger1", "trigger2", "trigger3"],
   "salesTechniques": ["technique1", "technique2", "technique3"]
 }`;
 
-    const systemPrompt = "You are an expert luxury marketing copywriter creating high-conversion sales content that drives immediate action and maximizes revenue.";
+    const systemPrompt = "You are an expert luxury marketing copywriter creating extremely concise, high-conversion sales content that fits hero banner design constraints. All text must be short and punchy.";
 
     return await this.generateWithGemini(prompt, systemPrompt);
   }
@@ -242,18 +263,38 @@ Create high-converting marketing copy that:
 4. Appeals to the target audience's aspirations
 5. Highlights massive savings and limited availability
 
+CRITICAL DESIGN REQUIREMENTS:
+- Badge text: 2-4 words maximum (e.g., "Limited Time", "Flash Sale")
+- Main title: 1-2 words maximum (e.g., "LUXURY", "PREMIUM")
+- Highlight title: 1-2 words maximum (e.g., "UNLEASHED", "COLLECTION")
+- Subtitle: 2-3 words maximum (e.g., "Exceptional Savings", "Made Accessible")
+- Description: Under 100 characters total (e.g., "Authentic luxury brands at up to 70% off. Premium quality, unbeatable prices.")
+- Button text: 2-3 words maximum (e.g., "Shop Now", "Explore Deals")
+- Footer text: Under 6 words (e.g., "Free worldwide shipping", "Limited stock remaining")
+
 Respond with JSON in this exact format:
 {
-  "badgeText": "short urgent badge text (2-4 words max)",
-  "mainTitle": "powerful main headline word (1-2 words max)",
-  "highlightTitle": "emphasized luxury word (1-2 words max)", 
-  "subtitle": "compelling subtitle (2-3 words max)",
-  "description": "persuasive 1-2 sentence description under 120 characters emphasizing value and urgency",
-  "buttonText": "action-driving button text (2-3 words max)",
-  "footerText": "additional incentive or guarantee (under 6 words)",
+  "badgeText": "2-4 words max",
+  "mainTitle": "1-2 words max",
+  "highlightTitle": "1-2 words max", 
+  "subtitle": "2-3 words max",
+  "description": "Under 100 characters emphasizing value and urgency",
+  "buttonText": "2-3 words max",
+  "footerText": "Under 6 words",
   "urgencyTactics": ["tactic1", "tactic2", "tactic3"],
   "emotionalTriggers": ["trigger1", "trigger2", "trigger3"],
   "salesTechniques": ["technique1", "technique2", "technique3"]
+}
+
+EXAMPLES of good short content:
+{
+  "badgeText": "Flash Sale",
+  "mainTitle": "LUXURY",
+  "highlightTitle": "UNLEASHED",
+  "subtitle": "Exceptional Savings",
+  "description": "Authentic luxury brands at up to 70% off. Premium quality, unbeatable prices.",
+  "buttonText": "Shop Now",
+  "footerText": "Free worldwide shipping"
 }`;
 
     try {
