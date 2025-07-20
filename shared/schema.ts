@@ -78,6 +78,13 @@ export const adminUsers = pgTable("admin_users", {
   passwordHash: text("password_hash").notNull(),
 });
 
+export const adminTokens = pgTable("admin_tokens", {
+  token: text("token").primaryKey(),
+  adminId: integer("admin_id").notNull().references(() => adminUsers.id),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const heroBanner = pgTable("hero_banner", {
   id: serial("id").primaryKey(),
   badgeIcon: text("badge_icon").default("Sparkles"),
@@ -136,5 +143,7 @@ export const insertHeroBannerSchema = createInsertSchema(heroBanner).omit({
 
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
+export type AdminToken = typeof adminTokens.$inferSelect;
+export type InsertAdminToken = typeof adminTokens.$inferInsert;
 export type HeroBanner = typeof heroBanner.$inferSelect;
 export type InsertHeroBanner = z.infer<typeof insertHeroBannerSchema>;

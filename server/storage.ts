@@ -1,4 +1,4 @@
-import { products, orders, orderItems, menuItems, webhooks, adminUsers, heroBanner, type Product, type Order, type OrderItem, type MenuItem, type Webhook, type AdminUser, type HeroBanner, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem, type InsertWebhook, type InsertAdminUser, type InsertHeroBanner } from "@shared/schema";
+import { products, orders, orderItems, menuItems, webhooks, adminUsers, adminTokens, heroBanner, type Product, type Order, type OrderItem, type MenuItem, type Webhook, type AdminUser, type AdminToken, type HeroBanner, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem, type InsertWebhook, type InsertAdminUser, type InsertAdminToken, type InsertHeroBanner } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
 
@@ -33,6 +33,11 @@ export interface IStorage {
   // Admin authentication methods
   getAdminByUsername(username: string): Promise<AdminUser | undefined>;
   createAdminUser(user: InsertAdminUser): Promise<AdminUser>;
+  // Token management methods
+  createToken(token: InsertAdminToken): Promise<AdminToken>;
+  validateToken(token: string): Promise<AdminToken | undefined>;
+  deleteToken(token: string): Promise<boolean>;
+  cleanupExpiredTokens(): Promise<number>;
   // Hero banner methods
   getHeroBanner(): Promise<HeroBanner | undefined>;
   updateHeroBanner(banner: InsertHeroBanner): Promise<HeroBanner>;

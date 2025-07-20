@@ -130,50 +130,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Simple token-based authentication for deployment reliability
-  const activeTokens = new Map<string, { adminId: number; username: string; expiresAt: number }>();
-  
+  // Database-backed token storage using sessions table for deployment reliability
   const generateToken = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   };
   
-  const isValidToken = (token: string): boolean => {
-    const tokenData = activeTokens.get(token);
-    if (!tokenData) {
-      console.log("Token not found in active tokens:", token);
-      return false;
-    }
+  const storeTokenInSession = async (token: string, adminData: { adminId: number; username: string }) => {
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const sessionData = {
+      admin: adminData,
+      expiresAt: expiresAt.toISOString(),
+      createdAt: new Date().toISOString()
+    };
     
-    if (Date.now() > tokenData.expiresAt) {
-      console.log("Token expired:", token);
-      activeTokens.delete(token);
-      return false;
+    try {
+      await db.execute(`
+        INSERT INTO sessions (sid, sess, expire) 
+        VALUES ($1, $2, $3) 
+        ON CONFLICT (sid) 
+        DO UPDATE SET sess = $2, expire = $3
+      `, [
+        `admin_token_${token}`,
+        JSON.stringify(sessionData),
+        expiresAt
+      ]);
+      console.log("Token stored in database:", token);
+    } catch (error) {
+      console.error("Error storing token:", error);
     }
-    
-    // Extend token expiration
-    tokenData.expiresAt = Date.now() + (24 * 60 * 60 * 1000);
-    console.log("Token valid and extended:", token);
-    return true;
+  };
+  
+  const validateTokenFromSession = async (token: string): Promise<{ adminId: number; username: string } | null> => {
+    try {
+      const result = await db.execute(`
+        SELECT sess FROM sessions 
+        WHERE sid = $1 AND expire > NOW()
+      `, [`admin_token_${token}`]);
+      
+      if (result.rows.length === 0) {
+        console.log("Token not found or expired in database:", token);
+        return null;
+      }
+      
+      const sessionData = result.rows[0].sess as any;
+      const parsedData = typeof sessionData === 'string' ? JSON.parse(sessionData) : sessionData;
+      
+      // Extend token expiration
+      const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      await db.execute(`
+        UPDATE sessions 
+        SET expire = $1 
+        WHERE sid = $2
+      `, [newExpiresAt, `admin_token_${token}`]);
+      
+      console.log("Token validated and extended:", token);
+      return parsedData.admin;
+    } catch (error) {
+      console.error("Error validating token:", error);
+      return null;
+    }
+  };
+  
+  const deleteTokenFromSession = async (token: string) => {
+    try {
+      await db.execute(`DELETE FROM sessions WHERE sid = $1`, [`admin_token_${token}`]);
+      console.log("Token deleted from database:", token);
+    } catch (error) {
+      console.error("Error deleting token:", error);
+    }
   };
 
   // Token-based authentication middleware
-  const requireAdminAuth = (req: any, res: any, next: any) => {
+  const requireAdminAuth = async (req: any, res: any, next: any) => {
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminToken;
     
     console.log("Auth check - Token:", token ? token.substring(0, 8) + '...' : 'missing');
     console.log("Auth check - Headers:", req.headers.authorization);
     console.log("Auth check - Raw cookies:", req.headers.cookie);
     console.log("Auth check - Parsed cookies:", req.cookies);
-    console.log("Active tokens count:", activeTokens.size);
     
-    if (token && isValidToken(token)) {
-      console.log("Token authentication successful for:", req.path);
-      req.adminAuth = activeTokens.get(token);
-      next();
-    } else {
-      console.log("Token authentication failed for:", req.path);
-      res.status(401).json({ message: "Admin authentication required" });
+    if (token) {
+      const adminData = await validateTokenFromSession(token);
+      if (adminData) {
+        console.log("Token authentication successful for:", req.path);
+        req.adminAuth = adminData;
+        next();
+        return;
+      }
     }
+    
+    console.log("Token authentication failed for:", req.path);
+    res.status(401).json({ message: "Admin authentication required" });
   };
 
   // Admin authentication routes
@@ -197,15 +244,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate authentication token
       const token = generateToken();
-      const tokenData = {
+      const adminData = {
         adminId: admin.id,
-        username: admin.username,
-        expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+        username: admin.username
       };
       
-      activeTokens.set(token, tokenData);
-      console.log("Token created successfully:", token);
-      console.log("Active tokens count after creation:", activeTokens.size);
+      await storeTokenInSession(token, adminData);
+      console.log("Token created and stored successfully:", token);
       
       // Set secure cookie and return token
       res.cookie('adminToken', token, {
@@ -227,11 +272,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/logout", (req, res) => {
+  app.post("/api/admin/logout", async (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminToken;
     
     if (token) {
-      activeTokens.delete(token);
+      await deleteTokenFromSession(token);
       console.log("Token removed successfully:", token);
     }
     
@@ -239,13 +284,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: "Logout successful" });
   });
 
-  app.get("/api/admin/auth-status", (req, res) => {
+  app.get("/api/admin/auth-status", async (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminToken;
-    const isAuthenticated = !!(token && isValidToken(token));
+    let isAuthenticated = false;
     
-    console.log("Auth status check - Token:", token ? 'present' : 'missing');
+    if (token) {
+      const adminData = await validateTokenFromSession(token);
+      isAuthenticated = !!adminData;
+    }
+    
+    console.log("Auth status check - Token:", token ? token.substring(0, 8) + '...' : 'missing');
     console.log("Auth status check - Valid:", isAuthenticated);
-    console.log("Auth status check - Cookie:", req.headers.cookie);
+    console.log("Auth status check - Raw cookie:", req.headers.cookie);
+    console.log("Auth status check - Parsed cookies:", req.cookies);
+    console.log("Auth status check - adminToken cookie:", req.cookies?.adminToken);
     
     res.json({ 
       isAuthenticated,
@@ -253,7 +305,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       debug: {
         hasToken: !!token,
         tokenValid: isAuthenticated,
-        activeTokensCount: activeTokens.size
+        rawCookies: req.headers.cookie,
+        parsedCookies: req.cookies
       }
     });
   });
