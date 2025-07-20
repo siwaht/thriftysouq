@@ -1,4 +1,4 @@
-import { products, orders, orderItems, menuItems, webhooks, adminUsers, type Product, type Order, type OrderItem, type MenuItem, type Webhook, type AdminUser, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem, type InsertWebhook, type InsertAdminUser } from "@shared/schema";
+import { products, orders, orderItems, menuItems, webhooks, adminUsers, heroBanner, type Product, type Order, type OrderItem, type MenuItem, type Webhook, type AdminUser, type HeroBanner, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem, type InsertWebhook, type InsertAdminUser, type InsertHeroBanner } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
 
@@ -33,6 +33,9 @@ export interface IStorage {
   // Admin authentication methods
   getAdminByUsername(username: string): Promise<AdminUser | undefined>;
   createAdminUser(user: InsertAdminUser): Promise<AdminUser>;
+  // Hero banner methods
+  getHeroBanner(): Promise<HeroBanner | undefined>;
+  updateHeroBanner(banner: InsertHeroBanner): Promise<HeroBanner>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -247,6 +250,25 @@ export class DatabaseStorage implements IStorage {
       .values(user)
       .returning();
     return newAdmin;
+  }
+
+  async getHeroBanner(): Promise<HeroBanner | undefined> {
+    const [banner] = await db.select().from(heroBanner).where(eq(heroBanner.isActive, true)).limit(1);
+    return banner || undefined;
+  }
+
+  async updateHeroBanner(banner: InsertHeroBanner): Promise<HeroBanner> {
+    // First, deactivate all existing banners
+    await db.update(heroBanner).set({ isActive: false });
+    
+    // Insert or update the new banner
+    const [newBanner] = await db.insert(heroBanner).values({
+      ...banner,
+      isActive: true,
+      updatedAt: new Date(),
+    }).returning();
+    
+    return newBanner;
   }
 }
 

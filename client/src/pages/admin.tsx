@@ -18,6 +18,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/navigation";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
+import { HeroBannerAdmin } from "@/components/hero-banner-admin";
 import type { Product, MenuItem, Webhook as WebhookType } from "@shared/schema";
 
 const productFormSchema = z.object({
@@ -582,7 +583,11 @@ export default function AdminPage() {
           </div>
 
           <Tabs defaultValue="products" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
+            <TabsList className="grid w-full grid-cols-5 mb-8">
+              <TabsTrigger value="hero" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
+                <Eye className="w-4 h-4 mr-2" />
+                Hero Banner
+              </TabsTrigger>
               <TabsTrigger value="products" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
                 <Package className="w-4 h-4 mr-2" />
                 Products
@@ -600,6 +605,10 @@ export default function AdminPage() {
                 Webhooks
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="hero">
+              <HeroBannerAdmin />
+            </TabsContent>
 
             <TabsContent value="products">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">

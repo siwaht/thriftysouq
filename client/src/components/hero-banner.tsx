@@ -1,7 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { HeroBanner } from "@shared/schema";
 
 export default function HeroBanner() {
+  const { data: banner } = useQuery<HeroBanner>({
+    queryKey: ["/api/hero-banner"],
+  });
+
+  // Use default values if no banner data is available
+  const bannerData = banner || {
+    badgeIcon: "Sparkles",
+    badgeText: "Luxury at unprecedented prices",
+    mainTitle: "Premium",
+    highlightTitle: "Luxury",
+    subtitle: "Made Accessible",
+    description: "Discover authenticated luxury brands at up to 70% off. Curated collections from the world's finest houses.",
+    buttonText: "Explore Collection",
+    footerText: "Free shipping on orders over $200",
+  };
+
   const scrollToProducts = () => {
     const productsSection = document.getElementById('products');
     if (productsSection) {
@@ -21,25 +39,22 @@ export default function HeroBanner() {
         <div className="text-center animate-fade-in">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8 text-sm font-medium">
             <Sparkles className="w-4 h-4 text-amber-400" />
-            Luxury at unprecedented prices
+            {bannerData.badgeText}
           </div>
           
           <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 text-balance">
-            Premium{" "}
+            {bannerData.mainTitle}{" "}
             <span className="bg-gradient-emerald bg-clip-text text-transparent">
-              Luxury
+              {bannerData.highlightTitle}
             </span>
             <br />
             <span className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light">
-              Made Accessible
+              {bannerData.subtitle}
             </span>
           </h1>
           
           <p className="text-xl sm:text-2xl text-slate-300 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
-            Discover authenticated luxury brands at{" "}
-            <span className="text-amber-400 font-semibold">up to 70% off</span>.
-            <br className="hidden sm:block" />
-            Curated collections from the world's finest houses.
+            {bannerData.description}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -47,13 +62,13 @@ export default function HeroBanner() {
               onClick={scrollToProducts}
               className="btn-emerald text-lg px-8 py-4 rounded-full hover:scale-105 transition-all duration-300 shadow-emerald group"
             >
-              Explore Collection
+              {bannerData.buttonText}
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
             
             <div className="text-sm text-slate-400 flex items-center gap-2">
               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-              Free shipping on orders over $200
+              {bannerData.footerText}
             </div>
           </div>
         </div>

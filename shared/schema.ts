@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, decimal } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, decimal, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
@@ -78,6 +78,20 @@ export const adminUsers = pgTable("admin_users", {
   passwordHash: text("password_hash").notNull(),
 });
 
+export const heroBanner = pgTable("hero_banner", {
+  id: serial("id").primaryKey(),
+  badgeIcon: text("badge_icon").default("Sparkles"),
+  badgeText: text("badge_text").default("Luxury at unprecedented prices"),
+  mainTitle: text("main_title").default("Premium"),
+  highlightTitle: text("highlight_title").default("Luxury"),
+  subtitle: text("subtitle").default("Made Accessible"),
+  description: text("description").default("Discover authenticated luxury brands at up to 70% off. Curated collections from the world's finest houses."),
+  buttonText: text("button_text").default("Explore Collection"),
+  footerText: text("footer_text").default("Free shipping on orders over $200"),
+  isActive: boolean("is_active").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const webhooks = pgTable("webhooks", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -115,5 +129,12 @@ export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
   id: true,
 });
 
+export const insertHeroBannerSchema = createInsertSchema(heroBanner).omit({
+  id: true,
+  updatedAt: true,
+});
+
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
+export type HeroBanner = typeof heroBanner.$inferSelect;
+export type InsertHeroBanner = z.infer<typeof insertHeroBannerSchema>;

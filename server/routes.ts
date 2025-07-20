@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema, insertProductSchema, insertMenuItemSchema, insertWebhookSchema } from "@shared/schema";
+import { insertOrderSchema, insertProductSchema, insertMenuItemSchema, insertWebhookSchema, insertHeroBannerSchema } from "@shared/schema";
 import { z } from "zod";
 import { webhookService } from "./webhook-service";
 import bcrypt from "bcryptjs";
@@ -536,6 +536,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ message: "Failed to test webhook" });
+    }
+  });
+
+  // Hero Banner API routes
+  // Get hero banner
+  app.get("/api/hero-banner", async (req, res) => {
+    try {
+      const banner = await storage.getHeroBanner();
+      res.json(banner);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch hero banner" });
+    }
+  });
+
+  // Update hero banner (admin only)
+  app.put("/api/admin/hero-banner", requireAdminAuth, async (req, res) => {
+    try {
+      const bannerData = insertHeroBannerSchema.parse(req.body);
+      const banner = await storage.updateHeroBanner(bannerData);
+      res.json(banner);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid hero banner data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update hero banner" });
     }
   });
 
