@@ -1,17 +1,19 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Zap } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
+import { QuickActions } from "./quick-actions";
 import type { Product } from "@/lib/types";
 
 interface ProductCardProps {
   product: Product;
   onProductClick?: (product: Product) => void;
+  onExpressCheckout?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, onProductClick }: ProductCardProps) {
+export default function ProductCard({ product, onProductClick, onExpressCheckout }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
 
@@ -23,6 +25,13 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
       description: `${product.name} has been added to your cart.`,
       duration: 2000,
     });
+  };
+
+  const handleExpressCheckout = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onExpressCheckout) {
+      onExpressCheckout(product);
+    }
   };
 
   const handleCardClick = () => {
@@ -47,6 +56,7 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
         <Badge className="absolute top-4 left-4 bg-gradient-emerald text-white text-xs font-bold px-3 py-1.5 shadow-emerald rounded-full">
           -{product.discount}%
         </Badge>
+        <QuickActions product={product} variant="card" />
       </div>
       
       <CardContent className="p-6">
@@ -64,14 +74,25 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
           </span>
         </div>
         
-        <Button 
-          onClick={handleAddToCart}
-          className="w-full btn-emerald py-3 text-sm font-semibold rounded-lg group"
-          disabled={product.stock === 0}
-        >
-          <ShoppingBag className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-          {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            onClick={handleAddToCart}
+            className="flex-1 btn-emerald py-3 text-sm font-semibold rounded-lg group"
+            disabled={product.stock === 0}
+          >
+            <ShoppingBag className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+            {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+          </Button>
+          {product.stock > 0 && onExpressCheckout && (
+            <Button 
+              onClick={handleExpressCheckout}
+              variant="outline"
+              className="px-3 py-3 text-sm font-semibold rounded-lg hover:bg-emerald-50 hover:text-emerald-700 border-emerald-200"
+            >
+              <Zap className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
