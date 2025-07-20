@@ -11,10 +11,13 @@ export function useAdminAuth() {
 
   // Redirect to login if not authenticated and not loading
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && !error) {
-      window.location.href = "/admin-login";
+    if (!isLoading && !isAuthenticated) {
+      // Only redirect if we're currently on the admin page
+      if (window.location.pathname === "/admin") {
+        window.location.href = "/admin-login";
+      }
     }
-  }, [isAuthenticated, isLoading, error]);
+  }, [isAuthenticated, isLoading]);
 
   return {
     isAuthenticated,

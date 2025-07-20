@@ -34,9 +34,6 @@ export default function AdminLogin() {
     mutationFn: async (data: LoginFormData) => {
       return await apiRequest("/api/admin/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(data),
       });
     },

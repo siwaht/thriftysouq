@@ -114,8 +114,10 @@ export default function AdminPage() {
 
   const createProductMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      const response = await apiRequest("POST", "/api/admin/products", data);
-      return response.json();
+      return await apiRequest("/api/admin/products", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -139,8 +141,10 @@ export default function AdminPage() {
 
   const updateProductMutation = useMutation({
     mutationFn: async (data: ProductFormData & { id: number }) => {
-      const response = await apiRequest("PUT", `/api/admin/products/${data.id}`, data);
-      return response.json();
+      return await apiRequest(`/api/admin/products/${data.id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -165,7 +169,9 @@ export default function AdminPage() {
 
   const deleteProductMutation = useMutation({
     mutationFn: async (productId: number) => {
-      await apiRequest("DELETE", `/api/admin/products/${productId}`);
+      return await apiRequest(`/api/admin/products/${productId}`, {
+        method: "DELETE",
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -188,8 +194,10 @@ export default function AdminPage() {
   // Menu item mutations
   const createMenuItemMutation = useMutation({
     mutationFn: async (menuData: MenuItemFormData) => {
-      const response = await apiRequest("POST", "/api/admin/menu-items", menuData);
-      return response.json();
+      return await apiRequest("/api/admin/menu-items", {
+        method: "POST",
+        body: JSON.stringify(menuData),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/menu-items"] });
@@ -213,8 +221,10 @@ export default function AdminPage() {
   const updateMenuItemMutation = useMutation({
     mutationFn: async (data: MenuItemFormData & { id: number }) => {
       const { id, ...menuData } = data;
-      const response = await apiRequest("PUT", `/api/admin/menu-items/${id}`, menuData);
-      return response.json();
+      return await apiRequest(`/api/admin/menu-items/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(menuData),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/menu-items"] });
@@ -237,7 +247,9 @@ export default function AdminPage() {
 
   const deleteMenuItemMutation = useMutation({
     mutationFn: async (menuItemId: number) => {
-      await apiRequest("DELETE", `/api/admin/menu-items/${menuItemId}`);
+      return await apiRequest(`/api/admin/menu-items/${menuItemId}`, {
+        method: "DELETE",
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/menu-items"] });
@@ -258,8 +270,10 @@ export default function AdminPage() {
   // Order status update mutation
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
-      const response = await apiRequest("PATCH", `/api/orders/${orderId}/status`, { status });
-      return response.json();
+      return await apiRequest(`/api/orders/${orderId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
@@ -282,8 +296,10 @@ export default function AdminPage() {
   // Webhook mutations
   const createWebhookMutation = useMutation({
     mutationFn: async (data: WebhookFormData) => {
-      const response = await apiRequest("POST", "/api/admin/webhooks", data);
-      return response.json();
+      return await apiRequest("/api/admin/webhooks", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/webhooks"] });
@@ -307,8 +323,10 @@ export default function AdminPage() {
 
   const updateWebhookMutation = useMutation({
     mutationFn: async (data: WebhookFormData & { id: number }) => {
-      const response = await apiRequest("PUT", `/api/admin/webhooks/${data.id}`, data);
-      return response.json();
+      return await apiRequest(`/api/admin/webhooks/${data.id}`, {
+        method: "PUT", 
+        body: JSON.stringify(data),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/webhooks"] });
@@ -333,7 +351,9 @@ export default function AdminPage() {
 
   const deleteWebhookMutation = useMutation({
     mutationFn: async (webhookId: number) => {
-      await apiRequest("DELETE", `/api/admin/webhooks/${webhookId}`);
+      return await apiRequest(`/api/admin/webhooks/${webhookId}`, {
+        method: "DELETE",
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/webhooks"] });
@@ -355,8 +375,9 @@ export default function AdminPage() {
 
   const testWebhookMutation = useMutation({
     mutationFn: async (webhookId: number) => {
-      const response = await apiRequest("POST", `/api/admin/webhooks/${webhookId}/test`);
-      return response.json();
+      return await apiRequest(`/api/admin/webhooks/${webhookId}/test`, {
+        method: "POST",
+      });
     },
     onSuccess: () => {
       toast({
