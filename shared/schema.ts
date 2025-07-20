@@ -1,5 +1,6 @@
 import { pgTable, text, serial, integer, boolean, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
+import { relations } from "drizzle-orm";
 import { z } from "zod";
 
 export const products = pgTable("products", {
@@ -46,6 +47,26 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
   id: true,
 });
+
+// Relations
+export const ordersRelations = relations(orders, ({ many }) => ({
+  orderItems: many(orderItems),
+}));
+
+export const orderItemsRelations = relations(orderItems, ({ one }) => ({
+  order: one(orders, {
+    fields: [orderItems.orderId],
+    references: [orders.id],
+  }),
+  product: one(products, {
+    fields: [orderItems.productId],
+    references: [products.id],
+  }),
+}));
+
+export const productsRelations = relations(products, ({ many }) => ({
+  orderItems: many(orderItems),
+}));
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;

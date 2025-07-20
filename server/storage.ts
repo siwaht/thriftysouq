@@ -1,4 +1,6 @@
 import { products, orders, orderItems, type Product, type Order, type OrderItem, type InsertProduct, type InsertOrder, type InsertOrderItem } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getProducts(): Promise<Product[]>;
@@ -6,6 +8,55 @@ export interface IStorage {
   getProductsByCategory(category: string): Promise<Product[]>;
   createOrder(order: InsertOrder, items: Omit<InsertOrderItem, 'orderId'>[]): Promise<{ order: Order; orderNumber: string }>;
   updateProductStock(productId: number, newStock: number): Promise<void>;
+}
+
+export class DatabaseStorage implements IStorage {
+  async getProducts(): Promise<Product[]> {
+    return await db.select().from(products);
+  }
+
+  async getProductById(id: number): Promise<Product | undefined> {
+    const [product] = await db.select().from(products).where(eq(products.id, id));
+    return product || undefined;
+  }
+
+  async getProductsByCategory(category: string): Promise<Product[]> {
+    return await db.select().from(products).where(eq(products.category, category));
+  }
+
+  async createOrder(order: InsertOrder, items: Omit<InsertOrderItem, 'orderId'>[]): Promise<{ order: Order; orderNumber: string }> {
+    const orderNumber = `LD-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    
+    const [newOrder] = await db
+      .insert(orders)
+      .values({
+        orderNumber,
+        status: "pending",
+        ...order
+      })
+      .returning();
+
+    // Create order items
+    if (items.length > 0) {
+      const orderItemsData = items.map(item => ({
+        orderId: newOrder.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price
+      }));
+
+      await db.insert(orderItems).values(orderItemsData);
+    }
+
+    return { order: newOrder, orderNumber };
+  }
+
+  async updateProductStock(productId: number, newStock: number): Promise<void> {
+    await db
+      .update(products)
+      .set({ stock: newStock })
+      .where(eq(products.id, productId));
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -458,4 +509,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

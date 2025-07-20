@@ -26,9 +26,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Database Architecture
 - **ORM**: Drizzle ORM with PostgreSQL dialect
-- **Database**: PostgreSQL (configured but can be provisioned later)
-- **Schema**: Products, orders, and order items tables with proper relationships
-- **Development Storage**: In-memory storage implementation for development
+- **Database**: PostgreSQL with live database connection
+- **Schema**: Products, orders, and order items tables with proper relationships and foreign keys
+- **Storage**: DatabaseStorage implementation with full CRUD operations
+- **Seeding**: Automated seeding with 30 luxury products from premium brands
 
 ## Key Components
 
@@ -93,5 +94,14 @@ Preferred communication style: Simple, everyday language.
 - **Asset Optimization**: Images and static assets are optimized during build
 - **Caching**: TanStack Query provides intelligent data caching
 - **CSS Optimization**: Tailwind purges unused styles in production
+
+## Recent Changes
+
+### Database Integration (January 20, 2025)
+- **Migration**: Successfully migrated from in-memory storage to PostgreSQL database
+- **Schema Deployment**: Created products, orders, and order_items tables with proper relationships
+- **Data Seeding**: Populated database with 30 luxury products from premium brands
+- **Storage Layer**: Implemented DatabaseStorage class with full CRUD operations
+- **Testing**: Verified end-to-end functionality including product retrieval and order processing
 
 The application is designed for rapid deployment and scaling, with a focus on minimal setup requirements and fast time-to-market for luxury e-commerce operations.
