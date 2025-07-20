@@ -22,23 +22,7 @@ const createOrderRequest = z.object({
   }))
 });
 
-// Token-based authentication middleware
-const requireAdminAuth = (req: any, res: any, next: any) => {
-  const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminToken;
-  
-  console.log("Auth check - Token:", token ? 'present' : 'missing');
-  console.log("Auth check - Headers:", req.headers.authorization);
-  console.log("Auth check - Cookies:", req.headers.cookie);
-  
-  if (token && isValidToken(token)) {
-    console.log("Token authentication successful for:", req.path);
-    req.adminAuth = activeTokens.get(token);
-    next();
-  } else {
-    console.log("Token authentication failed for:", req.path);
-    res.status(401).json({ message: "Admin authentication required" });
-  }
-};
+// Token-based authentication middleware - moved after token management functions
 
 // Import all seeding functions
 async function initializeDatabase() {
@@ -155,16 +139,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   const isValidToken = (token: string): boolean => {
     const tokenData = activeTokens.get(token);
-    if (!tokenData) return false;
+    if (!tokenData) {
+      console.log("Token not found in active tokens:", token);
+      return false;
+    }
     
     if (Date.now() > tokenData.expiresAt) {
+      console.log("Token expired:", token);
       activeTokens.delete(token);
       return false;
     }
     
     // Extend token expiration
     tokenData.expiresAt = Date.now() + (24 * 60 * 60 * 1000);
+    console.log("Token valid and extended:", token);
     return true;
+  };
+
+  // Token-based authentication middleware
+  const requireAdminAuth = (req: any, res: any, next: any) => {
+    const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminToken;
+    
+    console.log("Auth check - Token:", token ? token.substring(0, 8) + '...' : 'missing');
+    console.log("Auth check - Headers:", req.headers.authorization);
+    console.log("Auth check - Raw cookies:", req.headers.cookie);
+    console.log("Auth check - Parsed cookies:", req.cookies);
+    console.log("Active tokens count:", activeTokens.size);
+    
+    if (token && isValidToken(token)) {
+      console.log("Token authentication successful for:", req.path);
+      req.adminAuth = activeTokens.get(token);
+      next();
+    } else {
+      console.log("Token authentication failed for:", req.path);
+      res.status(401).json({ message: "Admin authentication required" });
+    }
   };
 
   // Admin authentication routes
@@ -196,6 +205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       activeTokens.set(token, tokenData);
       console.log("Token created successfully:", token);
+      console.log("Active tokens count after creation:", activeTokens.size);
       
       // Set secure cookie and return token
       res.cookie('adminToken', token, {
