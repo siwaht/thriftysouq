@@ -22,7 +22,7 @@ export default function Footer() {
               <a href="#" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
                 Features
               </a>
-              <a href="#" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
+              <a href="/privacy-policy" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
                 Privacy Policy
               </a>
               <a href="#" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
