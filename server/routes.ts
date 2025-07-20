@@ -492,6 +492,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin API routes
+  // Get all products for admin panel
+  app.get("/api/admin/products", requireAdminAuth, async (req, res) => {
+    try {
+      const products = await storage.getProducts();
+      res.json(products);
+    } catch (error) {
+      console.error("Failed to fetch products for admin:", error);
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
   // Create product
   app.post("/api/admin/products", requireAdminAuth, async (req, res) => {
     try {
