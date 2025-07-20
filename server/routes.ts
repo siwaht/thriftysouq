@@ -6,6 +6,7 @@ import { z } from "zod";
 import { webhookService } from "./webhook-service";
 import bcrypt from "bcryptjs";
 import session from "express-session";
+import connectPg from "connect-pg-simple";
 import { aiMarketing } from "./ai-marketing";
 
 const createOrderRequest = z.object({
@@ -131,13 +132,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Configure session middleware
+  // Configure session middleware with PostgreSQL store
+  const PgStore = connectPg(session);
+  const sessionStore = new PgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: true,
+    tableName: 'sessions'
+  });
+
   app.use(session({
-    secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
+    store: sessionStore,
+    secret: process.env.SESSION_SECRET || "thrifty-souq-session-secret-key",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Set to true if using HTTPS
+      secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
