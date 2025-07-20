@@ -129,18 +129,19 @@ Preferred communication style: Simple, everyday language.
 - **Purple Theme Integration**: Admin panel follows the same luxury purple-gold aesthetic as main site
 
 ### Admin Authentication System (January 20, 2025)
-- **Complete Authentication Flow**: Implemented secure username/password authentication for admin panel access
-- **Session Management**: Express-session with PostgreSQL store and rolling sessions for deployment reliability
+- **Token-Based Authentication**: Completely redesigned with deployment-reliable token system replacing problematic session-based auth
+- **Dual Storage Strategy**: Tokens stored in both secure HTTP cookies and localStorage for maximum reliability
+- **In-Memory Token Management**: Server-side token validation with automatic expiration and cleanup
 - **Password Security**: Bcrypt hashing for secure password storage in PostgreSQL database
 - **Admin User Seeding**: Automated admin user creation with default credentials (admin/admin123)
-- **Authentication Middleware**: Protected all admin API routes with session-based authentication
-- **Login/Logout System**: Beautiful admin login page with proper error handling and logout functionality
-- **Route Protection**: Admin panel automatically redirects to login if not authenticated
+- **Token Middleware**: All admin routes protected with Bearer token or cookie-based authentication
+- **Enhanced Login Flow**: Login returns secure token with 24-hour expiration and automatic renewal
+- **Route Protection**: Admin panel automatically redirects to login if token is invalid or missing
 - **Database Schema**: Added admin_users table with username and password hash fields
-- **Deployment-Ready Sessions**: Enhanced session configuration with custom name 'admin-session', rolling sessions, and deployment-optimized cookie settings
-- **Robust CORS**: Smart origin detection for Replit and localhost environments with credentials support
-- **Enhanced Auth API**: Specialized authentication functions with comprehensive debugging and error handling
-- **Session Persistence**: Rolling sessions with 30-second refresh interval to maintain authentication state after deployment
+- **Deployment Reliability**: Token system eliminates session persistence issues common in serverless deployments
+- **Smart Auth Headers**: Authorization header support with Bearer tokens for API authentication
+- **Comprehensive Debugging**: Token presence, validity, and expiration logging for troubleshooting
+- **Automatic Token Extension**: Valid tokens automatically extended on each authenticated request
 
 ### Hero Banner Management System (January 20, 2025)
 - **Dynamic Content Management**: Complete hero banner editing system integrated into admin panel

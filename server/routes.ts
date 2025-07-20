@@ -22,18 +22,20 @@ const createOrderRequest = z.object({
   }))
 });
 
-// Middleware to check if user is authenticated as admin
+// Token-based authentication middleware
 const requireAdminAuth = (req: any, res: any, next: any) => {
-  console.log("Auth check - Session ID:", req.sessionID);
-  console.log("Auth check - Session:", req.session);
-  console.log("Auth check - isAdmin:", req.session?.isAdmin);
-  console.log("Auth check - Cookie:", req.headers.cookie);
+  const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminToken;
   
-  if (req.session?.isAdmin) {
-    console.log("Authentication successful for:", req.path);
+  console.log("Auth check - Token:", token ? 'present' : 'missing');
+  console.log("Auth check - Headers:", req.headers.authorization);
+  console.log("Auth check - Cookies:", req.headers.cookie);
+  
+  if (token && isValidToken(token)) {
+    console.log("Token authentication successful for:", req.path);
+    req.adminAuth = activeTokens.get(token);
     next();
   } else {
-    console.log("Authentication failed for:", req.path);
+    console.log("Token authentication failed for:", req.path);
     res.status(401).json({ message: "Admin authentication required" });
   }
 };
@@ -144,30 +146,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Configure session middleware with PostgreSQL store
-  const PgStore = connectPg(session);
-  const sessionStore = new PgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: true,
-    tableName: 'sessions'
-  });
-
-  app.use(session({
-    store: sessionStore,
-    secret: process.env.SESSION_SECRET || "thrifty-souq-session-secret-key",
-    resave: true, // Force session save on each request for deployment reliability
-    saveUninitialized: false,
-    rolling: true, // Reset expiration on each request
-    name: 'admin-session', // Clear session name
-    cookie: {
-      secure: false, // HTTP compatibility for Replit
-      httpOnly: false, // Allow frontend access for debugging
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'lax', // More permissive for single-origin deployment
-      path: '/', // Available for all paths
-      domain: undefined // Let browser set domain automatically
+  // Simple token-based authentication for deployment reliability
+  const activeTokens = new Map<string, { adminId: number; username: string; expiresAt: number }>();
+  
+  const generateToken = () => {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  };
+  
+  const isValidToken = (token: string): boolean => {
+    const tokenData = activeTokens.get(token);
+    if (!tokenData) return false;
+    
+    if (Date.now() > tokenData.expiresAt) {
+      activeTokens.delete(token);
+      return false;
     }
-  }));
+    
+    // Extend token expiration
+    tokenData.expiresAt = Date.now() + (24 * 60 * 60 * 1000);
+    return true;
+  };
 
   // Admin authentication routes
   app.post("/api/admin/login", async (req, res) => {
@@ -188,22 +186,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Set session
-      (req.session as any).isAdmin = true;
-      (req.session as any).adminId = admin.id;
+      // Generate authentication token
+      const token = generateToken();
+      const tokenData = {
+        adminId: admin.id,
+        username: admin.username,
+        expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+      };
       
-      // Force session save
-      req.session.save((err: any) => {
-        if (err) {
-          console.error("Session save error:", err);
-          return res.status(500).json({ message: "Session save failed" });
-        }
-        console.log("Session saved successfully:", req.sessionID);
-        res.json({ 
-          message: "Login successful", 
-          admin: { id: admin.id, username: admin.username },
-          sessionId: req.sessionID 
-        });
+      activeTokens.set(token, tokenData);
+      console.log("Token created successfully:", token);
+      
+      // Set secure cookie and return token
+      res.cookie('adminToken', token, {
+        httpOnly: false, // Allow frontend access
+        secure: false, // HTTP compatibility
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000,
+        path: '/'
+      });
+      
+      res.json({ 
+        message: "Login successful", 
+        admin: { id: admin.id, username: admin.username },
+        token: token
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -212,25 +218,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/admin/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Logout failed" });
-      }
-      res.json({ message: "Logout successful" });
-    });
+    const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminToken;
+    
+    if (token) {
+      activeTokens.delete(token);
+      console.log("Token removed successfully:", token);
+    }
+    
+    res.clearCookie('adminToken');
+    res.json({ message: "Logout successful" });
   });
 
   app.get("/api/admin/auth-status", (req, res) => {
-    const isAuthenticated = !!(req.session as any)?.isAdmin;
-    console.log("Auth status check - Session ID:", req.sessionID);
-    console.log("Auth status check - isAdmin:", req.session?.isAdmin);
+    const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminToken;
+    const isAuthenticated = !!(token && isValidToken(token));
+    
+    console.log("Auth status check - Token:", token ? 'present' : 'missing');
+    console.log("Auth status check - Valid:", isAuthenticated);
     console.log("Auth status check - Cookie:", req.headers.cookie);
+    
     res.json({ 
       isAuthenticated,
-      sessionId: req.sessionID,
+      token: token ? 'present' : 'missing',
       debug: {
-        hasSession: !!req.session,
-        isAdmin: req.session?.isAdmin
+        hasToken: !!token,
+        tokenValid: isAuthenticated,
+        activeTokensCount: activeTokens.size
       }
     });
   });

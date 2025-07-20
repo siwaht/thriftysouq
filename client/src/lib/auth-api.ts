@@ -7,7 +7,7 @@ export async function loginAdmin(username: string, password: string) {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     },
-    credentials: 'include', // Critical for cookie-based sessions
+    credentials: 'include', // For cookie storage
     body: JSON.stringify({ username, password }),
   });
 
@@ -19,45 +19,70 @@ export async function loginAdmin(username: string, password: string) {
   const data = await response.json();
   console.log('Login successful, response:', data);
   
-  // Force cookie check after login
+  // Store token in localStorage as backup
+  if (data.token) {
+    localStorage.setItem('adminToken', data.token);
+    console.log('Token stored in localStorage:', data.token);
+  }
+  
+  // Check cookies after login
   console.log('Cookies after login:', document.cookie);
   
   return data;
 }
 
 export async function checkAuthStatus() {
+  // Get token from localStorage as backup
+  const storedToken = localStorage.getItem('adminToken');
+  const headers: Record<string, string> = {
+    'Accept': 'application/json',
+    'Cache-Control': 'no-cache',
+  };
+  
+  // Add authorization header if we have a token
+  if (storedToken) {
+    headers['Authorization'] = `Bearer ${storedToken}`;
+  }
+  
   const response = await fetch('/api/admin/auth-status', {
     method: 'GET',
-    headers: {
-      'Accept': 'application/json',
-      'Cache-Control': 'no-cache',
-    },
-    credentials: 'include', // Critical for cookie-based sessions
+    headers,
+    credentials: 'include', // Also check cookies
   });
 
   if (!response.ok) {
     console.error('Auth check failed:', response.status, response.statusText);
+    // Clear invalid token
+    localStorage.removeItem('adminToken');
     return { isAuthenticated: false };
   }
 
   const data = await response.json();
   console.log('Auth status response:', data);
   console.log('Current cookies:', document.cookie);
+  console.log('Stored token:', storedToken ? 'present' : 'missing');
   
   return data;
 }
 
 export async function logoutAdmin() {
+  const storedToken = localStorage.getItem('adminToken');
+  const headers: Record<string, string> = {};
+  
+  if (storedToken) {
+    headers['Authorization'] = `Bearer ${storedToken}`;
+  }
+  
   const response = await fetch('/api/admin/logout', {
     method: 'POST',
+    headers,
     credentials: 'include',
   });
 
   if (response.ok) {
     console.log('Logout successful');
-    // Clear any client-side session data
-    localStorage.clear();
-    sessionStorage.clear();
+    // Clear client-side auth data
+    localStorage.removeItem('adminToken');
   }
 
   return response.ok;
