@@ -1,13 +1,16 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { db } from "./db";
 import { insertOrderSchema, insertProductSchema, insertMenuItemSchema, insertWebhookSchema, insertHeroBannerSchema } from "@shared/schema";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { webhookService } from "./webhook-service";
 import bcrypt from "bcryptjs";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { aiMarketing } from "./ai-marketing";
+import crypto from 'crypto';
 
 const createOrderRequest = z.object({
   customerName: z.string(),
@@ -130,89 +133,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Database-backed token storage using sessions table for deployment reliability
-  const generateToken = () => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  };
+  // Stateless token authentication using crypto signatures
+  const TOKEN_SECRET = process.env.NODE_ENV === 'production' 
+    ? process.env.DATABASE_URL?.slice(-20) // Use part of DB URL as secret
+    : 'dev-secret-key-for-tokens';
   
-  const storeTokenInSession = async (token: string, adminData: { adminId: number; username: string }) => {
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    const sessionData = {
-      admin: adminData,
-      expiresAt: expiresAt.toISOString(),
-      createdAt: new Date().toISOString()
+  const generateStatelessToken = (adminData: { adminId: number; username: string }): string => {
+    const payload = {
+      adminId: adminData.adminId,
+      username: adminData.username,
+      expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+      iat: Date.now()
     };
     
-    try {
-      await db.execute(`
-        INSERT INTO sessions (sid, sess, expire) 
-        VALUES ($1, $2, $3) 
-        ON CONFLICT (sid) 
-        DO UPDATE SET sess = $2, expire = $3
-      `, [
-        `admin_token_${token}`,
-        JSON.stringify(sessionData),
-        expiresAt
-      ]);
-      console.log("Token stored in database:", token);
-    } catch (error) {
-      console.error("Error storing token:", error);
-    }
+    const payloadBase64 = Buffer.from(JSON.stringify(payload)).toString('base64');
+    const signature = crypto
+      .createHmac('sha256', TOKEN_SECRET)
+      .update(payloadBase64)
+      .digest('hex');
+    
+    return `${payloadBase64}.${signature}`;
   };
   
-  const validateTokenFromSession = async (token: string): Promise<{ adminId: number; username: string } | null> => {
+  const validateStatelessToken = (token: string): { adminId: number; username: string } | null => {
     try {
-      const result = await db.execute(`
-        SELECT sess FROM sessions 
-        WHERE sid = $1 AND expire > NOW()
-      `, [`admin_token_${token}`]);
+      const [payloadBase64, signature] = token.split('.');
       
-      if (result.rows.length === 0) {
-        console.log("Token not found or expired in database:", token);
+      if (!payloadBase64 || !signature) {
+        console.log("Invalid token format:", token.substring(0, 10) + '...');
         return null;
       }
       
-      const sessionData = result.rows[0].sess as any;
-      const parsedData = typeof sessionData === 'string' ? JSON.parse(sessionData) : sessionData;
+      // Verify signature
+      const expectedSignature = crypto
+        .createHmac('sha256', TOKEN_SECRET)
+        .update(payloadBase64)
+        .digest('hex');
       
-      // Extend token expiration
-      const newExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      await db.execute(`
-        UPDATE sessions 
-        SET expire = $1 
-        WHERE sid = $2
-      `, [newExpiresAt, `admin_token_${token}`]);
+      if (signature !== expectedSignature) {
+        console.log("Invalid token signature");
+        return null;
+      }
       
-      console.log("Token validated and extended:", token);
-      return parsedData.admin;
+      // Decode payload
+      const payload = JSON.parse(Buffer.from(payloadBase64, 'base64').toString());
+      
+      // Check expiration
+      if (Date.now() > payload.expiresAt) {
+        console.log("Token expired:", new Date(payload.expiresAt));
+        return null;
+      }
+      
+      console.log("Token validated successfully for admin:", payload.username);
+      return {
+        adminId: payload.adminId,
+        username: payload.username
+      };
     } catch (error) {
-      console.error("Error validating token:", error);
+      console.error("Token validation error:", error);
       return null;
-    }
-  };
-  
-  const deleteTokenFromSession = async (token: string) => {
-    try {
-      await db.execute(`DELETE FROM sessions WHERE sid = $1`, [`admin_token_${token}`]);
-      console.log("Token deleted from database:", token);
-    } catch (error) {
-      console.error("Error deleting token:", error);
     }
   };
 
   // Token-based authentication middleware
-  const requireAdminAuth = async (req: any, res: any, next: any) => {
+  const requireAdminAuth = (req: any, res: any, next: any) => {
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminToken;
     
-    console.log("Auth check - Token:", token ? token.substring(0, 8) + '...' : 'missing');
-    console.log("Auth check - Headers:", req.headers.authorization);
-    console.log("Auth check - Raw cookies:", req.headers.cookie);
-    console.log("Auth check - Parsed cookies:", req.cookies);
+    console.log("Auth check - Token:", token ? token.substring(0, 20) + '...' : 'missing');
+    console.log("Auth check - Headers:", req.headers.authorization ? 'Bearer token present' : 'No Bearer token');
+    console.log("Auth check - Cookie token:", req.cookies?.adminToken ? 'Cookie token present' : 'No cookie token');
     
     if (token) {
-      const adminData = await validateTokenFromSession(token);
+      const adminData = validateStatelessToken(token);
       if (adminData) {
-        console.log("Token authentication successful for:", req.path);
+        console.log("Stateless token authentication successful for:", req.path);
         req.adminAuth = adminData;
         next();
         return;
@@ -242,15 +236,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Generate authentication token
-      const token = generateToken();
+      // Generate stateless authentication token
       const adminData = {
         adminId: admin.id,
         username: admin.username
       };
       
-      await storeTokenInSession(token, adminData);
-      console.log("Token created and stored successfully:", token);
+      const token = generateStatelessToken(adminData);
+      console.log("Stateless token created successfully for admin:", admin.username);
       
       // Set secure cookie and return token
       res.cookie('adminToken', token, {
@@ -272,39 +265,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/logout", async (req, res) => {
-    const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminToken;
-    
-    if (token) {
-      await deleteTokenFromSession(token);
-      console.log("Token removed successfully:", token);
-    }
-    
+  app.post("/api/admin/logout", (req, res) => {
+    // For stateless tokens, we just clear the cookie
+    // The token will naturally expire on its own
+    console.log("Admin logout - clearing cookie");
     res.clearCookie('adminToken');
     res.json({ message: "Logout successful" });
   });
 
-  app.get("/api/admin/auth-status", async (req, res) => {
+  app.get("/api/admin/auth-status", (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminToken;
     let isAuthenticated = false;
+    let adminData = null;
     
     if (token) {
-      const adminData = await validateTokenFromSession(token);
+      adminData = validateStatelessToken(token);
       isAuthenticated = !!adminData;
     }
     
-    console.log("Auth status check - Token:", token ? token.substring(0, 8) + '...' : 'missing');
+    console.log("Auth status check - Token:", token ? token.substring(0, 20) + '...' : 'missing');
     console.log("Auth status check - Valid:", isAuthenticated);
-    console.log("Auth status check - Raw cookie:", req.headers.cookie);
-    console.log("Auth status check - Parsed cookies:", req.cookies);
-    console.log("Auth status check - adminToken cookie:", req.cookies?.adminToken);
+    console.log("Auth status check - Admin:", adminData?.username || 'none');
     
     res.json({ 
       isAuthenticated,
       token: token ? 'present' : 'missing',
+      admin: adminData ? { username: adminData.username } : null,
       debug: {
         hasToken: !!token,
         tokenValid: isAuthenticated,
+        tokenType: 'stateless',
         rawCookies: req.headers.cookie,
         parsedCookies: req.cookies
       }
