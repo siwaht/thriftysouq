@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { logSessionDebug } from "@/lib/session-utils";
 import { Lock, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
@@ -37,13 +38,20 @@ export default function AdminLogin() {
         body: JSON.stringify(data),
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Login response:", data);
+      logSessionDebug();
+      
       toast({
         title: "Login Successful",
         description: "Welcome to the admin panel!",
       });
-      // Redirect to admin panel
-      window.location.href = "/admin";
+      
+      // Force a brief delay to ensure session is set, then redirect
+      setTimeout(() => {
+        logSessionDebug();
+        window.location.href = "/admin";
+      }, 1000); // Increased delay for deployment
     },
     onError: (error: any) => {
       toast({

@@ -24,9 +24,13 @@ const createOrderRequest = z.object({
 
 // Middleware to check if user is authenticated as admin
 const requireAdminAuth = (req: any, res: any, next: any) => {
+  console.log("Auth check - Session ID:", req.sessionID);
   console.log("Auth check - Session:", req.session);
   console.log("Auth check - isAdmin:", req.session?.isAdmin);
+  console.log("Auth check - Cookie:", req.headers.cookie);
+  
   if (req.session?.isAdmin) {
+    console.log("Authentication successful for:", req.path);
     next();
   } else {
     console.log("Authentication failed for:", req.path);
@@ -146,11 +150,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     secret: process.env.SESSION_SECRET || "thrifty-souq-session-secret-key",
     resave: false,
     saveUninitialized: false,
+    name: 'thrifty.sid', // Custom session name
     cookie: {
       secure: false, // Allow cookies over HTTP for Replit deployment
-      httpOnly: true,
+      httpOnly: false, // Allow JavaScript access to cookie for debugging
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'lax' // Allow cross-site cookies for deployment
+      sameSite: 'none', // Allow cross-origin cookies for deployment
+      path: '/' // Ensure cookie is available for all paths
     }
   }));
 
@@ -177,7 +183,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       (req.session as any).isAdmin = true;
       (req.session as any).adminId = admin.id;
       
-      res.json({ message: "Login successful", admin: { id: admin.id, username: admin.username } });
+      // Force session save
+      req.session.save((err: any) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ message: "Session save failed" });
+        }
+        console.log("Session saved successfully:", req.sessionID);
+        res.json({ 
+          message: "Login successful", 
+          admin: { id: admin.id, username: admin.username },
+          sessionId: req.sessionID 
+        });
+      });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
@@ -195,7 +213,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/auth-status", (req, res) => {
     const isAuthenticated = !!(req.session as any)?.isAdmin;
-    res.json({ isAuthenticated });
+    console.log("Auth status check - Session ID:", req.sessionID);
+    console.log("Auth status check - isAdmin:", req.session?.isAdmin);
+    console.log("Auth status check - Cookie:", req.headers.cookie);
+    res.json({ 
+      isAuthenticated,
+      sessionId: req.sessionID,
+      debug: {
+        hasSession: !!req.session,
+        isAdmin: req.session?.isAdmin
+      }
+    });
   });
   // Get all products
   app.get("/api/products", async (req, res) => {

@@ -11,10 +11,14 @@ export async function apiRequest(
   url: string,
   options: RequestInit = {}
 ): Promise<any> {
+  // Force credentials and proper headers for deployment
   const res = await fetch(url, {
-    credentials: "include",
+    credentials: "include", // Always include credentials/cookies
+    mode: "cors", // Enable CORS
     headers: {
       "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Cache-Control": "no-cache",
       ...options.headers,
     },
     ...options,
@@ -31,7 +35,12 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const res = await fetch(queryKey.join("/") as string, {
-      credentials: "include",
+      credentials: "include", // Always include credentials/cookies
+      mode: "cors", // Enable CORS
+      headers: {
+        "Accept": "application/json",
+        "Cache-Control": "no-cache",
+      },
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
