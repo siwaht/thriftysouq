@@ -38,19 +38,18 @@ async function initializeDatabase() {
   try {
     console.log("Initializing database with seed data...");
     
-    // Import and run all seed functions
-    const { seedProducts } = await import("./seed");
-    const { seedAdminUser } = await import("./seed-admin");
-    const { seedMenuItems } = await import("./seed-menu");
-    const { seedHeroBanner } = await import("./seed-hero-banner");
-    
     // Check if products exist, if not seed them
-    const existingProducts = await storage.getProducts();
-    if (existingProducts.length === 0) {
-      console.log("No products found, seeding products...");
-      await seedProducts();
-    } else {
-      console.log(`Found ${existingProducts.length} existing products`);
+    try {
+      const existingProducts = await storage.getProducts();
+      if (existingProducts.length === 0) {
+        console.log("No products found, seeding products...");
+        const { seedProducts } = await import("./seed");
+        await seedProducts();
+      } else {
+        console.log(`Found ${existingProducts.length} existing products`);
+      }
+    } catch (error) {
+      console.log("Error checking/seeding products:", error.message);
     }
     
     // Check and seed admin user
@@ -58,22 +57,33 @@ async function initializeDatabase() {
       const admin = await storage.getAdminByUsername("admin");
       if (!admin) {
         console.log("No admin found, seeding admin user...");
+        const { seedAdminUser } = await import("./seed-admin");
         await seedAdminUser();
       } else {
         console.log("Admin user already exists");
       }
     } catch (error) {
-      console.log("Seeding admin user...");
-      await seedAdminUser();
+      console.log("Error checking/seeding admin user:", error.message);
+      try {
+        const { seedAdminUser } = await import("./seed-admin");
+        await seedAdminUser();
+      } catch (seedError) {
+        console.log("Failed to seed admin user:", seedError.message);
+      }
     }
     
     // Check and seed menu items
-    const menuItems = await storage.getMenuItems();
-    if (menuItems.length === 0) {
-      console.log("No menu items found, seeding menu items...");
-      await seedMenuItems();
-    } else {
-      console.log(`Found ${menuItems.length} existing menu items`);
+    try {
+      const menuItems = await storage.getMenuItems();
+      if (menuItems.length === 0) {
+        console.log("No menu items found, seeding menu items...");
+        const { seedMenuItems } = await import("./seed-menu");
+        await seedMenuItems();
+      } else {
+        console.log(`Found ${menuItems.length} existing menu items`);
+      }
+    } catch (error) {
+      console.log("Error checking/seeding menu items:", error.message);
     }
     
     // Check and seed hero banner
@@ -81,19 +91,25 @@ async function initializeDatabase() {
       const heroBanner = await storage.getHeroBanner();
       if (!heroBanner) {
         console.log("No hero banner found, seeding hero banner...");
+        const { seedHeroBanner } = await import("./seed-hero-banner");
         await seedHeroBanner();
       } else {
         console.log("Hero banner already exists");
       }
     } catch (error) {
-      console.log("Seeding hero banner...");
-      await seedHeroBanner();
+      console.log("Error checking/seeding hero banner:", error.message);
+      try {
+        const { seedHeroBanner } = await import("./seed-hero-banner");
+        await seedHeroBanner();
+      } catch (seedError) {
+        console.log("Failed to seed hero banner:", seedError.message);
+      }
     }
     
-    console.log("Database initialization completed successfully");
+    console.log("Database initialization completed");
   } catch (error) {
-    console.error("Database initialization failed:", error);
-    // Don't throw the error to prevent server startup failure
+    console.error("Database initialization failed:", error.message);
+    // Continue server startup even if seeding fails
   }
 }
 
