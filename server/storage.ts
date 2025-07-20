@@ -1,4 +1,4 @@
-import { products, orders, orderItems, menuItems, type Product, type Order, type OrderItem, type MenuItem, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem } from "@shared/schema";
+import { products, orders, orderItems, menuItems, webhooks, type Product, type Order, type OrderItem, type MenuItem, type Webhook, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem, type InsertWebhook } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
 
@@ -24,6 +24,12 @@ export interface IStorage {
   getOrderItems(orderId: number): Promise<OrderItem[]>;
   updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
   getOrdersWithItems(): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]>;
+  // Webhook methods
+  getWebhooks(): Promise<Webhook[]>;
+  createWebhook(webhook: InsertWebhook): Promise<Webhook>;
+  updateWebhook(id: number, webhook: InsertWebhook): Promise<Webhook | undefined>;
+  deleteWebhook(id: number): Promise<boolean>;
+  getActiveWebhooksForEvent(event: string): Promise<Webhook[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -190,6 +196,40 @@ export class DatabaseStorage implements IStorage {
     }
 
     return result;
+  }
+
+  // Webhook methods
+  async getWebhooks(): Promise<Webhook[]> {
+    return await db.select().from(webhooks).orderBy(asc(webhooks.id));
+  }
+
+  async createWebhook(webhook: InsertWebhook): Promise<Webhook> {
+    const [newWebhook] = await db
+      .insert(webhooks)
+      .values(webhook)
+      .returning();
+    return newWebhook;
+  }
+
+  async updateWebhook(id: number, webhook: InsertWebhook): Promise<Webhook | undefined> {
+    const [updatedWebhook] = await db
+      .update(webhooks)
+      .set(webhook)
+      .where(eq(webhooks.id, id))
+      .returning();
+    return updatedWebhook || undefined;
+  }
+
+  async deleteWebhook(id: number): Promise<boolean> {
+    const result = await db
+      .delete(webhooks)
+      .where(eq(webhooks.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async getActiveWebhooksForEvent(event: string): Promise<Webhook[]> {
+    const allWebhooks = await db.select().from(webhooks).where(eq(webhooks.isActive, true));
+    return allWebhooks.filter(webhook => webhook.events.includes(event));
   }
 }
 
@@ -760,6 +800,42 @@ export class MemStorage implements IStorage {
     }
 
     return result;
+  }
+
+  // Webhook methods for MemStorage (simplified for memory storage)
+  async getWebhooks(): Promise<Webhook[]> {
+    return []; // Return empty for memory storage
+  }
+
+  async createWebhook(webhook: InsertWebhook): Promise<Webhook> {
+    const newWebhook: Webhook = {
+      id: Date.now(),
+      name: webhook.name,
+      url: webhook.url,
+      events: webhook.events,
+      isActive: webhook.isActive ?? true,
+      secret: webhook.secret || null
+    };
+    return newWebhook;
+  }
+
+  async updateWebhook(id: number, webhook: InsertWebhook): Promise<Webhook | undefined> {
+    return {
+      id,
+      name: webhook.name,
+      url: webhook.url,
+      events: webhook.events,
+      isActive: webhook.isActive ?? true,
+      secret: webhook.secret || null
+    };
+  }
+
+  async deleteWebhook(id: number): Promise<boolean> {
+    return true;
+  }
+
+  async getActiveWebhooksForEvent(event: string): Promise<Webhook[]> {
+    return [];
   }
 }
 

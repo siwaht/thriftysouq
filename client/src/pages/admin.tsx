@@ -9,14 +9,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/navigation";
-import type { Product, MenuItem } from "@shared/schema";
+import type { Product, MenuItem, Webhook as WebhookType } from "@shared/schema";
 
 const productFormSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -36,14 +36,25 @@ const menuItemFormSchema = z.object({
   isActive: z.boolean(),
 });
 
+const webhookFormSchema = z.object({
+  name: z.string().min(1, "Webhook name is required"),
+  url: z.string().url("Must be a valid URL"),
+  events: z.array(z.string()).min(1, "At least one event must be selected"),
+  isActive: z.boolean(),
+  secret: z.string().optional(),
+});
+
 type ProductFormData = z.infer<typeof productFormSchema>;
 type MenuItemFormData = z.infer<typeof menuItemFormSchema>;
+type WebhookFormData = z.infer<typeof webhookFormSchema>;
 
 export default function AdminPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null);
+  const [editingWebhook, setEditingWebhook] = useState<WebhookType | null>(null);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);
+  const [isWebhookDialogOpen, setIsWebhookDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -57,6 +68,10 @@ export default function AdminPage() {
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["/api/orders"],
+  });
+
+  const { data: webhooks = [], isLoading: webhooksLoading } = useQuery<WebhookType[]>({
+    queryKey: ["/api/admin/webhooks"],
   });
 
   const productForm = useForm<ProductFormData>({
@@ -80,6 +95,17 @@ export default function AdminPage() {
       value: "",
       order: 0,
       isActive: true,
+    },
+  });
+
+  const webhookForm = useForm<WebhookFormData>({
+    resolver: zodResolver(webhookFormSchema),
+    defaultValues: {
+      name: "",
+      url: "",
+      events: [],
+      isActive: true,
+      secret: "",
     },
   });
 
@@ -250,6 +276,102 @@ export default function AdminPage() {
     },
   });
 
+  // Webhook mutations
+  const createWebhookMutation = useMutation({
+    mutationFn: async (data: WebhookFormData) => {
+      const response = await apiRequest("POST", "/api/admin/webhooks", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/webhooks"] });
+      setIsWebhookDialogOpen(false);
+      webhookForm.reset();
+      toast({
+        title: "Webhook created successfully",
+        description: "The webhook has been configured and is ready to receive events.",
+        duration: 2000,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error creating webhook",
+        description: "Failed to create webhook. Please check the URL and try again.",
+        variant: "destructive",
+        duration: 2000,
+      });
+    },
+  });
+
+  const updateWebhookMutation = useMutation({
+    mutationFn: async (data: WebhookFormData & { id: number }) => {
+      const response = await apiRequest("PUT", `/api/admin/webhooks/${data.id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/webhooks"] });
+      setIsWebhookDialogOpen(false);
+      setEditingWebhook(null);
+      webhookForm.reset();
+      toast({
+        title: "Webhook updated successfully",
+        description: "The webhook configuration has been updated.",
+        duration: 2000,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error updating webhook",
+        description: "Failed to update webhook. Please try again.",
+        variant: "destructive",
+        duration: 2000,
+      });
+    },
+  });
+
+  const deleteWebhookMutation = useMutation({
+    mutationFn: async (webhookId: number) => {
+      await apiRequest("DELETE", `/api/admin/webhooks/${webhookId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/webhooks"] });
+      toast({
+        title: "Webhook deleted successfully",
+        description: "The webhook has been removed.",
+        duration: 2000,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error deleting webhook",
+        description: "Failed to delete webhook. Please try again.",
+        variant: "destructive",
+        duration: 2000,
+      });
+    },
+  });
+
+  const testWebhookMutation = useMutation({
+    mutationFn: async (webhookId: number) => {
+      const response = await apiRequest("POST", `/api/admin/webhooks/${webhookId}/test`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Test webhook sent",
+        description: "A test payload has been sent to the webhook URL.",
+        duration: 2000,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Test failed",
+        description: "Failed to send test webhook. Please check the URL and try again.",
+        variant: "destructive",
+        duration: 2000,
+      });
+    },
+  });
+
   const onSubmit = (data: ProductFormData) => {
     if (editingProduct) {
       updateProductMutation.mutate({ ...data, id: editingProduct.id });
@@ -263,6 +385,14 @@ export default function AdminPage() {
       updateMenuItemMutation.mutate({ ...data, id: editingMenuItem.id });
     } else {
       createMenuItemMutation.mutate(data);
+    }
+  };
+
+  const onWebhookSubmit = (data: WebhookFormData) => {
+    if (editingWebhook) {
+      updateWebhookMutation.mutate({ ...data, id: editingWebhook.id });
+    } else {
+      createWebhookMutation.mutate(data);
     }
   };
 
@@ -317,7 +447,36 @@ export default function AdminPage() {
     setIsMenuDialogOpen(true);
   };
 
-  if (productsLoading || menuLoading) {
+  // Webhook handlers
+  const handleWebhookEdit = (webhook: WebhookType) => {
+    setEditingWebhook(webhook);
+    webhookForm.reset({
+      name: webhook.name,
+      url: webhook.url,
+      events: webhook.events,
+      isActive: webhook.isActive,
+      secret: webhook.secret || "",
+    });
+    setIsWebhookDialogOpen(true);
+  };
+
+  const handleWebhookDelete = (webhookId: number) => {
+    if (confirm("Are you sure you want to delete this webhook?")) {
+      deleteWebhookMutation.mutate(webhookId);
+    }
+  };
+
+  const handleWebhookAddNew = () => {
+    setEditingWebhook(null);
+    webhookForm.reset();
+    setIsWebhookDialogOpen(true);
+  };
+
+  const handleWebhookTest = (webhookId: number) => {
+    testWebhookMutation.mutate(webhookId);
+  };
+
+  if (productsLoading || menuLoading || webhooksLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50/50 via-white to-violet-50/30">
         <Navigation onCartToggle={() => {}} />
@@ -348,7 +507,7 @@ export default function AdminPage() {
           </div>
 
           <Tabs defaultValue="products" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsList className="grid w-full grid-cols-4 mb-8">
               <TabsTrigger value="products" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
                 <Package className="w-4 h-4 mr-2" />
                 Products
@@ -360,6 +519,10 @@ export default function AdminPage() {
               <TabsTrigger value="menu" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
                 <Menu className="w-4 h-4 mr-2" />
                 Navigation Menu
+              </TabsTrigger>
+              <TabsTrigger value="webhooks" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
+                <Webhook className="w-4 h-4 mr-2" />
+                Webhooks
               </TabsTrigger>
             </TabsList>
 
@@ -930,6 +1093,256 @@ export default function AdminPage() {
                   )}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="webhooks">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
+                <div>
+                  <h2 className="text-2xl font-light text-luxury-black mb-2">
+                    Webhook <span className="text-luxury-purple font-normal">Management</span>
+                  </h2>
+                  <p className="text-gray-600">Configure webhooks for automation platforms like n8n and Make.com</p>
+                </div>
+
+                <Dialog open={isWebhookDialogOpen} onOpenChange={setIsWebhookDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      onClick={handleWebhookAddNew}
+                      className="luxury-gradient-purple text-white font-bold px-6 py-3 rounded-xl hover:scale-105 transition-all duration-300 mobile-optimized"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Webhook
+                    </Button>
+                  </DialogTrigger>
+                  
+                  <DialogContent className="w-[95%] sm:max-w-2xl max-h-[95vh] overflow-y-auto mobile-optimized">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl sm:text-2xl font-light text-luxury-dark">
+                        {editingWebhook ? "Edit Webhook" : "Add New Webhook"}
+                      </DialogTitle>
+                    </DialogHeader>
+                    
+                    <Form {...webhookForm}>
+                      <form onSubmit={webhookForm.handleSubmit(onWebhookSubmit)} className="space-y-4 sm:space-y-6">
+                        <div className="grid grid-cols-1 gap-4">
+                          <FormField
+                            control={webhookForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-luxury-dark font-medium">Webhook Name</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="e.g., n8n Order Processing"
+                                    className="border-gray-300 focus:border-luxury-purple mobile-optimized"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={webhookForm.control}
+                            name="url"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-luxury-dark font-medium">Webhook URL</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="url"
+                                    placeholder="https://hooks.zapier.com/hooks/catch/..."
+                                    className="border-gray-300 focus:border-luxury-purple mobile-optimized"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={webhookForm.control}
+                            name="events"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-luxury-dark font-medium">Events to Listen For</FormLabel>
+                                <div className="space-y-2">
+                                  {[
+                                    { value: 'order.created', label: 'Order Created' },
+                                    { value: 'order.status_changed', label: 'Order Status Changed' },
+                                    { value: 'webhook.test', label: 'Webhook Test' }
+                                  ].map((event) => (
+                                    <div key={event.value} className="flex items-center space-x-2">
+                                      <Checkbox
+                                        id={event.value}
+                                        checked={field.value?.includes(event.value)}
+                                        onCheckedChange={(checked) => {
+                                          const currentEvents = field.value || [];
+                                          if (checked) {
+                                            field.onChange([...currentEvents, event.value]);
+                                          } else {
+                                            field.onChange(currentEvents.filter(e => e !== event.value));
+                                          }
+                                        }}
+                                      />
+                                      <label 
+                                        htmlFor={event.value}
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                      >
+                                        {event.label}
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={webhookForm.control}
+                            name="secret"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-luxury-dark font-medium">Secret Key (Optional)</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="password"
+                                    placeholder="Optional secret for webhook verification"
+                                    className="border-gray-300 focus:border-luxury-purple mobile-optimized"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={webhookForm.control}
+                            name="isActive"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                <div className="space-y-0.5">
+                                  <FormLabel className="text-luxury-dark font-medium">Active Webhook</FormLabel>
+                                  <div className="text-sm text-gray-600">
+                                    Enable or disable this webhook
+                                  </div>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsWebhookDialogOpen(false)}
+                            className="sm:flex-1 mobile-optimized"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="sm:flex-1 luxury-gradient-purple text-white mobile-optimized"
+                            disabled={createWebhookMutation.isPending || updateWebhookMutation.isPending}
+                          >
+                            {createWebhookMutation.isPending || updateWebhookMutation.isPending ? "Saving..." : (editingWebhook ? "Update Webhook" : "Create Webhook")}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <div className="grid gap-6">
+                {webhooks.length === 0 ? (
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-center py-8">
+                        <Webhook className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No Webhooks Configured</h3>
+                        <p className="text-gray-500 mb-4">Connect your automation platforms to receive real-time order updates.</p>
+                        <Button onClick={handleWebhookAddNew} className="luxury-gradient-purple text-white">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Your First Webhook
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  webhooks.map((webhook) => (
+                    <Card key={webhook.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <div>
+                          <h3 className="font-semibold text-lg text-luxury-dark">{webhook.name}</h3>
+                          <p className="text-sm text-gray-600 break-all">{webhook.url}</p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={webhook.isActive ? "default" : "secondary"} className="text-xs">
+                            {webhook.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-col space-y-4">
+                          <div>
+                            <h4 className="font-medium text-sm text-gray-700 mb-2">Events</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {webhook.events.map((event) => (
+                                <Badge key={event} variant="outline" className="text-xs">
+                                  {event.replace('_', ' ').replace('.', ': ')}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleWebhookTest(webhook.id)}
+                              disabled={testWebhookMutation.isPending}
+                              className="flex-1"
+                            >
+                              <TestTube className="w-4 h-4 mr-2" />
+                              {testWebhookMutation.isPending ? "Testing..." : "Test Webhook"}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleWebhookEdit(webhook)}
+                              className="flex-1"
+                            >
+                              <Edit className="w-4 h-4 mr-2" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleWebhookDelete(webhook.id)}
+                              className="flex-1"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </div>

@@ -1,8 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertOrderSchema, insertProductSchema, insertMenuItemSchema } from "@shared/schema";
+import { insertOrderSchema, insertProductSchema, insertMenuItemSchema, insertWebhookSchema } from "@shared/schema";
 import { z } from "zod";
+import { webhookService } from "./webhook-service";
 
 const createOrderRequest = z.object({
   customerName: z.string(),
@@ -105,6 +106,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Get full order details with products for webhook
+      const orderWithItems = await storage.getOrderItems(result.order.id);
+      const fullOrderItems = await Promise.all(
+        orderWithItems.map(async (item) => {
+          const product = await storage.getProductById(item.productId);
+          return { ...item, product: product! };
+        })
+      );
+
+      // Trigger webhook for order created
+      try {
+        await webhookService.triggerOrderCreated(result.order, fullOrderItems);
+      } catch (webhookError) {
+        console.error("Webhook error:", webhookError);
+        // Don't fail the order if webhook fails
+      }
+
       res.json({
         success: true,
         order: result.order,
@@ -154,11 +172,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!status || typeof status !== "string") {
         return res.status(400).json({ message: "Valid status is required" });
       }
-      
+
+      // Get current order for webhook
+      const currentOrder = await storage.getOrderById(id);
+      if (!currentOrder) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      const oldStatus = currentOrder.status;
       const updatedOrder = await storage.updateOrderStatus(id, status);
       
       if (!updatedOrder) {
         return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Trigger webhook for status change
+      try {
+        await webhookService.triggerOrderStatusChanged(updatedOrder, oldStatus, status);
+      } catch (webhookError) {
+        console.error("Webhook error:", webhookError);
+        // Don't fail the status update if webhook fails
       }
       
       res.json(updatedOrder);
@@ -309,6 +342,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Failed to update menu item order" });
+    }
+  });
+
+  // Webhook management API routes
+  // Get all webhooks
+  app.get("/api/admin/webhooks", async (req, res) => {
+    try {
+      const webhooks = await storage.getWebhooks();
+      res.json(webhooks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch webhooks" });
+    }
+  });
+
+  // Create webhook
+  app.post("/api/admin/webhooks", async (req, res) => {
+    try {
+      const webhookData = insertWebhookSchema.parse(req.body);
+      const webhook = await storage.createWebhook(webhookData);
+      res.json(webhook);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid webhook data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create webhook" });
+    }
+  });
+
+  // Update webhook
+  app.put("/api/admin/webhooks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid webhook ID" });
+      }
+
+      const webhookData = insertWebhookSchema.parse(req.body);
+      const webhook = await storage.updateWebhook(id, webhookData);
+      
+      if (!webhook) {
+        return res.status(404).json({ message: "Webhook not found" });
+      }
+      
+      res.json(webhook);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid webhook data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update webhook" });
+    }
+  });
+
+  // Delete webhook
+  app.delete("/api/admin/webhooks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid webhook ID" });
+      }
+
+      const success = await storage.deleteWebhook(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Webhook not found" });
+      }
+      
+      res.json({ message: "Webhook deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete webhook" });
+    }
+  });
+
+  // Test webhook endpoint
+  app.post("/api/admin/webhooks/:id/test", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const webhooks = await storage.getWebhooks();
+      const webhook = webhooks.find(w => w.id === id);
+      
+      if (!webhook) {
+        return res.status(404).json({ message: "Webhook not found" });
+      }
+
+      // Send test payload
+      const testPayload = {
+        event: 'webhook.test',
+        timestamp: new Date().toISOString(),
+        data: {
+          message: 'This is a test webhook from LuxDeal Quick',
+          webhook_id: webhook.id,
+          webhook_name: webhook.name
+        }
+      };
+
+      try {
+        const response = await fetch(webhook.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'LuxDeal-Webhook/1.0'
+          },
+          body: JSON.stringify(testPayload),
+        });
+
+        if (response.ok) {
+          res.json({ message: "Test webhook sent successfully", status: response.status });
+        } else {
+          res.status(500).json({ message: "Webhook endpoint returned error", status: response.status });
+        }
+      } catch (webhookError) {
+        res.status(500).json({ message: "Failed to send test webhook", error: String(webhookError) });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to test webhook" });
     }
   });
 

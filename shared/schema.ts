@@ -72,6 +72,15 @@ export const menuItems = pgTable("menu_items", {
   isActive: boolean("is_active").notNull().default(true),
 });
 
+export const webhooks = pgTable("webhooks", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  events: text("events").array().notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  secret: text("secret"),
+});
+
 export const productsRelations = relations(products, ({ many }) => ({
   orderItems: many(orderItems),
 }));
@@ -88,3 +97,10 @@ export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type MenuItem = typeof menuItems.$inferSelect;
 export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;
+
+export const insertWebhookSchema = createInsertSchema(webhooks).omit({
+  id: true,
+});
+
+export type Webhook = typeof webhooks.$inferSelect;
+export type InsertWebhook = z.infer<typeof insertWebhookSchema>;
