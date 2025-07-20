@@ -244,13 +244,13 @@ Create high-converting marketing copy that:
 
 Respond with JSON in this exact format:
 {
-  "badgeText": "short urgent badge text (3-5 words)",
-  "mainTitle": "powerful main headline word (1-2 words)",
-  "highlightTitle": "emphasized luxury word (1-2 words)", 
-  "subtitle": "compelling subtitle (2-4 words)",
-  "description": "persuasive 2-3 sentence description emphasizing value, authenticity, and urgency",
-  "buttonText": "action-driving button text (2-3 words)",
-  "footerText": "additional incentive or guarantee (under 8 words)",
+  "badgeText": "short urgent badge text (2-4 words max)",
+  "mainTitle": "powerful main headline word (1-2 words max)",
+  "highlightTitle": "emphasized luxury word (1-2 words max)", 
+  "subtitle": "compelling subtitle (2-3 words max)",
+  "description": "persuasive 1-2 sentence description under 120 characters emphasizing value and urgency",
+  "buttonText": "action-driving button text (2-3 words max)",
+  "footerText": "additional incentive or guarantee (under 6 words)",
   "urgencyTactics": ["tactic1", "tactic2", "tactic3"],
   "emotionalTriggers": ["trigger1", "trigger2", "trigger3"],
   "salesTechniques": ["technique1", "technique2", "technique3"]
