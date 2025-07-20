@@ -196,7 +196,7 @@ export function WebhookTester() {
           <h3 className="text-xl font-semibold text-luxury-black mb-2">
             Webhook <span className="text-luxury-purple">API Tester</span>
           </h3>
-          <p className="text-gray-600">Test and integrate with external product management webhooks</p>
+          <p className="text-gray-600">Test and integrate with external product and order management webhooks</p>
         </div>
         <Button
           onClick={() => window.open('/webhook-examples.md', '_blank')}
