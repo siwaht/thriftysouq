@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube, LogOut, BarChart3, Tag } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube, LogOut, BarChart3, Tag, Brain } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,6 +21,7 @@ import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { HeroBannerAdmin } from "@/components/hero-banner-admin";
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
 import { MarketingTools } from "@/components/marketing-tools";
+import { AIMarketing } from "@/components/ai-marketing";
 import type { Product, MenuItem, Webhook as WebhookType } from "@shared/schema";
 
 const productFormSchema = z.object({
@@ -585,10 +586,14 @@ export default function AdminPage() {
           </div>
 
           <Tabs defaultValue="analytics" className="w-full">
-            <TabsList className="grid w-full grid-cols-7 mb-8">
+            <TabsList className="grid w-full grid-cols-8 mb-8">
               <TabsTrigger value="analytics" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Analytics
+              </TabsTrigger>
+              <TabsTrigger value="ai-marketing" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white">
+                <Brain className="w-4 h-4 mr-2" />
+                AI Marketing
               </TabsTrigger>
               <TabsTrigger value="marketing" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
                 <Tag className="w-4 h-4 mr-2" />
@@ -618,6 +623,10 @@ export default function AdminPage() {
 
             <TabsContent value="analytics">
               <AnalyticsDashboard />
+            </TabsContent>
+
+            <TabsContent value="ai-marketing">
+              <AIMarketing />
             </TabsContent>
 
             <TabsContent value="marketing">

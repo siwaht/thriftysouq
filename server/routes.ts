@@ -6,6 +6,7 @@ import { z } from "zod";
 import { webhookService } from "./webhook-service";
 import bcrypt from "bcryptjs";
 import session from "express-session";
+import { aiMarketing } from "./ai-marketing";
 
 const createOrderRequest = z.object({
   customerName: z.string(),
@@ -561,6 +562,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid hero banner data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to update hero banner" });
+    }
+  });
+
+  // AI Marketing API routes
+  // Analyze products and generate marketing insights
+  app.post("/api/admin/ai-marketing/analyze", requireAdminAuth, async (req, res) => {
+    try {
+      const products = await storage.getProducts();
+      if (products.length === 0) {
+        return res.status(400).json({ message: "No products available for analysis" });
+      }
+
+      const analysis = await aiMarketing.analyzeProducts(products);
+      res.json(analysis);
+    } catch (error) {
+      console.error("AI analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze products with AI" });
+    }
+  });
+
+  // Generate hero banner content with single AI
+  app.post("/api/admin/ai-marketing/generate-banner", requireAdminAuth, async (req, res) => {
+    try {
+      const { aiProvider = "openai" } = req.body;
+      const products = await storage.getProducts();
+      
+      if (products.length === 0) {
+        return res.status(400).json({ message: "No products available for content generation" });
+      }
+
+      let content;
+      if (aiProvider === "gemini") {
+        content = await aiMarketing.generateHeroBannerContentWithGemini(products);
+      } else {
+        content = await aiMarketing.generateHeroBannerContent(products);
+      }
+
+      res.json({ content, provider: aiProvider });
+    } catch (error) {
+      console.error("AI content generation error:", error);
+      res.status(500).json({ message: "Failed to generate marketing content with AI" });
+    }
+  });
+
+  // Generate dual AI content comparison
+  app.post("/api/admin/ai-marketing/generate-dual", requireAdminAuth, async (req, res) => {
+    try {
+      const products = await storage.getProducts();
+      
+      if (products.length === 0) {
+        return res.status(400).json({ message: "No products available for content generation" });
+      }
+
+      const result = await aiMarketing.generateDualAIContent(products);
+      res.json(result);
+    } catch (error) {
+      console.error("Dual AI generation error:", error);
+      res.status(500).json({ message: "Failed to generate dual AI content" });
+    }
+  });
+
+  // Generate product descriptions
+  app.post("/api/admin/ai-marketing/product-description/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+      }
+
+      const product = await storage.getProduct(id);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      const descriptions = await aiMarketing.generateProductDescriptions(product);
+      res.json(descriptions);
+    } catch (error) {
+      console.error("Product description generation error:", error);
+      res.status(500).json({ message: "Failed to generate product descriptions with AI" });
+    }
+  });
+
+  // Apply AI-generated content to hero banner
+  app.post("/api/admin/ai-marketing/apply-banner", requireAdminAuth, async (req, res) => {
+    try {
+      const { content } = req.body;
+      
+      if (!content) {
+        return res.status(400).json({ message: "No content provided" });
+      }
+
+      // Transform AI content to hero banner format
+      const bannerData = {
+        badgeText: content.badgeText || "LIMITED TIME",
+        mainTitle: content.mainTitle || "LUXURY",
+        highlightTitle: content.highlightTitle || "DEALS",
+        subtitle: content.subtitle || "Exclusive Savings",
+        description: content.description || "Discover authentic luxury brands at incredible discounts.",
+        buttonText: content.buttonText || "Shop Now",
+        footerText: content.footerText || "Free worldwide shipping"
+      };
+
+      const banner = await storage.updateHeroBanner(bannerData);
+      res.json({ banner, message: "AI-generated content applied successfully" });
+    } catch (error) {
+      console.error("Apply banner content error:", error);
+      res.status(500).json({ message: "Failed to apply AI content to banner" });
     }
   });
 
