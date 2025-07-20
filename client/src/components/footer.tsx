@@ -41,7 +41,7 @@ export default function Footer() {
               <a href="#" className="text-slate-300 hover:text-emerald-400 transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="mailto:support@thriftysouq.com" className="text-slate-300 hover:text-emerald-400 transition-colors">
+              <a href="mailto:cc@thriftysouq.com" className="text-slate-300 hover:text-emerald-400 transition-colors">
                 <Mail className="w-5 h-5" />
               </a>
               <a href="tel:+971-4-THRIFTY" className="text-slate-300 hover:text-emerald-400 transition-colors">

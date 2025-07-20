@@ -103,7 +103,7 @@ export default function PrivacyPolicy() {
               <li><strong>Objection:</strong> Object to certain processing activities</li>
             </ul>
             <p className="text-slate-700 leading-relaxed">
-              To exercise these rights, please contact us at <a href="mailto:privacy@thriftysouq.com" className="text-emerald-600 hover:text-emerald-700">privacy@thriftysouq.com</a>
+              To exercise these rights, please contact us at <a href="mailto:cc@thriftysouq.com" className="text-emerald-600 hover:text-emerald-700">cc@thriftysouq.com</a>
             </p>
           </section>
 

@@ -223,7 +223,7 @@ Preferred communication style: Simple, everyday language.
 - **SEO Updates**: Updated HTML meta tags, Open Graph tags, and structured data for new brand
 - **Navigation Updates**: Updated logo and branding in navigation component
 - **Footer Updates**: Updated footer branding and copyright information
-- **Contact Information**: Updated phone number to UAE format (+971-4-THRIFTY) and email to support@thriftysouq.com
+- **Contact Information**: Updated phone number to UAE format (+971-4-THRIFTY) and email to cc@thriftysouq.com
 - **Geographic Targeting**: Updated structured data address country to "AE" (United Arab Emirates)
 
 ### Comprehensive Webhook Integration for Product Management (January 20, 2025)
