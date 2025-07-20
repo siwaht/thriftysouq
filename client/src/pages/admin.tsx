@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube, LogOut } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube, LogOut, BarChart3, Tag } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,6 +19,8 @@ import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/navigation";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import { HeroBannerAdmin } from "@/components/hero-banner-admin";
+import { AnalyticsDashboard } from "@/components/analytics-dashboard";
+import { MarketingTools } from "@/components/marketing-tools";
 import type { Product, MenuItem, Webhook as WebhookType } from "@shared/schema";
 
 const productFormSchema = z.object({
@@ -582,8 +584,16 @@ export default function AdminPage() {
             </Button>
           </div>
 
-          <Tabs defaultValue="products" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-8">
+          <Tabs defaultValue="analytics" className="w-full">
+            <TabsList className="grid w-full grid-cols-7 mb-8">
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger value="marketing" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
+                <Tag className="w-4 h-4 mr-2" />
+                Marketing
+              </TabsTrigger>
               <TabsTrigger value="hero" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
                 <Eye className="w-4 h-4 mr-2" />
                 Hero Banner
@@ -605,6 +615,14 @@ export default function AdminPage() {
                 Webhooks
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="analytics">
+              <AnalyticsDashboard />
+            </TabsContent>
+
+            <TabsContent value="marketing">
+              <MarketingTools />
+            </TabsContent>
 
             <TabsContent value="hero">
               <HeroBannerAdmin />
