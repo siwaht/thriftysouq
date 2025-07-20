@@ -1,0 +1,15 @@
+"Design and create a single-page e-commerce website optimized for quick commerce, specializing in high-quality, expensive luxury brands offered at steep discounts. Focus on product categories including watches, sunglasses, jewelry, bags, and wallets from premium brands like Rolex, Ray-Ban, Tiffany & Co., Louis Vuitton, and Gucci (use placeholders or sample images for demonstration).
+
+Key requirements:
+
+Layout and User Experience: The entire site must fit on one scrollable page with a clean, modern design. Include sections for a hero banner highlighting discounts (e.g., 'Up to 70% Off Luxury Items'), a product grid with high-resolution images, brief descriptions, original prices, discounted prices, and 'Add to Cart' buttons. Use responsive design for mobile and desktop compatibility.
+
+Product Selection: Display 10-15 sample products across the categories. Allow users to filter by category or sort by discount percentage. Include a mini-cart that updates in real-time as items are added.
+
+Checkout Process: Implement a frictionless, one-step checkout without any user registration or login requirements. After adding items to the cart, users should enter minimal details (name, email, shipping address, and phone number) and choose between online payment (integrate placeholders for gateways like Stripe or PayPal) or cash on delivery (COD). Display order summary, total cost (including any shipping fees), and a 'Place Order' button. Upon submission, show a confirmation message with an order ID.
+
+Quick Commerce Features: Emphasize speed and simplicity – aim for a 'select, pay, and go' flow where users can complete a purchase in under 2 minutes. No account creation, wishlists, or reviews. Add urgency elements like limited-time deals or stock counters.
+
+Technical and Security Notes: Build using HTML, CSS, and JavaScript (or a framework like React for interactivity). Ensure basic security for form data. Optimize for fast loading times. Do not include backend integration; simulate checkout success for demo purposes.
+
+Branding and Legal: Use a site name like 'LuxDeal Quick' with a tagline 'Luxury at Lightning Speed.' Include a footer with terms of service, privacy policy links, and contact info. Ensure all content is original and compliant with e-commerce best practices."
