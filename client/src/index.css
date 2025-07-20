@@ -624,6 +624,47 @@
   line-height: 1.7;
 }
 
+/* Enhanced Modal Styles for Better UX */
+.modal-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 185, 129, 0.3) transparent;
+}
+
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.3);
+  border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+/* Mobile-Optimized Input Styles */
+.mobile-optimized {
+  min-height: 44px;
+}
+
+/* Smooth scroll behavior for modals */
+.modal-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Mobile responsiveness for modals */
+@media (max-width: 640px) {
+  .modal-content {
+    margin: 0 8px;
+  }
+}
+
 /* Gradient Animation */
 .animate-gradient {
   background-size: 200% 200%;

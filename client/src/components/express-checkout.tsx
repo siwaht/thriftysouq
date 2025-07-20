@@ -43,15 +43,15 @@ export function ExpressCheckout({ product, isOpen, onClose, onSuccess }: Express
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto w-[95%] sm:w-full modal-content modal-scroll">
+        <DialogHeader className="sticky top-0 bg-white z-10 pb-4 border-b border-slate-100">
           <DialogTitle className="flex items-center space-x-2">
             <CreditCard className="w-5 h-5 text-emerald-600" />
             <span>Express Checkout</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 px-1 pb-4">
           {/* Product Summary */}
           <div className="flex space-x-4 p-4 bg-slate-50 rounded-xl">
             <img 
@@ -99,12 +99,12 @@ export function ExpressCheckout({ product, isOpen, onClose, onSuccess }: Express
 
           {/* Quick Form */}
           <div className="space-y-3">
-            <Input placeholder="Email" type="email" className="mobile-optimized" />
+            <Input placeholder="Email" type="email" className="mobile-optimized text-base" style={{ fontSize: '16px' }} />
             <div className="grid grid-cols-2 gap-3">
-              <Input placeholder="First name" className="mobile-optimized" />
-              <Input placeholder="Last name" className="mobile-optimized" />
+              <Input placeholder="First name" className="mobile-optimized text-base" style={{ fontSize: '16px' }} />
+              <Input placeholder="Last name" className="mobile-optimized text-base" style={{ fontSize: '16px' }} />
             </div>
-            <Input placeholder="Phone" type="tel" className="mobile-optimized" />
+            <Input placeholder="Phone" type="tel" className="mobile-optimized text-base" style={{ fontSize: '16px' }} />
           </div>
 
           {/* Order Summary */}
