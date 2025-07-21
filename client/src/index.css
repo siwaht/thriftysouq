@@ -441,6 +441,45 @@
   min-height: 44px;
 }
 
+/* Mobile Admin Responsiveness */
+@media (max-width: 640px) {
+  .admin-tab-trigger {
+    @apply flex-col gap-1 p-2 text-xs min-h-[60px];
+  }
+  
+  .admin-card-grid {
+    @apply grid-cols-1 gap-4;
+  }
+  
+  .admin-button-group {
+    @apply flex-col w-full space-y-2;
+  }
+  
+  .admin-form-row {
+    @apply flex-col space-y-4;
+  }
+  
+  .admin-stats-grid {
+    @apply grid-cols-1 sm:grid-cols-2 gap-3;
+  }
+}
+
+/* Enhanced touch targets for mobile */
+@media (max-width: 768px) {
+  .mobile-touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  .mobile-button-spacing {
+    @apply space-y-3;
+  }
+  
+  .mobile-form-spacing {
+    @apply space-y-4;
+  }
+}
+
 /* Smooth scroll behavior for modals */
 .modal-scroll {
   scroll-behavior: smooth;

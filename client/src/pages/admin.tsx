@@ -793,7 +793,11 @@ export default function AdminPage() {
 
   const handleExportOrders = async () => {
     try {
-      const response = await apiRequest("GET", "/api/admin/orders/export");
+      const response = await fetch("/api/admin/orders/export", {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        }
+      });
       const result = await response.json();
       
       if (result.success && result.data) {
@@ -804,7 +808,7 @@ export default function AdminPage() {
         ];
 
         const csvContent = csvData
-          .map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(","))
+          .map(row => row.map((field: any) => `"${String(field).replace(/"/g, '""')}"`).join(","))
           .join("\n");
 
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -889,38 +893,46 @@ export default function AdminPage() {
           </div>
 
           <Tabs defaultValue="analytics" className="w-full">
-            <TabsList className="grid w-full grid-cols-8 mb-8">
-              <TabsTrigger value="analytics" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Analytics
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 mb-8 h-auto">
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
+                <BarChart3 className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
+                <span className="hidden sm:inline">Analytics</span>
+                <span className="sm:hidden">Stats</span>
               </TabsTrigger>
-              <TabsTrigger value="marketing" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
-                <Tag className="w-4 h-4 mr-2" />
-                Marketing
+              <TabsTrigger value="marketing" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
+                <Tag className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
+                <span className="hidden sm:inline">Marketing</span>
+                <span className="sm:hidden">Promo</span>
               </TabsTrigger>
-              <TabsTrigger value="hero" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
-                <Eye className="w-4 h-4 mr-2" />
-                Hero Banner
+              <TabsTrigger value="hero" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
+                <Eye className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
+                <span className="hidden sm:inline">Hero Banner</span>
+                <span className="sm:hidden">Hero</span>
               </TabsTrigger>
-              <TabsTrigger value="products" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
-                <Package className="w-4 h-4 mr-2" />
-                Products
+              <TabsTrigger value="products" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
+                <Package className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
+                <span className="hidden sm:inline">Products</span>
+                <span className="sm:hidden">Items</span>
               </TabsTrigger>
-              <TabsTrigger value="orders" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
-                <ClipboardList className="w-4 h-4 mr-2" />
-                Orders
+              <TabsTrigger value="orders" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
+                <ClipboardList className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
+                <span className="hidden sm:inline">Orders</span>
+                <span className="sm:hidden">Orders</span>
               </TabsTrigger>
-              <TabsTrigger value="menu" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
-                <Menu className="w-4 h-4 mr-2" />
-                Navigation Menu
+              <TabsTrigger value="menu" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
+                <Menu className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
+                <span className="hidden sm:inline">Navigation Menu</span>
+                <span className="sm:hidden">Menu</span>
               </TabsTrigger>
-              <TabsTrigger value="webhooks" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
-                <Webhook className="w-4 h-4 mr-2" />
-                Webhooks
+              <TabsTrigger value="webhooks" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
+                <Webhook className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
+                <span className="hidden sm:inline">Webhooks</span>
+                <span className="sm:hidden">API</span>
               </TabsTrigger>
-              <TabsTrigger value="payments" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
-                <DollarSign className="w-4 h-4 mr-2" />
-                Payments
+              <TabsTrigger value="payments" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
+                <DollarSign className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
+                <span className="hidden sm:inline">Payments</span>
+                <span className="sm:hidden">Pay</span>
               </TabsTrigger>
             </TabsList>
 
@@ -1248,7 +1260,7 @@ export default function AdminPage() {
             </Dialog>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 admin-card-grid">
             {products.map((product) => (
               <Card key={product.id} className="luxury-card-shadow-purple border border-purple-100/50 hover:shadow-xl transition-all duration-300">
                 <CardHeader className="pb-3">
@@ -1282,12 +1294,12 @@ export default function AdminPage() {
                     </div>
                   </div>
                   
-                  <div className="flex gap-2 pt-2">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2 mobile-button-spacing">
                     <Button
                       onClick={() => handleEdit(product)}
                       size="sm"
                       variant="outline"
-                      className="flex-1 mobile-optimized"
+                      className="flex-1 mobile-optimized mobile-touch-target"
                     >
                       <Edit className="w-3 h-3 mr-1" />
                       Edit
@@ -1296,7 +1308,7 @@ export default function AdminPage() {
                       onClick={() => handleDelete(product.id)}
                       size="sm"
                       variant="destructive"
-                      className="flex-1 mobile-optimized"
+                      className="flex-1 mobile-optimized mobile-touch-target"
                     >
                       <Trash2 className="w-3 h-3 mr-1" />
                       Delete
@@ -1444,7 +1456,7 @@ export default function AdminPage() {
                 </Dialog>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 admin-card-grid">
                 {menuItems.map((menuItem) => (
                   <Card key={menuItem.id} className="luxury-card-shadow-purple border border-purple-100/50 hover:shadow-xl transition-all duration-300">
                     <CardHeader className="pb-3">
@@ -1463,12 +1475,12 @@ export default function AdminPage() {
                         <p className="text-sm font-mono text-luxury-purple">{menuItem.value}</p>
                       </div>
                       
-                      <div className="flex gap-2 pt-2">
+                      <div className="flex flex-col sm:flex-row gap-2 pt-2 mobile-button-spacing">
                         <Button
                           onClick={() => handleMenuEdit(menuItem)}
                           size="sm"
                           variant="outline"
-                          className="flex-1 mobile-optimized"
+                          className="flex-1 mobile-optimized mobile-touch-target"
                         >
                           <Edit className="w-3 h-3 mr-1" />
                           Edit
@@ -1477,7 +1489,7 @@ export default function AdminPage() {
                           onClick={() => handleMenuDelete(menuItem.id)}
                           size="sm"
                           variant="destructive"
-                          className="flex-1 mobile-optimized"
+                          className="flex-1 mobile-optimized mobile-touch-target"
                         >
                           <Trash2 className="w-3 h-3 mr-1" />
                           Delete
