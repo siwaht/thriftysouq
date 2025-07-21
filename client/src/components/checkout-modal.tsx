@@ -256,7 +256,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             </div>
 
             {/* Order Summary */}
-            <div className="luxury-gradient-purple text-white p-8 rounded-2xl border border-purple-400/30">
+            <div className="bg-gradient-to-br from-purple-900/95 to-purple-800/95 backdrop-blur-sm text-white p-8 rounded-2xl border border-purple-400/50 shadow-xl">
               <h4 className="text-2xl font-medium mb-8">Order Summary</h4>
               <div className="space-y-3">
                 {cartItems.map((item) => (
