@@ -19,7 +19,7 @@ const checkoutSchema = z.object({
   customerEmail: z.string().email("Please enter a valid email"),
   customerPhone: z.string().min(10, "Please enter a valid phone number"),
   shippingAddress: z.string().min(10, "Please enter your full address"),
-  emirate: z.string().min(2, "Emirate is required"),
+  city: z.string().min(2, "City is required"),
   postalCode: z.string().optional(),
   paymentMethod: z.enum(["online", "cod"]),
   specialInstructions: z.string().optional(),
@@ -44,7 +44,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
       customerEmail: "",
       customerPhone: "",
       shippingAddress: "",
-      emirate: "",
+      city: "",
       postalCode: "",
       paymentMethod: "online",
       specialInstructions: "",
@@ -166,21 +166,12 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
                 />
                 <FormField
                   control={form.control}
-                  name="emirate"
+                  name="city"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Emirate *</FormLabel>
+                      <FormLabel>City *</FormLabel>
                       <FormControl>
-                        <select {...field} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                          <option value="">Select Emirate</option>
-                          <option value="Dubai">Dubai</option>
-                          <option value="Abu Dhabi">Abu Dhabi</option>
-                          <option value="Sharjah">Sharjah</option>
-                          <option value="Ajman">Ajman</option>
-                          <option value="Umm Al Quwain">Umm Al Quwain</option>
-                          <option value="Ras Al Khaimah">Ras Al Khaimah</option>
-                          <option value="Fujairah">Fujairah</option>
-                        </select>
+                        <Input placeholder="Dubai" className="mobile-optimized" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -17,7 +17,7 @@ const createOrderRequest = z.object({
   customerEmail: z.string().email(),
   customerPhone: z.string(),
   shippingAddress: z.string(),
-  emirate: z.string(),
+  city: z.string(),
   postalCode: z.string().optional(),
   specialInstructions: z.string().optional(),
   paymentMethod: z.enum(["online", "cod"]),
@@ -300,6 +300,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerEmail: orderData.customerEmail,
         customerPhone: orderData.customerPhone,
         shippingAddress: orderData.shippingAddress,
+        city: orderData.city,
+        postalCode: orderData.postalCode || null,
+        specialInstructions: orderData.specialInstructions || null,
         paymentMethod: orderData.paymentMethod,
         total: total.toFixed(2),
         status: "pending" as const

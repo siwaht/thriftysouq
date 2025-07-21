@@ -22,7 +22,7 @@ export const orders = pgTable("orders", {
   customerEmail: text("customer_email").notNull(),
   customerPhone: text("customer_phone").notNull(),
   shippingAddress: text("shipping_address").notNull(),
-  emirate: text("emirate").notNull(),
+  city: text("city").notNull(),
   postalCode: text("postal_code"),
   specialInstructions: text("special_instructions"),
   paymentMethod: text("payment_method").notNull(),
