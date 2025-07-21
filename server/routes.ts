@@ -274,6 +274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create order
   app.post("/api/orders", async (req, res) => {
     try {
+      console.log("Order request body:", JSON.stringify(req.body, null, 2));
       const orderData = createOrderRequest.parse(req.body);
       
       // Calculate total
@@ -347,10 +348,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderNumber: result.orderNumber
       });
     } catch (error) {
+      console.error("Create order error:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid order data", errors: error.errors });
       }
-      res.status(500).json({ message: "Failed to create order" });
+      res.status(500).json({ message: "Failed to create order", error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 
