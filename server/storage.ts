@@ -1,4 +1,4 @@
-import { products, orders, orderItems, menuItems, webhooks, adminUsers, adminTokens, heroBanner, type Product, type Order, type OrderItem, type MenuItem, type Webhook, type AdminUser, type AdminToken, type HeroBanner, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem, type InsertWebhook, type InsertAdminUser, type InsertAdminToken, type InsertHeroBanner } from "@shared/schema";
+import { products, orders, orderItems, menuItems, webhooks, adminUsers, adminTokens, heroBanner, paymentCredentials, type Product, type Order, type OrderItem, type MenuItem, type Webhook, type AdminUser, type AdminToken, type HeroBanner, type PaymentCredential, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem, type InsertWebhook, type InsertAdminUser, type InsertAdminToken, type InsertHeroBanner, type InsertPaymentCredential } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
 
@@ -41,6 +41,11 @@ export interface IStorage {
   // Hero banner methods
   getHeroBanner(): Promise<HeroBanner | undefined>;
   updateHeroBanner(banner: InsertHeroBanner): Promise<HeroBanner>;
+  
+  // Payment credentials methods
+  getPaymentCredentials(): Promise<PaymentCredential[]>;
+  upsertPaymentCredential(data: InsertPaymentCredential): Promise<PaymentCredential>;
+  deletePaymentCredential(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -274,6 +279,34 @@ export class DatabaseStorage implements IStorage {
     }).returning();
     
     return newBanner;
+  }
+
+  // Payment credentials methods
+  async getPaymentCredentials(): Promise<PaymentCredential[]> {
+    return await db.select().from(paymentCredentials).where(eq(paymentCredentials.isActive, true));
+  }
+
+  async upsertPaymentCredential(data: InsertPaymentCredential): Promise<PaymentCredential> {
+    const [credential] = await db
+      .insert(paymentCredentials)
+      .values({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [paymentCredentials.provider, paymentCredentials.keyType],
+        set: {
+          keyValue: data.keyValue,
+          isActive: data.isActive ?? true,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return credential;
+  }
+
+  async deletePaymentCredential(id: number): Promise<void> {
+    await db.delete(paymentCredentials).where(eq(paymentCredentials.id, id));
   }
 }
 

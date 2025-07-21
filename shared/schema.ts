@@ -147,3 +147,23 @@ export type AdminToken = typeof adminTokens.$inferSelect;
 export type InsertAdminToken = typeof adminTokens.$inferInsert;
 export type HeroBanner = typeof heroBanner.$inferSelect;
 export type InsertHeroBanner = z.infer<typeof insertHeroBannerSchema>;
+
+// Payment credentials table for secure storage
+export const paymentCredentials = pgTable("payment_credentials", {
+  id: serial("id").primaryKey(),
+  provider: text("provider").notNull(), // 'stripe' or 'paypal'
+  keyType: text("key_type").notNull(), // 'public_key', 'secret_key', 'client_id', 'client_secret'
+  keyValue: text("key_value").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPaymentCredentialSchema = createInsertSchema(paymentCredentials).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type PaymentCredential = typeof paymentCredentials.$inferSelect;
+export type InsertPaymentCredential = z.infer<typeof insertPaymentCredentialSchema>;

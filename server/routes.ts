@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db, pool } from "./db";
-import { insertOrderSchema, insertProductSchema, insertMenuItemSchema, insertWebhookSchema, insertHeroBannerSchema } from "@shared/schema";
+import { insertOrderSchema, insertProductSchema, insertMenuItemSchema, insertWebhookSchema, insertHeroBannerSchema, insertPaymentCredentialSchema } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { webhookService } from "./webhook-service";
@@ -1125,6 +1125,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid hero banner data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to update hero banner" });
+    }
+  });
+
+  // Payment credentials routes
+  app.get("/api/admin/payment-credentials", requireAdminAuth, async (req, res) => {
+    try {
+      const credentials = await storage.getPaymentCredentials();
+      res.json(credentials);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch payment credentials" });
+    }
+  });
+
+  app.post("/api/admin/payment-credentials", requireAdminAuth, async (req, res) => {
+    try {
+      const credentialData = insertPaymentCredentialSchema.parse(req.body);
+      const credential = await storage.upsertPaymentCredential(credentialData);
+      res.json(credential);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid credential data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to save payment credential" });
+    }
+  });
+
+  app.delete("/api/admin/payment-credentials/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePaymentCredential(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete payment credential" });
     }
   });
 

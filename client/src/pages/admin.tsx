@@ -22,6 +22,7 @@ import { HeroBannerAdmin } from "@/components/hero-banner-admin";
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
 import { MarketingTools } from "@/components/marketing-tools";
 import { WebhookTester } from "@/components/webhook-tester";
+import AdminPaymentSettings from "./admin-payment-settings";
 
 import type { Product, MenuItem, Webhook as WebhookType } from "@shared/schema";
 
@@ -765,7 +766,7 @@ export default function AdminPage() {
           </div>
 
           <Tabs defaultValue="analytics" className="w-full">
-            <TabsList className="grid w-full grid-cols-7 mb-8">
+            <TabsList className="grid w-full grid-cols-8 mb-8">
               <TabsTrigger value="analytics" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Analytics
@@ -793,6 +794,10 @@ export default function AdminPage() {
               <TabsTrigger value="webhooks" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
                 <Webhook className="w-4 h-4 mr-2" />
                 Webhooks
+              </TabsTrigger>
+              <TabsTrigger value="payments" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white">
+                <DollarSign className="w-4 h-4 mr-2" />
+                Payments
               </TabsTrigger>
             </TabsList>
 
@@ -1392,14 +1397,14 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {orders.length === 0 ? (
+                  {!Array.isArray(orders) || orders.length === 0 ? (
                     <Card className="p-8 text-center">
                       <ClipboardList className="mx-auto h-12 w-12 text-gray-300 mb-4" />
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
                       <p className="text-gray-500">Orders will appear here when customers make purchases.</p>
                     </Card>
                   ) : (
-                    orders.map((order: any) => (
+                    Array.isArray(orders) && orders.map((order: any) => (
                       <Card key={order.id} className="luxury-card-shadow-purple border border-purple-100/50">
                         <CardHeader className="pb-4">
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
@@ -1750,6 +1755,10 @@ export default function AdminPage() {
                   ))
                 )}
               </div>
+            </TabsContent>
+
+            <TabsContent value="payments">
+              <AdminPaymentSettings />
             </TabsContent>
           </Tabs>
         </div>
