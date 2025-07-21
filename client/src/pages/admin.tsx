@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube, LogOut, BarChart3, Tag, Upload, Download, FileText } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube, LogOut, BarChart3, Tag, Upload, Download, FileText, MapPin, Users } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -70,6 +70,8 @@ export default function AdminPage() {
   const [orderImportFile, setOrderImportFile] = useState<File | null>(null);
   const [importResults, setImportResults] = useState<{ success: number; errors: string[] } | null>(null);
   const [orderImportResults, setOrderImportResults] = useState<{ success: number; errors: string[] } | null>(null);
+  const [isOrderDetailDialogOpen, setIsOrderDetailDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -408,6 +410,8 @@ export default function AdminPage() {
     },
   });
 
+
+
   const onSubmit = (data: ProductFormData) => {
     if (editingProduct) {
       updateProductMutation.mutate({ ...data, id: editingProduct.id });
@@ -510,6 +514,11 @@ export default function AdminPage() {
 
   const handleWebhookTest = (webhookId: number) => {
     testWebhookMutation.mutate(webhookId);
+  };
+
+  const handleViewOrderDetails = (order: any) => {
+    setSelectedOrder(order);
+    setIsOrderDetailDialogOpen(true);
   };
 
   const logoutMutation = useMutation({
@@ -1676,7 +1685,7 @@ export default function AdminPage() {
                             </div>
                             <div className="flex items-center space-x-3">
                               <div className="text-right">
-                                <p className="font-bold text-luxury-purple">${parseFloat(order.total).toLocaleString()}</p>
+                                <p className="font-bold text-luxury-purple">AED {parseFloat(order.total).toLocaleString()}</p>
                                 <p className="text-xs text-gray-500">{order.items?.length || 0} items</p>
                               </div>
                               <div className="flex items-center space-x-2">
@@ -1726,34 +1735,20 @@ export default function AdminPage() {
                             </div>
                             <div>
                               <h4 className="font-semibold text-sm text-gray-700 mb-2">Shipping Address</h4>
-                              <p className="text-sm text-gray-600">{order.shippingAddress}</p>
+                              <p className="text-sm text-gray-600">{order.shippingAddress}, {order.city} {order.postalCode}</p>
                             </div>
                           </div>
                           
-                          {order.items && order.items.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold text-sm text-gray-700 mb-3">Order Items</h4>
-                              <div className="space-y-2">
-                                {order.items.map((item: any, index: number) => (
-                                  <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                    <img 
-                                      src={item.product?.image || '/placeholder.jpg'} 
-                                      alt={item.product?.name || 'Product'} 
-                                      className="w-12 h-12 object-cover rounded"
-                                    />
-                                    <div className="flex-1">
-                                      <p className="font-medium text-sm">{item.product?.name || 'Unknown Product'}</p>
-                                      <p className="text-xs text-gray-500">{item.product?.brand || 'Unknown Brand'}</p>
-                                      <p className="text-xs text-gray-500">Qty: {item.quantity} × ${parseFloat(item.price).toFixed(2)}</p>
-                                    </div>
-                                    <div className="text-right">
-                                      <p className="font-semibold text-sm">${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                          <div className="flex flex-col sm:flex-row gap-2 justify-end pt-4 border-t border-gray-100">
+                            <Button
+                              onClick={() => handleViewOrderDetails(order)}
+                              variant="outline"
+                              className="flex items-center gap-2 mobile-touch-target"
+                            >
+                              <Eye className="w-4 h-4" />
+                              View Full Details
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))
@@ -1761,6 +1756,181 @@ export default function AdminPage() {
                 </div>
               )}
             </TabsContent>
+
+            {/* Order Details Modal */}
+            <Dialog open={isOrderDetailDialogOpen} onOpenChange={setIsOrderDetailDialogOpen}>
+              <DialogContent className="w-[95%] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-xl sm:text-2xl font-light text-luxury-dark">
+                    Order Details - {selectedOrder?.orderNumber}
+                  </DialogTitle>
+                </DialogHeader>
+                
+                {selectedOrder && (
+                  <div className="space-y-6">
+                    {/* Order Status and Actions */}
+                    <div className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className={`flex items-center space-x-1 px-3 py-2 rounded-full text-sm font-medium ${
+                            selectedOrder.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            selectedOrder.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                            selectedOrder.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                            selectedOrder.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {selectedOrder.status === 'pending' && <Clock className="h-4 w-4" />}
+                            {selectedOrder.status === 'processing' && <Clock className="h-4 w-4" />}
+                            {selectedOrder.status === 'shipped' && <Package className="h-4 w-4" />}
+                            {selectedOrder.status === 'delivered' && <CheckCircle className="h-4 w-4" />}
+                            {selectedOrder.status === 'cancelled' && <XCircle className="h-4 w-4" />}
+                            {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                          </div>
+                          <div className="text-2xl font-bold text-luxury-purple">
+                            AED {parseFloat(selectedOrder.total).toLocaleString()}
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600">Order placed: {new Date(selectedOrder.createdAt || Date.now()).toLocaleString()}</p>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Select 
+                          value={selectedOrder.status} 
+                          onValueChange={(newStatus) => {
+                            updateOrderStatusMutation.mutate({ orderId: selectedOrder.id, status: newStatus });
+                            setSelectedOrder({...selectedOrder, status: newStatus});
+                          }}
+                        >
+                          <SelectTrigger className="w-full sm:w-40">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="processing">Processing</SelectItem>
+                            <SelectItem value="shipped">Shipped</SelectItem>
+                            <SelectItem value="delivered">Delivered</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Customer Information */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Users className="h-5 w-5 text-luxury-purple" />
+                            Customer Information
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div>
+                            <p className="text-sm font-medium text-gray-700">Name</p>
+                            <p className="text-sm text-gray-900">{selectedOrder.customerName}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-700">Email</p>
+                            <p className="text-sm text-gray-900">{selectedOrder.customerEmail}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-700">Phone</p>
+                            <p className="text-sm text-gray-900">{selectedOrder.customerPhone}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-700">Payment Method</p>
+                            <p className="text-sm text-gray-900">
+                              {selectedOrder.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <MapPin className="h-5 w-5 text-luxury-purple" />
+                            Shipping Address
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div>
+                            <p className="text-sm font-medium text-gray-700">Address</p>
+                            <p className="text-sm text-gray-900">{selectedOrder.shippingAddress}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-700">City</p>
+                            <p className="text-sm text-gray-900">{selectedOrder.city}</p>
+                          </div>
+                          {selectedOrder.postalCode && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-700">Postal Code</p>
+                              <p className="text-sm text-gray-900">{selectedOrder.postalCode}</p>
+                            </div>
+                          )}
+                          {selectedOrder.specialInstructions && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-700">Special Instructions</p>
+                              <p className="text-sm text-gray-900">{selectedOrder.specialInstructions}</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Order Items */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Package className="h-5 w-5 text-luxury-purple" />
+                          Order Items ({selectedOrder.items?.length || 0} items)
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                          <div className="space-y-4">
+                            {selectedOrder.items.map((item: any, index: number) => (
+                              <div key={index} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                                <img 
+                                  src={item.product?.image || '/placeholder.jpg'} 
+                                  alt={item.product?.name || 'Product'} 
+                                  className="w-16 h-16 object-cover rounded-lg"
+                                />
+                                <div className="flex-1 space-y-2">
+                                  <div>
+                                    <h4 className="font-medium text-gray-900">{item.product?.name || 'Unknown Product'}</h4>
+                                    <p className="text-sm text-gray-600">{item.product?.brand || 'Unknown Brand'}</p>
+                                    <p className="text-xs text-gray-500">Category: {item.product?.category || 'N/A'}</p>
+                                  </div>
+                                  <div className="flex items-center gap-4 text-sm">
+                                    <span className="text-gray-600">Qty: {item.quantity}</span>
+                                    <span className="text-gray-600">Unit Price: AED {parseFloat(item.price).toFixed(2)}</span>
+                                    <span className="font-semibold text-luxury-purple">
+                                      Total: AED {(parseFloat(item.price) * item.quantity).toFixed(2)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                            
+                            <div className="border-t pt-4 mt-4">
+                              <div className="flex justify-between items-center">
+                                <span className="text-lg font-semibold text-gray-900">Order Total:</span>
+                                <span className="text-xl font-bold text-luxury-purple">
+                                  AED {parseFloat(selectedOrder.total).toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-gray-500 text-center py-8">No items found for this order</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
 
             <TabsContent value="webhooks">
               <WebhookTester />
