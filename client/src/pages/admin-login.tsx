@@ -148,12 +148,6 @@ export default function AdminLogin() {
               </Button>
             </form>
           </Form>
-          
-          <div className="text-center">
-            <p className="text-slate-400 text-xs">
-              Default credentials: admin / admin123
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
