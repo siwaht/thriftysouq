@@ -17,7 +17,6 @@ const createOrderRequest = z.object({
   customerEmail: z.string().email(),
   customerPhone: z.string(),
   shippingAddress: z.string(),
-  city: z.string(),
   emirate: z.string(),
   postalCode: z.string().optional(),
   specialInstructions: z.string().optional(),

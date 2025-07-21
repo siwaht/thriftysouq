@@ -19,7 +19,6 @@ const checkoutSchema = z.object({
   customerEmail: z.string().email("Please enter a valid email"),
   customerPhone: z.string().min(10, "Please enter a valid phone number"),
   shippingAddress: z.string().min(10, "Please enter your full address"),
-  city: z.string().min(2, "City is required"),
   emirate: z.string().min(2, "Emirate is required"),
   postalCode: z.string().optional(),
   paymentMethod: z.enum(["online", "cod"]),
@@ -45,7 +44,6 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
       customerEmail: "",
       customerPhone: "",
       shippingAddress: "",
-      city: "",
       emirate: "",
       postalCode: "",
       paymentMethod: "online",
@@ -166,43 +164,28 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
                     </FormItem>
                   )}
                 />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>City *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Dubai" className="mobile-optimized" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="emirate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Emirate *</FormLabel>
-                        <FormControl>
-                          <select {...field} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                            <option value="">Select Emirate</option>
-                            <option value="Dubai">Dubai</option>
-                            <option value="Abu Dhabi">Abu Dhabi</option>
-                            <option value="Sharjah">Sharjah</option>
-                            <option value="Ajman">Ajman</option>
-                            <option value="Umm Al Quwain">Umm Al Quwain</option>
-                            <option value="Ras Al Khaimah">Ras Al Khaimah</option>
-                            <option value="Fujairah">Fujairah</option>
-                          </select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="emirate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Emirate *</FormLabel>
+                      <FormControl>
+                        <select {...field} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                          <option value="">Select Emirate</option>
+                          <option value="Dubai">Dubai</option>
+                          <option value="Abu Dhabi">Abu Dhabi</option>
+                          <option value="Sharjah">Sharjah</option>
+                          <option value="Ajman">Ajman</option>
+                          <option value="Umm Al Quwain">Umm Al Quwain</option>
+                          <option value="Ras Al Khaimah">Ras Al Khaimah</option>
+                          <option value="Fujairah">Fujairah</option>
+                        </select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="postalCode"
