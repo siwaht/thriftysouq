@@ -256,7 +256,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             </div>
 
             {/* Order Summary */}
-            <div className="bg-gradient-to-br from-purple-900/95 to-purple-800/95 backdrop-blur-sm text-white p-8 rounded-2xl border border-purple-400/50 shadow-xl">
+            <div className="bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-sm text-white p-8 rounded-2xl border border-emerald-500/30 shadow-xl">
               <h4 className="text-2xl font-medium mb-8">Order Summary</h4>
               <div className="space-y-3">
                 {cartItems.map((item) => (
@@ -272,7 +272,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
                 <div className="border-t border-gray-600 pt-4 mt-4">
                   <div className="flex justify-between items-center text-xl font-semibold">
                     <span>Total:</span>
-                    <span className="text-luxury-gold">AED {total.toLocaleString()}</span>
+                    <span className="text-emerald-400">AED {total.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -281,7 +281,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             {/* Submit Button */}
             <Button 
               type="submit" 
-              className="w-full luxury-gradient-gold-purple text-white font-bold py-5 text-xl rounded-xl transition-all duration-500 hover:shadow-2xl hover:scale-105 border border-purple-400/30"
+              className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold py-5 text-xl rounded-xl transition-all duration-500 hover:shadow-2xl hover:scale-105 border border-emerald-400/30"
               disabled={createOrderMutation.isPending}
             >
               {createOrderMutation.isPending ? (
