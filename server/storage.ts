@@ -4,6 +4,8 @@ import { eq, asc } from "drizzle-orm";
 
 export interface IStorage {
   getProducts(): Promise<Product[]>;
+  getAllProducts(): Promise<Product[]>; // Added for webhook compatibility
+  getProduct(id: number): Promise<Product | undefined>; // Added for webhook compatibility
   getProductById(id: number): Promise<Product | undefined>;
   getProductsByCategory(category: string): Promise<Product[]>;
   createOrder(order: InsertOrder, items: Omit<InsertOrderItem, 'orderId'>[]): Promise<{ order: Order; orderNumber: string }>;
@@ -20,6 +22,8 @@ export interface IStorage {
   updateMenuItemOrder(id: number, newOrder: number): Promise<void>;
   // Order management methods
   getOrders(): Promise<Order[]>;
+  getAllOrders(): Promise<Order[]>; // Added for webhook compatibility
+  getOrder(id: number): Promise<Order | undefined>; // Added for webhook compatibility
   getOrderById(id: number): Promise<Order | undefined>;
   getOrderItems(orderId: number): Promise<OrderItem[]>;
   updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
@@ -51,6 +55,15 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   async getProducts(): Promise<Product[]> {
     return await db.select().from(products);
+  }
+
+  async getAllProducts(): Promise<Product[]> {
+    return await db.select().from(products);
+  }
+
+  async getProduct(id: number): Promise<Product | undefined> {
+    const [product] = await db.select().from(products).where(eq(products.id, id));
+    return product || undefined;
   }
 
   async getProductById(id: number): Promise<Product | undefined> {
@@ -162,6 +175,15 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(orders).orderBy(asc(orders.id));
   }
 
+  async getAllOrders(): Promise<Order[]> {
+    return await db.select().from(orders).orderBy(asc(orders.id));
+  }
+
+  async getOrder(id: number): Promise<Order | undefined> {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order || undefined;
+  }
+
   async getOrderById(id: number): Promise<Order | undefined> {
     const [order] = await db.select().from(orders).where(eq(orders.id, id));
     return order || undefined;
@@ -265,6 +287,35 @@ export class DatabaseStorage implements IStorage {
   async getHeroBanner(): Promise<HeroBanner | undefined> {
     const [banner] = await db.select().from(heroBanner).where(eq(heroBanner.isActive, true)).limit(1);
     return banner || undefined;
+  }
+
+  // Token management methods (missing implementation)
+  async createToken(token: InsertAdminToken): Promise<AdminToken> {
+    const [newToken] = await db
+      .insert(adminTokens)
+      .values(token)
+      .returning();
+    return newToken;
+  }
+
+  async validateToken(token: string): Promise<AdminToken | undefined> {
+    const [adminToken] = await db.select().from(adminTokens).where(eq(adminTokens.token, token));
+    return adminToken || undefined;
+  }
+
+  async deleteToken(token: string): Promise<boolean> {
+    const result = await db
+      .delete(adminTokens)
+      .where(eq(adminTokens.token, token));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async cleanupExpiredTokens(): Promise<number> {
+    const now = new Date();
+    const result = await db
+      .delete(adminTokens)
+      .where(eq(adminTokens.expiresAt, now));
+    return result.rowCount || 0;
   }
 
   async updateHeroBanner(banner: InsertHeroBanner): Promise<HeroBanner> {
