@@ -65,8 +65,11 @@ export default function AdminPage() {
   const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);
   const [isWebhookDialogOpen, setIsWebhookDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isOrderImportDialogOpen, setIsOrderImportDialogOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
+  const [orderImportFile, setOrderImportFile] = useState<File | null>(null);
   const [importResults, setImportResults] = useState<{ success: number; errors: string[] } | null>(null);
+  const [orderImportResults, setOrderImportResults] = useState<{ success: number; errors: string[] } | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -708,6 +711,126 @@ export default function AdminPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const downloadOrderSampleCSV = () => {
+    const sampleData = [
+      ["customerName", "customerEmail", "customerPhone", "shippingAddress", "city", "postalCode", "specialInstructions", "paymentMethod", "total", "status", "items"],
+      ["John Doe", "john@example.com", "+971-50-123-4567", "123 Sheikh Zayed Road", "Dubai", "12345", "Handle with care", "card", "5500.50", "pending", '[{"productId": 1, "quantity": 2, "price": "2750.25"}]'],
+      ["Jane Smith", "jane@example.com", "+971-52-987-6543", "456 Al Wasl Road", "Dubai", "67890", "", "cash", "3200.00", "processing", '[{"productId": 2, "quantity": 1, "price": "3200.00"}]']
+    ];
+
+    const csvContent = sampleData
+      .map(row => row.map(field => `"${field}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "orders-import-sample.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportOrders = async () => {
+    if (!orderImportFile) return;
+
+    try {
+      const text = await orderImportFile.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      
+      const ordersData = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+        const order: any = {};
+        
+        headers.forEach((header, index) => {
+          let value = values[index] || '';
+          
+          if (header === 'items') {
+            try {
+              order[header] = JSON.parse(value);
+            } catch {
+              order[header] = [];
+            }
+          } else if (header === 'total') {
+            order[header] = parseFloat(value) || 0;
+          } else {
+            order[header] = value;
+          }
+        });
+        
+        return order;
+      });
+
+      const response = await apiRequest("POST", "/api/admin/orders/import", {
+        orders: ordersData
+      });
+      
+      const result = await response.json();
+      setOrderImportResults(result.results);
+
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      
+      toast({
+        title: "Import completed",
+        description: `Successfully imported ${result.results.success} orders.`,
+        duration: 2000,
+      });
+
+    } catch (error) {
+      toast({
+        title: "Import failed",
+        description: "Failed to process the CSV file. Please check the format and try again.",
+        variant: "destructive",
+        duration: 2000,
+      });
+    }
+  };
+
+  const handleExportOrders = async () => {
+    try {
+      const response = await apiRequest("GET", "/api/admin/orders/export");
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        const headers = Object.keys(result.data[0] || {});
+        const csvData = [
+          headers,
+          ...result.data.map((order: any) => headers.map(header => order[header] || ''))
+        ];
+
+        const csvContent = csvData
+          .map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(","))
+          .join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `orders-export-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast({
+          title: "Export completed",
+          description: `Successfully exported ${result.count} orders.`,
+          duration: 2000,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: "Failed to export orders.",
+        variant: "destructive",
+        duration: 2000,
+      });
+    }
   };
 
   // Show loading screen while checking authentication
@@ -1382,11 +1505,133 @@ export default function AdminPage() {
             </TabsContent>
 
             <TabsContent value="orders">
-              <div className="mb-8">
-                <h2 className="text-2xl font-light text-luxury-black mb-2">
-                  Order <span className="text-luxury-purple font-normal">Management</span>
-                </h2>
-                <p className="text-gray-600">View and manage customer orders</p>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
+                <div>
+                  <h2 className="text-2xl font-light text-luxury-black mb-2">
+                    Order <span className="text-luxury-purple font-normal">Management</span>
+                  </h2>
+                  <p className="text-gray-600">View and manage customer orders</p>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={downloadOrderSampleCSV}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Sample CSV
+                  </Button>
+                  
+                  <Dialog open={isOrderImportDialogOpen} onOpenChange={setIsOrderImportDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Import CSV
+                      </Button>
+                    </DialogTrigger>
+                    
+                    <DialogContent className="w-[95%] sm:max-w-2xl max-h-[95vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Import Orders from CSV</DialogTitle>
+                      </DialogHeader>
+                      
+                      <div className="space-y-6">
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">
+                              Select CSV File
+                            </label>
+                            <Input
+                              type="file"
+                              accept=".csv"
+                              onChange={(e) => setOrderImportFile(e.target.files?.[0] || null)}
+                              className="cursor-pointer"
+                            />
+                            <p className="text-sm text-gray-500 mt-1">
+                              Upload a CSV file with order data. Required columns: customerName, customerEmail, customerPhone, shippingAddress, city, paymentMethod, total, items (JSON array)
+                            </p>
+                          </div>
+                          
+                          {orderImportFile && (
+                            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                              <p className="text-sm text-green-700">
+                                File selected: {orderImportFile.name} ({Math.round(orderImportFile.size / 1024)}KB)
+                              </p>
+                            </div>
+                          )}
+                          
+                          {orderImportResults && (
+                            <div className="space-y-2">
+                              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p className="text-sm text-blue-700 font-medium">
+                                  Import Results:
+                                </p>
+                                <p className="text-sm text-blue-600">
+                                  Successfully imported: {orderImportResults.success} orders
+                                </p>
+                              </div>
+                              
+                              {orderImportResults.errors.length > 0 && (
+                                <div className="p-3 bg-red-50 border border-red-200 rounded-lg max-h-40 overflow-y-auto">
+                                  <p className="text-sm text-red-700 font-medium mb-1">Errors:</p>
+                                  <ul className="text-sm text-red-600 space-y-1">
+                                    {orderImportResults.errors.map((error, index) => (
+                                      <li key={index}>• {error}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Button
+                            onClick={handleImportOrders}
+                            disabled={!orderImportFile}
+                            className="flex items-center gap-2"
+                          >
+                            <Upload className="w-4 h-4" />
+                            Import Orders
+                          </Button>
+                          
+                          <Button
+                            onClick={downloadOrderSampleCSV}
+                            variant="outline"
+                            className="flex items-center gap-2"
+                          >
+                            <FileText className="w-4 h-4" />
+                            Download Sample
+                          </Button>
+                          
+                          <Button
+                            onClick={() => {
+                              setIsOrderImportDialogOpen(false);
+                              setOrderImportFile(null);
+                              setOrderImportResults(null);
+                            }}
+                            variant="outline"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  <Button
+                    onClick={handleExportOrders}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export CSV
+                  </Button>
+                </div>
               </div>
 
               {ordersLoading ? (

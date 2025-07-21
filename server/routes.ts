@@ -1170,6 +1170,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Order bulk import/export routes
+  app.post("/api/admin/orders/import", requireAdminAuth, async (req, res) => {
+    try {
+      const { orders } = req.body;
+      
+      if (!Array.isArray(orders)) {
+        return res.status(400).json({ message: "Orders array is required" });
+      }
+
+      const results = {
+        success: 0,
+        errors: [] as string[]
+      };
+
+      for (let i = 0; i < orders.length; i++) {
+        try {
+          const orderData = orders[i];
+          
+          // Validate required fields
+          if (!orderData.customerName || !orderData.customerEmail || !orderData.customerPhone || 
+              !orderData.shippingAddress || !orderData.city || !orderData.paymentMethod || 
+              !orderData.total || !Array.isArray(orderData.items)) {
+            results.errors.push(`Order ${i + 1}: Missing required fields`);
+            continue;
+          }
+
+          // Create order with items
+          const { order } = await storage.createOrder({
+            customerName: orderData.customerName,
+            customerEmail: orderData.customerEmail,
+            customerPhone: orderData.customerPhone,
+            shippingAddress: orderData.shippingAddress,
+            city: orderData.city,
+            postalCode: orderData.postalCode || null,
+            specialInstructions: orderData.specialInstructions || null,
+            paymentMethod: orderData.paymentMethod,
+            total: orderData.total,
+            status: orderData.status || 'pending'
+          }, orderData.items);
+
+          results.success++;
+        } catch (error) {
+          results.errors.push(`Order ${i + 1}: ${error instanceof Error ? error.message : 'Failed to create'}`);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Bulk import completed`,
+        results
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to import orders" });
+    }
+  });
+
+  app.get("/api/admin/orders/export", requireAdminAuth, async (req, res) => {
+    try {
+      const orders = await storage.getOrdersWithItems();
+      
+      // Convert orders to CSV format
+      const csvData = orders.map(order => ({
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        customerPhone: order.customerPhone,
+        shippingAddress: order.shippingAddress,
+        city: order.city,
+        postalCode: order.postalCode || '',
+        specialInstructions: order.specialInstructions || '',
+        paymentMethod: order.paymentMethod,
+        total: order.total,
+        status: order.status,
+        itemCount: order.items?.length || 0,
+        items: order.items?.map(item => 
+          `${item.product.name} (ID: ${item.productId}, Qty: ${item.quantity}, Price: ${item.price})`
+        ).join('; ') || ''
+      }));
+
+      res.json({
+        success: true,
+        data: csvData,
+        count: csvData.length
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to export orders" });
+    }
+  });
+
   // AI Marketing API routes
   // Analyze products and generate marketing insights
   app.post("/api/admin/ai-marketing/analyze", requireAdminAuth, async (req, res) => {
