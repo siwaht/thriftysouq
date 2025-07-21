@@ -40,14 +40,14 @@ export default function Home() {
     const sorted = [...products];
     switch (sortBy) {
       case "price-low":
-        return sorted.sort((a, b) => a.discountedPrice - b.discountedPrice);
+        return sorted.sort((a, b) => parseFloat(a.discountedPrice) - parseFloat(b.discountedPrice));
       case "price-high":
-        return sorted.sort((a, b) => b.discountedPrice - a.discountedPrice);
+        return sorted.sort((a, b) => parseFloat(b.discountedPrice) - parseFloat(a.discountedPrice));
       case "newest":
         return sorted.sort((a, b) => b.id - a.id);
       case "featured":
       default:
-        return sorted.sort((a, b) => b.discountPercentage - a.discountPercentage);
+        return sorted.sort((a, b) => b.discount - a.discount);
     }
   };
 

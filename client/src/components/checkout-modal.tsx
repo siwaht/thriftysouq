@@ -19,7 +19,11 @@ const checkoutSchema = z.object({
   customerEmail: z.string().email("Please enter a valid email"),
   customerPhone: z.string().min(10, "Please enter a valid phone number"),
   shippingAddress: z.string().min(10, "Please enter your full address"),
+  city: z.string().min(2, "City is required"),
+  emirate: z.string().min(2, "Emirate is required"),
+  postalCode: z.string().optional(),
   paymentMethod: z.enum(["online", "cod"]),
+  specialInstructions: z.string().optional(),
 });
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
@@ -41,7 +45,11 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
       customerEmail: "",
       customerPhone: "",
       shippingAddress: "",
+      city: "",
+      emirate: "",
+      postalCode: "",
       paymentMethod: "online",
+      specialInstructions: "",
     },
   });
 
@@ -56,8 +64,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
         })),
       };
 
-      const response = await apiRequest("POST", "/api/orders", orderData);
-      return response.json();
+      return await apiRequest("POST", "/api/orders", orderData);
     },
     onSuccess: (data) => {
       clearCart();
@@ -88,10 +95,10 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[95%] sm:max-w-3xl max-h-[95vh] overflow-y-auto bg-white border-0 shadow-2xl rounded-xl sm:rounded-2xl mobile-optimized">
+      <DialogContent className="w-[95%] sm:max-w-3xl max-h-[95vh] overflow-y-auto bg-white border-0 shadow-2xl rounded-xl sm:rounded-2xl mobile-optimized" aria-describedby="checkout-description">
         <DialogHeader className="border-b border-gray-100 pb-4 sm:pb-6">
           <DialogTitle className="text-2xl sm:text-3xl font-light text-luxury-dark">Secure Checkout</DialogTitle>
-          <p className="text-gray-600 mt-2 text-sm sm:text-base">Complete your luxury purchase in seconds</p>
+          <p id="checkout-description" className="text-gray-600 mt-2 text-sm sm:text-base">Complete your luxury purchase in seconds</p>
         </DialogHeader>
 
         <Form {...form}>
@@ -134,7 +141,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
                   <FormItem className="mt-4">
                     <FormLabel>Phone Number *</FormLabel>
                     <FormControl>
-                      <Input placeholder="+1 (555) 123-4567" {...field} />
+                      <Input placeholder="+971 50 123 4567" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -143,21 +150,86 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             </div>
 
             {/* Shipping Address */}
-            <div className="bg-gray-50 p-6 rounded-xl">
-              <h4 className="text-xl font-medium text-luxury-dark mb-6">Shipping Address</h4>
-              <FormField
-                control={form.control}
-                name="shippingAddress"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Address *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="123 Main Street, City, State, ZIP Code" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-xl">
+              <h4 className="text-lg sm:text-xl font-medium text-luxury-dark mb-4 sm:mb-6">Shipping Address</h4>
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="shippingAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Street Address *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Building, Floor, Apartment/Villa Number" className="mobile-optimized" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Dubai" className="mobile-optimized" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="emirate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Emirate *</FormLabel>
+                        <FormControl>
+                          <select {...field} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                            <option value="">Select Emirate</option>
+                            <option value="Dubai">Dubai</option>
+                            <option value="Abu Dhabi">Abu Dhabi</option>
+                            <option value="Sharjah">Sharjah</option>
+                            <option value="Ajman">Ajman</option>
+                            <option value="Umm Al Quwain">Umm Al Quwain</option>
+                            <option value="Ras Al Khaimah">Ras Al Khaimah</option>
+                            <option value="Fujairah">Fujairah</option>
+                          </select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="postalCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Postal Code (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="12345" className="mobile-optimized" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="specialInstructions"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Special Delivery Instructions (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Ring the doorbell, Leave with security" className="mobile-optimized" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             {/* Payment Method */}
