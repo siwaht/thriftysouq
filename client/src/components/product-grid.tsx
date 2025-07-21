@@ -7,10 +7,9 @@ interface ProductGridProps {
   products: Product[];
   isLoading: boolean;
   onProductClick?: (product: Product) => void;
-  onExpressCheckout?: (product: Product) => void;
 }
 
-export default function ProductGrid({ products, isLoading, onProductClick, onExpressCheckout }: ProductGridProps) {
+export default function ProductGrid({ products, isLoading, onProductClick }: ProductGridProps) {
   const [sortBy, setSortBy] = useState("discount-desc");
 
   // Sort products
@@ -59,7 +58,6 @@ export default function ProductGrid({ products, isLoading, onProductClick, onExp
               <ProductCard 
                 product={product} 
                 onProductClick={onProductClick}
-                onExpressCheckout={onExpressCheckout}
               />
             </div>
           ))}

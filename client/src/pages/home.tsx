@@ -7,7 +7,7 @@ import MiniCart from "@/components/mini-cart";
 import CheckoutModal from "@/components/checkout-modal";
 import SuccessModal from "@/components/success-modal";
 import { ProductDetailModal } from "@/components/product-detail-modal";
-import { ExpressCheckout } from "@/components/express-checkout";
+
 import { SmartFilters } from "@/components/smart-filters";
 import Footer from "@/components/footer";
 import { CartProvider } from "@/hooks/use-cart";
@@ -18,7 +18,7 @@ export default function Home() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [isProductDetailOpen, setIsProductDetailOpen] = useState(false);
-  const [isExpressCheckoutOpen, setIsExpressCheckoutOpen] = useState(false);
+
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -80,11 +80,6 @@ export default function Home() {
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setIsProductDetailOpen(true);
-  };
-
-  const handleExpressCheckout = (product: Product) => {
-    setSelectedProduct(product);
-    setIsExpressCheckoutOpen(true);
   };
 
   const handleSmartFilterChange = (filtered: Product[]) => {
@@ -190,7 +185,6 @@ export default function Home() {
           products={displayProducts} 
           isLoading={isLoading} 
           onProductClick={handleProductClick}
-          onExpressCheckout={handleExpressCheckout}
         />
         <Footer />
         
@@ -220,15 +214,6 @@ export default function Home() {
           isOpen={isProductDetailOpen}
           onClose={() => setIsProductDetailOpen(false)}
         />
-
-        {selectedProduct && (
-          <ExpressCheckout
-            product={selectedProduct}
-            isOpen={isExpressCheckoutOpen}
-            onClose={() => setIsExpressCheckoutOpen(false)}
-            onSuccess={handleOrderSuccess}
-          />
-        )}
       </div>
     </CartProvider>
   );

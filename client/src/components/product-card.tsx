@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShoppingBag, Zap } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { QuickActions } from "./quick-actions";
@@ -10,10 +10,9 @@ import type { Product } from "@/lib/types";
 interface ProductCardProps {
   product: Product;
   onProductClick?: (product: Product) => void;
-  onExpressCheckout?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, onProductClick, onExpressCheckout }: ProductCardProps) {
+export default function ProductCard({ product, onProductClick }: ProductCardProps) {
   const { addToCart } = useCart();
   const { toast } = useToast();
 
@@ -25,13 +24,6 @@ export default function ProductCard({ product, onProductClick, onExpressCheckout
       description: `${product.name} has been added to your cart.`,
       duration: 2000,
     });
-  };
-
-  const handleExpressCheckout = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onExpressCheckout) {
-      onExpressCheckout(product);
-    }
   };
 
   const handleCardClick = () => {
@@ -73,24 +65,14 @@ export default function ProductCard({ product, onProductClick, onExpressCheckout
           </span>
         </div>
         
-        <div className="flex space-x-2">
-          <Button 
-            onClick={handleAddToCart}
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 text-sm font-medium rounded-md"
-            size="sm"
-          >
-            <ShoppingBag className="w-4 h-4 mr-1" />
-            Add
-          </Button>
-          <Button 
-            onClick={handleExpressCheckout}
-            variant="outline"
-            className="px-3 py-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 rounded-md"
-            size="sm"
-          >
-            <Zap className="w-4 h-4" />
-          </Button>
-        </div>
+        <Button 
+          onClick={handleAddToCart}
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 text-sm font-medium rounded-md"
+          size="sm"
+        >
+          <ShoppingBag className="w-4 h-4 mr-1" />
+          Add to Cart
+        </Button>
       </CardContent>
     </Card>
   );
