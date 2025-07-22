@@ -111,8 +111,19 @@ async function initializeDatabase() {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize database with seed data on startup
-  await initializeDatabase();
+  // Health check endpoint - must be fast for deployment health checks
+  app.get('/', (req, res) => {
+    res.status(200).json({ 
+      status: 'ok', 
+      app: 'ThriftySouq',
+      timestamp: new Date().toISOString() 
+    });
+  });
+
+  // Initialize database with seed data on startup (async in background)
+  initializeDatabase().catch(error => {
+    console.error("Background database initialization failed:", error.message);
+  });
   
   // Configure CORS to allow credentials - critical for session persistence
   app.use((req, res, next) => {
