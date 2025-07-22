@@ -80,11 +80,11 @@ export class AIMarketingGenerator {
   }
 
   async generateHeroBannerContentWithGemini(products: Product[]): Promise<MarketingContent> {
-    const totalValue = products.reduce((sum, p) => sum + p.originalPrice, 0);
-    const totalSavings = products.reduce((sum, p) => sum + (p.originalPrice - p.discountedPrice), 0);
+    const totalValue = products.reduce((sum, p) => sum + parseFloat(p.originalPrice), 0);
+    const totalSavings = products.reduce((sum, p) => sum + (parseFloat(p.originalPrice) - parseFloat(p.discountedPrice)), 0);
     const avgDiscount = Math.round(products.reduce((sum, p) => sum + p.discount, 0) / products.length);
-    const topBrands = [...new Set(products.map(p => p.brand))].slice(0, 3);
-    const categories = [...new Set(products.map(p => p.category))];
+    const topBrands = Array.from(new Set(products.map(p => p.brand))).slice(0, 3);
+    const categories = Array.from(new Set(products.map(p => p.category)));
 
     const prompt = `Create compelling hero banner content for luxury e-commerce:
 
@@ -237,11 +237,11 @@ Focus on luxury psychology, urgency creation, and conversion optimization.`;
   async generateHeroBannerContent(products: Product[], analysis?: ProductAnalysis): Promise<MarketingContent> {
     const productAnalysis = analysis || await this.analyzeProducts(products);
     
-    const totalValue = products.reduce((sum, p) => sum + p.originalPrice, 0);
-    const totalSavings = products.reduce((sum, p) => sum + (p.originalPrice - p.discountedPrice), 0);
+    const totalValue = products.reduce((sum, p) => sum + parseFloat(p.originalPrice), 0);
+    const totalSavings = products.reduce((sum, p) => sum + (parseFloat(p.originalPrice) - parseFloat(p.discountedPrice)), 0);
     const avgDiscount = Math.round(products.reduce((sum, p) => sum + p.discount, 0) / products.length);
-    const topBrands = [...new Set(products.map(p => p.brand))].slice(0, 3);
-    const categories = [...new Set(products.map(p => p.category))];
+    const topBrands = Array.from(new Set(products.map(p => p.brand))).slice(0, 3);
+    const categories = Array.from(new Set(products.map(p => p.category)));
 
     const prompt = `Create compelling hero banner content for a luxury e-commerce site. Use these insights:
 

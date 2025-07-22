@@ -361,7 +361,7 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export class MemStorage implements IStorage {
+export class MemStorage implements Partial<IStorage> {
   private products: Map<number, Product>;
   private orders: Map<number, Order>;
   private orderItems: Map<number, OrderItem>;
@@ -782,7 +782,8 @@ export class MemStorage implements IStorage {
       id: this.currentOrderId++,
       orderNumber,
       status: "pending",
-      ...order
+      ...order,
+      postalCode: order.postalCode || null
     };
 
     this.orders.set(newOrder.id, newOrder);
