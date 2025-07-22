@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { menuItems } from "../shared/schema";
 
-async function seedMenuItems() {
+export async function seedMenuItems() {
   try {
     console.log("Seeding menu items...");
     
@@ -14,11 +14,12 @@ async function seedMenuItems() {
     ]).onConflictDoNothing();
     
     console.log("Menu items seeded successfully");
-    process.exit(0);
   } catch (error) {
     console.error("Error seeding menu items:", error);
-    process.exit(1);
+    throw error;
   }
 }
 
-seedMenuItems();
+if (import.meta.url === `file://${process.argv[1]}`) {
+  seedMenuItems().then(() => process.exit(0)).catch(() => process.exit(1));
+}

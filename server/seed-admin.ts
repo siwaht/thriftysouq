@@ -1,7 +1,7 @@
 import { storage } from "./storage.js";
 import bcrypt from "bcryptjs";
 
-async function seedAdmin() {
+export async function seedAdminUser() {
   console.log("Seeding admin user...");
   
   try {
@@ -29,5 +29,5 @@ async function seedAdmin() {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  seedAdmin();
+  seedAdminUser();
 }
