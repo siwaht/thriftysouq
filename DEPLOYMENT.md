@@ -51,6 +51,12 @@ Your app will automatically use:
 NODE_ENV=production node dist/index.js
 ```
 
+## Health Check
+
+Deployment health checks are handled at `/health` endpoint:
+- Root URL (`/`) serves the actual ThriftySouq website
+- Health checks use `/health` endpoint for monitoring
+
 ## Post-Deployment
 
 After deployment, your app will:

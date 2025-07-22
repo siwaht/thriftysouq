@@ -111,8 +111,8 @@ async function initializeDatabase() {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Health check endpoint - must be fast for deployment health checks
-  app.get('/', (req, res) => {
+  // Health check endpoint specifically for deployment health checks
+  app.get('/health', (req, res) => {
     res.status(200).json({ 
       status: 'ok', 
       app: 'ThriftySouq',
