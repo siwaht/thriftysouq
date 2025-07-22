@@ -46,7 +46,7 @@ async function initializeDatabase() {
         console.log(`Found ${existingProducts.length} existing products`);
       }
     } catch (error) {
-      console.log("Error checking/seeding products:", error.message);
+      console.log("Error checking/seeding products:", error instanceof Error ? error.message : String(error));
     }
     
     // Check and seed admin user
@@ -60,12 +60,12 @@ async function initializeDatabase() {
         console.log("Admin user already exists");
       }
     } catch (error) {
-      console.log("Error checking/seeding admin user:", error.message);
+      console.log("Error checking/seeding admin user:", error instanceof Error ? error.message : String(error));
       try {
         const { seedAdminUser } = await import("./seed-admin");
         await seedAdminUser();
       } catch (seedError) {
-        console.log("Failed to seed admin user:", seedError.message);
+        console.log("Failed to seed admin user:", seedError instanceof Error ? seedError.message : String(seedError));
       }
     }
     
@@ -80,7 +80,7 @@ async function initializeDatabase() {
         console.log(`Found ${menuItems.length} existing menu items`);
       }
     } catch (error) {
-      console.log("Error checking/seeding menu items:", error.message);
+      console.log("Error checking/seeding menu items:", error instanceof Error ? error.message : String(error));
     }
     
     // Check and seed hero banner
@@ -94,12 +94,12 @@ async function initializeDatabase() {
         console.log("Hero banner already exists");
       }
     } catch (error) {
-      console.log("Error checking/seeding hero banner:", error.message);
+      console.log("Error checking/seeding hero banner:", error instanceof Error ? error.message : String(error));
       try {
         const { seedHeroBanner } = await import("./seed-hero-banner");
         await seedHeroBanner();
       } catch (seedError) {
-        console.log("Failed to seed hero banner:", seedError.message);
+        console.log("Failed to seed hero banner:", seedError instanceof Error ? seedError.message : String(seedError));
       }
     }
     
@@ -602,7 +602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const productData = insertProductSchema.partial().parse(req.body);
-      const product = await storage.updateProduct(id, productData);
+      const product = await storage.updateProduct(id, productData as any);
       
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
@@ -717,7 +717,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 continue;
               }
               const validData = insertProductSchema.partial().parse(productData);
-              const updated = await storage.updateProduct(id, validData);
+              const updated = await storage.updateProduct(id, validData as any);
               if (updated) {
                 results.success++;
               } else {
@@ -1299,14 +1299,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         analysis = await aiMarketing.analyzeProducts(products);
         console.log("Real AI analysis completed:", analysis);
       } catch (aiError) {
-        console.log("AI analysis failed, using fallback:", aiError.message);
+        console.log("AI analysis failed, using fallback:", aiError instanceof Error ? aiError.message : String(aiError));
         analysis = fallbackAnalysis;
       }
       
       res.json(analysis);
     } catch (error) {
       console.error("AI analysis error:", error);
-      res.status(500).json({ message: "Failed to analyze products with AI", error: error.message });
+      res.status(500).json({ message: "Failed to analyze products with AI", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -1343,7 +1343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         console.log("AI content generation completed");
       } catch (aiError) {
-        console.log("AI content generation failed, using fallback:", aiError.message);
+        console.log("AI content generation failed, using fallback:", aiError instanceof Error ? aiError.message : String(aiError));
         content = fallbackContent;
       }
 
@@ -1409,7 +1409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         result = await aiMarketing.generateDualAIContent(products);
         console.log("Dual AI generation completed");
       } catch (aiError) {
-        console.log("Dual AI generation failed, using fallback:", aiError.message);
+        console.log("Dual AI generation failed, using fallback:", aiError instanceof Error ? aiError.message : String(aiError));
         result = fallbackResult;
       }
 
