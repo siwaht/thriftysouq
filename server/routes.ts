@@ -126,9 +126,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.error("Background database initialization failed:", error.message);
   });
 
-  // Mount MCP HTTP Server endpoints
-  const mcpServer = createMCPHttpServer();
-  app.use('/mcp', mcpServer);
+  // Add MCP endpoints directly to avoid Vite interference
+  app.get('/mcp/info', (req, res) => {
+    res.json({
+      name: "ThriftySouq MCP HTTP Server",
+      version: "1.0.0",
+      description: "HTTP-based MCP server for ThriftySouq luxury e-commerce platform",
+      capabilities: [
+        "product_management",
+        "order_management", 
+        "marketing_automation",
+        "webhook_integration",
+        "analytics_reporting"
+      ],
+      endpoints: {
+        products: "/mcp/products",
+        orders: "/mcp/orders", 
+        marketing: "/mcp/marketing",
+        webhooks: "/mcp/webhooks",
+        analytics: "/mcp/analytics"
+      }
+    });
+  });
+
+  app.get('/mcp/health', (req, res) => {
+    res.json({
+      status: 'healthy',
+      service: 'ThriftySouq MCP HTTP Server',
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  app.get('/mcp/products', async (req, res) => {
+    try {
+      const { category } = req.query;
+      const products = category ? 
+        await storage.getProductsByCategory(category as string) : 
+        await storage.getProducts();
+      
+      res.json({
+        success: true,
+        data: products,
+        count: products.length
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get('/mcp/analytics', async (req, res) => {
+    try {
+      const { period = 'month' } = req.query;
+      
+      const products = await storage.getProducts();
+      const orders = await storage.getOrders();
+      
+      const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total), 0);
+      const averageOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
+      const topCategories = products.reduce((acc, product) => {
+        acc[product.category] = (acc[product.category] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const analytics = {
+        period,
+        timestamp: new Date().toISOString(),
+        metrics: {
+          totalProducts: products.length,
+          totalOrders: orders.length,
+          totalRevenue: totalRevenue.toFixed(2),
+          averageOrderValue: averageOrderValue.toFixed(2),
+          topCategories,
+          orderStatusDistribution: orders.reduce((acc, order) => {
+            acc[order.status] = (acc[order.status] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>)
+        }
+      };
+      
+      res.json({
+        success: true,
+        data: analytics
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
+  console.log("MCP HTTP endpoints added directly to main router");
   
   // Configure CORS to allow credentials - critical for session persistence
   app.use((req, res, next) => {

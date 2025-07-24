@@ -10,6 +10,12 @@ import { webhookService } from "./webhook-service";
 export function createMCPHttpServer() {
   const app = express();
   app.use(express.json());
+  
+  // Debug middleware
+  app.use((req, res, next) => {
+    console.log(`[MCP] ${req.method} ${req.path}`);
+    next();
+  });
 
   // CORS for external access
   app.use((req, res, next) => {

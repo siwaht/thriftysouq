@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube, LogOut, BarChart3, Tag, Upload, Download, FileText, MapPin, Users } from "lucide-react";
+import { Trash2, Edit, Plus, Package, Menu, ClipboardList, Calendar, DollarSign, CheckCircle, Clock, XCircle, Eye, Webhook, TestTube, LogOut, BarChart3, Tag, Upload, Download, FileText, MapPin, Users, Server } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,6 +22,7 @@ import { HeroBannerAdmin } from "@/components/hero-banner-admin";
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
 import { MarketingTools } from "@/components/marketing-tools";
 import { WebhookTester } from "@/components/webhook-tester";
+import { MCPManagement } from "@/components/mcp-management";
 import AdminPaymentSettings from "./admin-payment-settings";
 
 import type { Product, MenuItem, Webhook as WebhookType } from "@shared/schema";
@@ -902,7 +903,7 @@ export default function AdminPage() {
           </div>
 
           <Tabs defaultValue="analytics" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 mb-8 h-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 mb-8 h-auto">
               <TabsTrigger value="analytics" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
                 <BarChart3 className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                 <span className="hidden sm:inline">Analytics</span>
@@ -942,6 +943,11 @@ export default function AdminPage() {
                 <DollarSign className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                 <span className="hidden sm:inline">Payments</span>
                 <span className="sm:hidden">Pay</span>
+              </TabsTrigger>
+              <TabsTrigger value="mcp" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
+                <Server className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
+                <span className="hidden sm:inline">MCP Server</span>
+                <span className="sm:hidden">MCP</span>
               </TabsTrigger>
             </TabsList>
 
@@ -2186,6 +2192,10 @@ export default function AdminPage() {
 
             <TabsContent value="payments">
               <AdminPaymentSettings />
+            </TabsContent>
+
+            <TabsContent value="mcp">
+              <MCPManagement />
             </TabsContent>
           </Tabs>
         </div>
