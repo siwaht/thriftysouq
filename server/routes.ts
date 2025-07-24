@@ -11,6 +11,7 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { aiMarketing } from "./ai-marketing";
 import crypto from 'crypto';
+import { createMCPHttpServer } from "./mcp-http-server";
 
 const createOrderRequest = z.object({
   customerName: z.string(),
@@ -124,6 +125,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   initializeDatabase().catch(error => {
     console.error("Background database initialization failed:", error.message);
   });
+
+  // Mount MCP HTTP Server endpoints
+  const mcpServer = createMCPHttpServer();
+  app.use('/mcp', mcpServer);
   
   // Configure CORS to allow credentials - critical for session persistence
   app.use((req, res, next) => {
