@@ -177,6 +177,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/mcp/products', async (req, res) => {
+    try {
+      const product = await storage.createProduct(req.body);
+      res.status(201).json({
+        success: true,
+        data: product,
+        message: 'Product created successfully'
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get('/mcp/orders', async (req, res) => {
+    try {
+      const { status } = req.query;
+      let orders = await storage.getOrders();
+      
+      if (status) {
+        orders = orders.filter(order => order.status === status);
+      }
+      
+      res.json({
+        success: true,
+        data: orders,
+        count: orders.length
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get('/mcp/marketing/hero-banner', async (req, res) => {
+    try {
+      const heroBanner = await storage.getHeroBanner();
+      res.json({
+        success: true,
+        data: heroBanner
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   app.get('/mcp/analytics', async (req, res) => {
     try {
       const { period = 'month' } = req.query;
@@ -253,6 +306,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Simple session-based authentication middleware
   const requireAdminAuth = (req: any, res: any, next: any) => {
+    // Skip authentication for MCP endpoints - they are publicly accessible
+    if (req.path.startsWith('/mcp/')) {
+      return next();
+    }
+    
     const sessionId = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminSessionId;
     
     if (sessionId) {

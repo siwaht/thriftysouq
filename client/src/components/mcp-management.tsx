@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Copy, Play, Server, Code, Database, BarChart3, Webhook, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Copy, Play, Server, Code, Database, BarChart3, Webhook, CheckCircle, XCircle, Clock, ClipboardList, Tag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -43,9 +43,10 @@ export function MCPManagement() {
     { name: "Server Info", method: "GET", path: "/mcp/info", description: "Get MCP server information and capabilities", category: "system" },
     { name: "Health Check", method: "GET", path: "/mcp/health", description: "Check MCP server health status", category: "system" },
     { name: "List Products", method: "GET", path: "/mcp/products", description: "Get all products with optional category filtering", category: "products" },
-    { name: "Get Analytics", method: "GET", path: "/mcp/analytics", description: "Get business analytics and metrics", category: "analytics" },
     { name: "Create Product", method: "POST", path: "/mcp/products", description: "Create a new product via MCP", category: "products" },
-    { name: "Update Product", method: "PUT", path: "/mcp/products/:id", description: "Update existing product via MCP", category: "products" },
+    { name: "List Orders", method: "GET", path: "/mcp/orders", description: "Get all orders with optional status filtering", category: "orders" },  
+    { name: "Hero Banner", method: "GET", path: "/mcp/marketing/hero-banner", description: "Get current hero banner content", category: "marketing" },
+    { name: "Get Analytics", method: "GET", path: "/mcp/analytics", description: "Get business analytics and metrics", category: "analytics" },
   ];
 
   useEffect(() => {
@@ -253,17 +254,19 @@ export function MCPManagement() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {['system', 'products', 'analytics'].map((category) => (
+                {['system', 'products', 'orders', 'marketing', 'analytics'].map((category) => (
                   <div key={category}>
                     <h4 className="font-semibold text-sm text-slate-700 mb-2 capitalize flex items-center gap-2">
                       {category === 'system' && <Server className="h-4 w-4" />}
                       {category === 'products' && <Database className="h-4 w-4" />}
+                      {category === 'orders' && <ClipboardList className="h-4 w-4" />}
+                      {category === 'marketing' && <Tag className="h-4 w-4" />}
                       {category === 'analytics' && <BarChart3 className="h-4 w-4" />}
                       {category}
                     </h4>
                     <div className="grid gap-2">
-                      {mcpEndpoints.filter(ep => ep.category === category).map((endpoint) => (
-                        <Card key={endpoint.path} className="border-l-4 border-l-purple-500">
+                      {mcpEndpoints.filter(ep => ep.category === category).map((endpoint, index) => (
+                        <Card key={`${endpoint.category}-${endpoint.method}-${index}`} className="border-l-4 border-l-purple-500">
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">

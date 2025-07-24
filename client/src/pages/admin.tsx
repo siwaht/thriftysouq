@@ -776,8 +776,10 @@ export default function AdminPage() {
         return order;
       });
 
-      const response = await apiRequest("POST", "/api/admin/orders/import", {
-        orders: ordersData
+      const response = await apiRequest("/api/admin/orders/import", {
+        method: "POST",
+        body: JSON.stringify({ orders: ordersData }),
+        headers: { "Content-Type": "application/json" }
       });
       
       const result = await response.json();
