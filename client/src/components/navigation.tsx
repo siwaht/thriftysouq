@@ -23,10 +23,10 @@ export default function Navigation({ onCartToggle }: NavigationProps) {
     queryKey: ["/api/menu-items"],
   });
 
-  // Add default "All" option
+  // Add default "All" option, filter out any "all" value from database to avoid duplicates
   const allCategories = [
     { id: 0, label: "All", value: "all", order: 0, isActive: true },
-    ...menuItems.filter(item => item.isActive).sort((a, b) => a.order - b.order)
+    ...menuItems.filter(item => item.isActive && item.value !== "all").sort((a, b) => a.order - b.order)
   ];
 
   const handleFilterChange = (category: string) => {
