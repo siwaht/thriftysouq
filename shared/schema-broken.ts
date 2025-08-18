@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, boolean, decimal, timestamp } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
 
@@ -45,6 +46,19 @@ export const menuItems = pgTable("menu_items", {
   isActive: boolean("is_active").notNull().default(true),
 });
 
+export const adminUsers = pgTable("admin_users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+});
+
+export const adminTokens = pgTable("admin_tokens", {
+  token: text("token").primaryKey(),
+  adminId: integer("admin_id").notNull().references(() => adminUsers.id),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const heroBanner = pgTable("hero_banner", {
   id: serial("id").primaryKey(),
   badgeIcon: text("badge_icon").default("Sparkles"),
@@ -59,55 +73,87 @@ export const heroBanner = pgTable("hero_banner", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Simple Zod schemas without using createInsertSchema
-export const insertProductSchema = z.object({
-  name: z.string(),
-  brand: z.string(),
-  category: z.string(),
+export const webhooks = pgTable("webhooks", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  events: text("events").array().notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  secret: text("secret"),
+});
+
+export const paymentCredentials = pgTable("payment_credentials", {
+  id: serial("id").primaryKey(),
+  provider: text("provider").notNull(),
+  keyType: text("key_type").notNull(),
+  keyValue: text("key_value").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations
+export const ordersRelations = relations(orders, ({ many }) => ({
+  orderItems: many(orderItems),
+}));
+
+export const orderItemsRelations = relations(orderItems, ({ one }) => ({
+  order: one(orders, {
+    fields: [orderItems.orderId],
+    references: [orders.id],
+  }),
+  product: one(products, {
+    fields: [orderItems.productId],
+    references: [products.id],
+  }),
+}));
+
+export const productsRelations = relations(products, ({ many }) => ({
+  orderItems: many(orderItems),
+}));
+
+// Insert schemas with proper typing
+export const insertProductSchema = createInsertSchema(products, {
   originalPrice: z.string(),
   discountedPrice: z.string(),
-  discount: z.number(),
-  image: z.string(),
-  stock: z.number(),
+}).omit({
+  id: true,
 });
 
-export const insertOrderSchema = z.object({
-  customerName: z.string(),
-  customerEmail: z.string(),
-  customerPhone: z.string(),
-  shippingAddress: z.string(),
-  city: z.string(),
-  postalCode: z.string().optional(),
-  specialInstructions: z.string().optional(),
-  paymentMethod: z.string(),
+export const insertOrderSchema = createInsertSchema(orders, {
   total: z.string(),
-  status: z.string().optional(),
+}).omit({
+  id: true,
+  orderNumber: true,
 });
 
-export const insertOrderItemSchema = z.object({
-  orderId: z.number().optional(),
-  productId: z.number(),
-  quantity: z.number(),
+export const insertOrderItemSchema = createInsertSchema(orderItems, {
   price: z.string(),
+}).omit({
+  id: true,
 });
 
-export const insertMenuItemSchema = z.object({
-  label: z.string(),
-  value: z.string(),
-  order: z.number().optional(),
-  isActive: z.boolean().optional(),
+export const insertMenuItemSchema = createInsertSchema(menuItems).omit({
+  id: true,
 });
 
-export const insertHeroBannerSchema = z.object({
-  badgeIcon: z.string().optional(),
-  badgeText: z.string().optional(),
-  mainTitle: z.string().optional(),
-  highlightTitle: z.string().optional(),
-  subtitle: z.string().optional(),
-  description: z.string().optional(),
-  buttonText: z.string().optional(),
-  footerText: z.string().optional(),
-  isActive: z.boolean().optional(),
+export const insertWebhookSchema = createInsertSchema(webhooks).omit({
+  id: true,
+});
+
+export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
+  id: true,
+});
+
+export const insertHeroBannerSchema = createInsertSchema(heroBanner).omit({
+  id: true,
+  updatedAt: true,
+});
+
+export const insertPaymentCredentialSchema = createInsertSchema(paymentCredentials).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 // Type exports
@@ -119,5 +165,13 @@ export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type MenuItem = typeof menuItems.$inferSelect;
 export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;
+export type Webhook = typeof webhooks.$inferSelect;
+export type InsertWebhook = z.infer<typeof insertWebhookSchema>;
+export type AdminUser = typeof adminUsers.$inferSelect;
+export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
+export type AdminToken = typeof adminTokens.$inferSelect;
+export type InsertAdminToken = typeof adminTokens.$inferInsert;
 export type HeroBanner = typeof heroBanner.$inferSelect;
 export type InsertHeroBanner = z.infer<typeof insertHeroBannerSchema>;
+export type PaymentCredential = typeof paymentCredentials.$inferSelect;
+export type InsertPaymentCredential = z.infer<typeof insertPaymentCredentialSchema>;
