@@ -23,6 +23,7 @@ import { AnalyticsDashboard } from "@/components/analytics-dashboard";
 import { MarketingTools } from "@/components/marketing-tools";
 import { WebhookTester } from "@/components/webhook-tester";
 import { MCPManagement } from "@/components/mcp-management";
+import { UserManagementPanel } from "@/components/user-management";
 import AdminPaymentSettings from "./admin-payment-settings";
 
 import type { Product, MenuItem, Webhook as WebhookType } from "@shared/schema";
@@ -905,11 +906,16 @@ export default function AdminPage() {
           </div>
 
           <Tabs defaultValue="analytics" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 mb-8 h-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 mb-8 h-auto">
               <TabsTrigger value="analytics" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
                 <BarChart3 className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
                 <span className="hidden sm:inline">Analytics</span>
                 <span className="sm:hidden">Stats</span>
+              </TabsTrigger>
+              <TabsTrigger value="users" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
+                <Users className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
+                <span className="hidden sm:inline">Users</span>
+                <span className="sm:hidden">Users</span>
               </TabsTrigger>
               <TabsTrigger value="marketing" className="data-[state=active]:bg-luxury-purple data-[state=active]:text-white flex-col sm:flex-row p-2 sm:p-3 text-xs sm:text-sm h-auto min-h-[44px]">
                 <Tag className="w-4 h-4 mb-1 sm:mb-0 sm:mr-2" />
@@ -955,6 +961,10 @@ export default function AdminPage() {
 
             <TabsContent value="analytics">
               <AnalyticsDashboard />
+            </TabsContent>
+
+            <TabsContent value="users">
+              <UserManagementPanel />
             </TabsContent>
 
             <TabsContent value="marketing">

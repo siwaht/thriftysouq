@@ -1163,6 +1163,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Management API routes
+  // Get all admin users
+  app.get("/api/admin/users", requireAdminAuth, async (req, res) => {
+    try {
+      const users = await storage.getAdminUsers();
+      // Don't send password hashes to client
+      const safeUsers = users.map(({passwordHash, ...user}) => user);
+      res.json(safeUsers);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Create admin user
+  app.post("/api/admin/users", requireAdminAuth, async (req, res) => {
+    try {
+      const { username, email, password, role, isActive } = req.body;
+
+      if (!username || !email || !password) {
+        return res.status(400).json({ message: "Username, email, and password are required" });
+      }
+
+      // Hash password
+      const bcrypt = await import("bcryptjs");
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      const newUser = await storage.createAdminUser({
+        username,
+        email,
+        passwordHash,
+        role: role || "admin",
+        isActive: isActive !== undefined ? isActive : true,
+      });
+
+      // Don't send password hash
+      const { passwordHash: _, ...safeUser } = newUser;
+      res.status(201).json(safeUser);
+    } catch (error: any) {
+      console.error("Failed to create user:", error);
+      res.status(500).json({ message: error.message || "Failed to create user" });
+    }
+  });
+
+  // Update admin user
+  app.put("/api/admin/users/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { username, email, password, role, isActive } = req.body;
+
+      const updates: any = {};
+      if (username) updates.username = username;
+      if (email) updates.email = email;
+      if (role) updates.role = role;
+      if (isActive !== undefined) updates.isActive = isActive;
+
+      // Hash new password if provided
+      if (password) {
+        const bcrypt = await import("bcryptjs");
+        updates.passwordHash = await bcrypt.hash(password, 10);
+      }
+
+      const updatedUser = await storage.updateAdminUser(userId, updates);
+
+      // Don't send password hash
+      const { passwordHash: _, ...safeUser } = updatedUser;
+      res.json(safeUser);
+    } catch (error: any) {
+      console.error("Failed to update user:", error);
+      res.status(500).json({ message: error.message || "Failed to update user" });
+    }
+  });
+
+  // Delete admin user
+  app.delete("/api/admin/users/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      await storage.deleteAdminUser(userId);
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("Failed to delete user:", error);
+      res.status(500).json({ message: error.message || "Failed to delete user" });
+    }
+  });
+
   // Webhook management API routes
   // Get all webhooks
   app.get("/api/admin/webhooks", requireAdminAuth, async (req, res) => {

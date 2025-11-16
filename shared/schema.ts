@@ -59,6 +59,45 @@ export const heroBanner = pgTable("hero_banner", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const adminUsers = pgTable("admin_users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  email: text("email").notNull().unique(),
+  role: text("role").notNull().default("admin"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const adminTokens = pgTable("admin_tokens", {
+  token: text("token").primaryKey(),
+  adminId: integer("admin_id").notNull().references(() => adminUsers.id),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const webhooks = pgTable("webhooks", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  url: text("url").notNull(),
+  events: text("events").array().notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  secret: text("secret"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const paymentCredentials = pgTable("payment_credentials", {
+  id: serial("id").primaryKey(),
+  provider: text("provider").notNull(),
+  keyType: text("key_type").notNull(),
+  keyValue: text("key_value").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Simple Zod schemas without using createInsertSchema
 export const insertProductSchema = z.object({
   name: z.string(),
@@ -110,6 +149,29 @@ export const insertHeroBannerSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+export const insertAdminUserSchema = z.object({
+  username: z.string(),
+  passwordHash: z.string(),
+  email: z.string().email(),
+  role: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const insertWebhookSchema = z.object({
+  name: z.string(),
+  url: z.string().url(),
+  events: z.array(z.string()),
+  isActive: z.boolean().optional(),
+  secret: z.string().optional(),
+});
+
+export const insertPaymentCredentialSchema = z.object({
+  provider: z.string(),
+  keyType: z.string(),
+  keyValue: z.string(),
+  isActive: z.boolean().optional(),
+});
+
 // Type exports
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -121,3 +183,11 @@ export type MenuItem = typeof menuItems.$inferSelect;
 export type InsertMenuItem = z.infer<typeof insertMenuItemSchema>;
 export type HeroBanner = typeof heroBanner.$inferSelect;
 export type InsertHeroBanner = z.infer<typeof insertHeroBannerSchema>;
+export type AdminUser = typeof adminUsers.$inferSelect;
+export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
+export type AdminToken = typeof adminTokens.$inferSelect;
+export type InsertAdminToken = typeof adminTokens.$inferInsert;
+export type Webhook = typeof webhooks.$inferSelect;
+export type InsertWebhook = z.infer<typeof insertWebhookSchema>;
+export type PaymentCredential = typeof paymentCredentials.$inferSelect;
+export type InsertPaymentCredential = z.infer<typeof insertPaymentCredentialSchema>;
