@@ -1,4 +1,4 @@
-import { products, orders, orderItems, menuItems, heroBanner, type Product, type Order, type OrderItem, type MenuItem, type HeroBanner, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem, type InsertHeroBanner } from "@shared/schema";
+import { products, orders, orderItems, menuItems, heroBanner, webhooks, adminUsers, paymentCredentials, type Product, type Order, type OrderItem, type MenuItem, type HeroBanner, type Webhook, type AdminUser, type PaymentCredential, type InsertProduct, type InsertOrder, type InsertOrderItem, type InsertMenuItem, type InsertHeroBanner, type InsertWebhook, type InsertAdminUser, type InsertPaymentCredential } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc } from "drizzle-orm";
 
@@ -25,6 +25,23 @@ export interface IStorage {
   // Hero banner methods
   getHeroBanner(): Promise<HeroBanner | undefined>;
   updateHeroBanner(banner: InsertHeroBanner): Promise<HeroBanner>;
+  // Webhook methods
+  getWebhooks(): Promise<Webhook[]>;
+  createWebhook(webhook: InsertWebhook): Promise<Webhook>;
+  updateWebhook(id: number, webhook: Partial<InsertWebhook>): Promise<Webhook | undefined>;
+  deleteWebhook(id: number): Promise<boolean>;
+  // Admin user methods
+  getAdminUsers(): Promise<AdminUser[]>;
+  getAdminUserById(id: number): Promise<AdminUser | undefined>;
+  getAdminUserByUsername(username: string): Promise<AdminUser | undefined>;
+  createAdminUser(user: InsertAdminUser): Promise<AdminUser>;
+  updateAdminUser(id: number, user: Partial<InsertAdminUser>): Promise<AdminUser>;
+  deleteAdminUser(id: number): Promise<void>;
+  // Payment credentials methods
+  getPaymentCredentials(): Promise<PaymentCredential[]>;
+  createPaymentCredential(credential: InsertPaymentCredential): Promise<PaymentCredential>;
+  updatePaymentCredential(id: number, credential: Partial<InsertPaymentCredential>): Promise<PaymentCredential | undefined>;
+  deletePaymentCredential(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -164,6 +181,117 @@ export class DatabaseStorage implements IStorage {
       .where(eq(heroBanner.id, 1))
       .returning();
     return updated;
+  }
+
+  // Webhook methods
+  async getWebhooks(): Promise<Webhook[]> {
+    return await db.select().from(webhooks);
+  }
+
+  async createWebhook(webhook: InsertWebhook): Promise<Webhook> {
+    const [newWebhook] = await db
+      .insert(webhooks)
+      .values(webhook)
+      .returning();
+    return newWebhook;
+  }
+
+  async updateWebhook(id: number, webhook: Partial<InsertWebhook>): Promise<Webhook | undefined> {
+    const [updatedWebhook] = await db
+      .update(webhooks)
+      .set({
+        ...webhook,
+        updatedAt: new Date()
+      })
+      .where(eq(webhooks.id, id))
+      .returning();
+    return updatedWebhook || undefined;
+  }
+
+  async deleteWebhook(id: number): Promise<boolean> {
+    const result = await db
+      .delete(webhooks)
+      .where(eq(webhooks.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Admin user methods
+  async getAdminUsers(): Promise<AdminUser[]> {
+    return await db.select().from(adminUsers);
+  }
+
+  async getAdminUserById(id: number): Promise<AdminUser | undefined> {
+    const [user] = await db.select().from(adminUsers).where(eq(adminUsers.id, id));
+    return user || undefined;
+  }
+
+  async getAdminUserByUsername(username: string): Promise<AdminUser | undefined> {
+    const [user] = await db.select().from(adminUsers).where(eq(adminUsers.username, username));
+    return user || undefined;
+  }
+
+  async createAdminUser(user: InsertAdminUser): Promise<AdminUser> {
+    const [newUser] = await db
+      .insert(adminUsers)
+      .values({
+        ...user,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return newUser;
+  }
+
+  async updateAdminUser(id: number, user: Partial<InsertAdminUser>): Promise<AdminUser> {
+    const [updatedUser] = await db
+      .update(adminUsers)
+      .set({
+        ...user,
+        updatedAt: new Date()
+      })
+      .where(eq(adminUsers.id, id))
+      .returning();
+    return updatedUser;
+  }
+
+  async deleteAdminUser(id: number): Promise<void> {
+    await db.delete(adminUsers).where(eq(adminUsers.id, id));
+  }
+
+  // Payment credentials methods
+  async getPaymentCredentials(): Promise<PaymentCredential[]> {
+    return await db.select().from(paymentCredentials);
+  }
+
+  async createPaymentCredential(credential: InsertPaymentCredential): Promise<PaymentCredential> {
+    const [newCredential] = await db
+      .insert(paymentCredentials)
+      .values({
+        ...credential,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return newCredential;
+  }
+
+  async updatePaymentCredential(id: number, credential: Partial<InsertPaymentCredential>): Promise<PaymentCredential | undefined> {
+    const [updatedCredential] = await db
+      .update(paymentCredentials)
+      .set({
+        ...credential,
+        updatedAt: new Date()
+      })
+      .where(eq(paymentCredentials.id, id))
+      .returning();
+    return updatedCredential || undefined;
+  }
+
+  async deletePaymentCredential(id: number): Promise<boolean> {
+    const result = await db
+      .delete(paymentCredentials)
+      .where(eq(paymentCredentials.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 }
 
