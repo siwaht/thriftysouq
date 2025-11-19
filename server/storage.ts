@@ -10,17 +10,19 @@ export interface IStorage {
   updateProductStock(productId: number, newStock: number): Promise<void>;
   // Menu methods
   getMenuItems(): Promise<MenuItem[]>;
+  createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem>;
+  updateMenuItem(id: number, menuItem: InsertMenuItem): Promise<MenuItem | undefined>;
+  deleteMenuItem(id: number): Promise<boolean>;
+  updateMenuItemOrder(id: number, newOrder: number): Promise<void>;
   // Admin methods
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: number, product: InsertProduct): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
-  createMenuItem(menuItem: InsertMenuItem): Promise<MenuItem>;
-  updateMenuItem(id: number, menuItem: InsertMenuItem): Promise<MenuItem | undefined>;
-  deleteMenuItem(id: number): Promise<boolean>;
   // Order management methods
   getOrders(): Promise<Order[]>;
   getOrderById(id: number): Promise<Order | undefined>;
   getOrderItems(orderId: number): Promise<OrderItem[]>;
+  getOrdersWithItems(): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]>;
   updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
   // Hero banner methods
   getHeroBanner(): Promise<HeroBanner | undefined>;
@@ -42,6 +44,7 @@ export interface IStorage {
   createPaymentCredential(credential: InsertPaymentCredential): Promise<PaymentCredential>;
   updatePaymentCredential(id: number, credential: Partial<InsertPaymentCredential>): Promise<PaymentCredential | undefined>;
   deletePaymentCredential(id: number): Promise<boolean>;
+  upsertPaymentCredential(credential: InsertPaymentCredential): Promise<PaymentCredential>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -60,7 +63,7 @@ export class DatabaseStorage implements IStorage {
 
   async createOrder(order: InsertOrder, items: Omit<InsertOrderItem, 'orderId'>[]): Promise<{ order: Order; orderNumber: string }> {
     const orderNumber = `LD-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-    
+
     const [newOrder] = await db
       .insert(orders)
       .values({
@@ -144,6 +147,13 @@ export class DatabaseStorage implements IStorage {
     return result.rowCount !== null && result.rowCount > 0;
   }
 
+  async updateMenuItemOrder(id: number, newOrder: number): Promise<void> {
+    await db
+      .update(menuItems)
+      .set({ order: newOrder })
+      .where(eq(menuItems.id, id));
+  }
+
   async getOrders(): Promise<Order[]> {
     return await db.select().from(orders);
   }
@@ -155,6 +165,27 @@ export class DatabaseStorage implements IStorage {
 
   async getOrderItems(orderId: number): Promise<OrderItem[]> {
     return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+  }
+
+  async getOrdersWithItems(): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
+    const allOrders = await this.getOrders();
+    const results = [];
+
+    for (const order of allOrders) {
+      const items = await this.getOrderItems(order.id);
+      const itemsWithProducts = [];
+
+      for (const item of items) {
+        const product = await this.getProductById(item.productId);
+        if (product) {
+          itemsWithProducts.push({ ...item, product });
+        }
+      }
+
+      results.push({ ...order, items: itemsWithProducts });
+    }
+
+    return results;
   }
 
   async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
@@ -292,6 +323,17 @@ export class DatabaseStorage implements IStorage {
       .delete(paymentCredentials)
       .where(eq(paymentCredentials.id, id));
     return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async upsertPaymentCredential(credential: InsertPaymentCredential): Promise<PaymentCredential> {
+    const existing = await this.getPaymentCredentials();
+    if (existing.length > 0) {
+      const updated = await this.updatePaymentCredential(existing[0].id, credential);
+      if (!updated) throw new Error("Failed to update credential");
+      return updated;
+    } else {
+      return await this.createPaymentCredential(credential);
+    }
   }
 }
 

@@ -35,7 +35,7 @@ const createOrderRequest = z.object({
 async function initializeDatabase() {
   try {
     console.log("Initializing database with seed data...");
-    
+
     // Check if products exist, if not seed them
     try {
       const existingProducts = await storage.getProducts();
@@ -49,10 +49,10 @@ async function initializeDatabase() {
     } catch (error) {
       console.log("Error checking/seeding products:", error instanceof Error ? error.message : String(error));
     }
-    
+
     // Check and seed admin user
     try {
-      const admin = await storage.getAdminByUsername("admin");
+      const admin = await storage.getAdminUserByUsername("admin");
       if (!admin) {
         console.log("No admin found, seeding admin user...");
         const { seedAdminUser } = await import("./seed-admin");
@@ -69,7 +69,7 @@ async function initializeDatabase() {
         console.log("Failed to seed admin user:", seedError instanceof Error ? seedError.message : String(seedError));
       }
     }
-    
+
     // Check and seed menu items
     try {
       const menuItems = await storage.getMenuItems();
@@ -83,7 +83,7 @@ async function initializeDatabase() {
     } catch (error) {
       console.log("Error checking/seeding menu items:", error instanceof Error ? error.message : String(error));
     }
-    
+
     // Check and seed hero banner
     try {
       const heroBanner = await storage.getHeroBanner();
@@ -103,7 +103,7 @@ async function initializeDatabase() {
         console.log("Failed to seed hero banner:", seedError instanceof Error ? seedError.message : String(seedError));
       }
     }
-    
+
     console.log("Database initialization completed");
   } catch (error) {
     console.error("Database initialization failed:", error.message);
@@ -114,10 +114,10 @@ async function initializeDatabase() {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint specifically for deployment health checks
   app.get('/health', (req, res) => {
-    res.status(200).json({ 
-      status: 'ok', 
+    res.status(200).json({
+      status: 'ok',
       app: 'ThriftySouq',
-      timestamp: new Date().toISOString() 
+      timestamp: new Date().toISOString()
     });
   });
 
@@ -134,14 +134,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       description: "HTTP-based MCP server for ThriftySouq luxury e-commerce platform",
       capabilities: [
         "product_management",
-        "order_management", 
+        "order_management",
         "marketing_automation",
         "webhook_integration",
         "analytics_reporting"
       ],
       endpoints: {
         products: "/mcp/products",
-        orders: "/mcp/orders", 
+        orders: "/mcp/orders",
         marketing: "/mcp/marketing",
         webhooks: "/mcp/webhooks",
         analytics: "/mcp/analytics"
@@ -160,10 +160,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/mcp/products', async (req, res) => {
     try {
       const { category } = req.query;
-      const products = category ? 
-        await storage.getProductsByCategory(category as string) : 
+      const products = category ?
+        await storage.getProductsByCategory(category as string) :
         await storage.getProducts();
-      
+
       res.json({
         success: true,
         data: products,
@@ -197,11 +197,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { status } = req.query;
       let orders = await storage.getOrders();
-      
+
       if (status) {
         orders = orders.filter(order => order.status === status);
       }
-      
+
       res.json({
         success: true,
         data: orders,
@@ -233,10 +233,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/mcp/analytics', async (req, res) => {
     try {
       const { period = 'month' } = req.query;
-      
+
       const products = await storage.getProducts();
       const orders = await storage.getOrders();
-      
+
       const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total), 0);
       const averageOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
       const topCategories = products.reduce((acc, product) => {
@@ -259,7 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }, {} as Record<string, number>)
         }
       };
-      
+
       res.json({
         success: true,
         data: analytics
@@ -271,24 +271,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   console.log("MCP HTTP endpoints added directly to main router");
-  
+
   // Configure CORS to allow credentials - critical for session persistence
   app.use((req, res, next) => {
     const origin = req.headers.origin;
     res.header('Access-Control-Allow-Credentials', 'true');
-    
+
     // Allow requests from same origin and common deployment domains
     if (origin && (origin.includes('replit') || origin.includes('localhost') || origin === req.protocol + '://' + req.get('host'))) {
       res.header('Access-Control-Allow-Origin', origin);
     } else {
       res.header('Access-Control-Allow-Origin', req.headers.origin || req.protocol + '://' + req.get('host'));
     }
-    
+
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, Cookie, Set-Cookie');
-    
+
     if (req.method === 'OPTIONS') {
       res.sendStatus(200);
     } else {
@@ -310,9 +310,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (req.path.startsWith('/mcp/')) {
       return next();
     }
-    
+
     const sessionId = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminSessionId;
-    
+
     if (sessionId) {
       const adminData = validateAdminSession(sessionId);
       if (adminData) {
@@ -321,7 +321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
     }
-    
+
     console.log("Admin auth failed for:", req.path);
     res.status(401).json({ message: "Admin authentication required" });
   };
@@ -330,17 +330,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/login", async (req, res) => {
     try {
       const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password required" });
-      }
-
-      const admin = await storage.getAdminByUsername(username);
-      if (!admin) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
       if (!isValidPassword) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
@@ -348,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate session
       const sessionId = createAdminSession(admin.id, admin.username);
       console.log("Admin login successful:", admin.username);
-      
+
       // Set session cookie
       res.cookie('adminSessionId', sessionId, {
         httpOnly: true,
@@ -382,13 +371,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const sessionId = req.headers.authorization?.replace('Bearer ', '') || req.cookies?.adminSessionId;
     let isAuthenticated = false;
     let adminData = null;
-    
+
     if (sessionId) {
       adminData = validateAdminSession(sessionId);
       isAuthenticated = !!adminData;
     }
-    
-    res.json({ 
+
+    res.json({
       isAuthenticated,
       session: sessionId ? 'present' : 'missing',
       admin: adminData ? { username: adminData.username } : null,
@@ -425,11 +414,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const product = await storage.getProductById(id);
-      
+
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
-      
+
       res.json(product);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch product" });
@@ -441,7 +430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Order request body:", JSON.stringify(req.body, null, 2));
       const orderData = createOrderRequest.parse(req.body);
-      
+
       // Calculate total
       let total = 0;
       for (const item of orderData.items) {
@@ -449,11 +438,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!product) {
           return res.status(400).json({ message: `Product ${item.productId} not found` });
         }
-        
+
         if (product.stock < item.quantity) {
           return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
         }
-        
+
         total += parseFloat(product.discountedPrice) * item.quantity;
       }
 
@@ -537,11 +526,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const order = await storage.getOrderById(id);
-      
+
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
+
       const items = await storage.getOrderItems(id);
       res.json({ ...order, items });
     } catch (error) {
@@ -554,7 +543,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
-      
+
       if (!status || typeof status !== "string") {
         return res.status(400).json({ message: "Valid status is required" });
       }
@@ -567,7 +556,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const oldStatus = currentOrder.status;
       const updatedOrder = await storage.updateOrderStatus(id, status);
-      
+
       if (!updatedOrder) {
         return res.status(404).json({ message: "Order not found" });
       }
@@ -579,7 +568,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Webhook error:", webhookError);
         // Don't fail the status update if webhook fails
       }
-      
+
       res.json(updatedOrder);
     } catch (error) {
       res.status(500).json({ message: "Failed to update order status" });
@@ -632,11 +621,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const productData = insertProductSchema.parse(req.body);
       const product = await storage.updateProduct(id, productData);
-      
+
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
-      
+
       res.json(product);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -655,11 +644,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const success = await storage.deleteProduct(id);
-      
+
       if (!success) {
         return res.status(404).json({ message: "Product not found" });
       }
-      
+
       res.json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete product" });
@@ -670,7 +659,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/products/bulk-import", requireAdminAuth, async (req, res) => {
     try {
       const { products } = req.body;
-      
+
       if (!Array.isArray(products) || products.length === 0) {
         return res.status(400).json({ message: "Products array is required" });
       }
@@ -683,11 +672,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (let i = 0; i < products.length; i++) {
         try {
           const productData = products[i];
-          
+
           // Validate required fields
           if (!productData.name || !productData.brand || !productData.category ||
-              !productData.originalPrice || !productData.discountedPrice ||
-              typeof productData.discount !== 'number' || typeof productData.stock !== 'number') {
+            !productData.originalPrice || !productData.discountedPrice ||
+            typeof productData.discount !== 'number' || typeof productData.stock !== 'number') {
             results.errors.push(`Product ${i + 1}: Missing or invalid required fields`);
             continue;
           }
@@ -723,7 +712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Webhook endpoints for external product management
-  
+
   // Add product via webhook
   app.post("/webhook/products", async (req, res) => {
     try {
@@ -735,17 +724,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const productData = insertProductSchema.parse(req.body);
       const product = await storage.createProduct(productData);
-      
-      res.status(201).json({ 
-        success: true, 
+
+      res.status(201).json({
+        success: true,
         message: "Product created successfully",
-        product 
+        product
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: "Invalid product data", 
-          errors: error.errors 
+        return res.status(400).json({
+          message: "Invalid product data",
+          errors: error.errors
         });
       }
       res.status(500).json({ message: "Failed to create product" });
@@ -768,21 +757,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const productData = insertProductSchema.partial().parse(req.body);
       const product = await storage.updateProduct(id, productData as any);
-      
+
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         message: "Product updated successfully",
-        product 
+        product
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: "Invalid product data", 
-          errors: error.errors 
+        return res.status(400).json({
+          message: "Invalid product data",
+          errors: error.errors
         });
       }
       res.status(500).json({ message: "Failed to update product" });
@@ -804,14 +793,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const success = await storage.deleteProduct(id);
-      
+
       if (!success) {
         return res.status(404).json({ message: "Product not found" });
       }
-      
-      res.json({ 
-        success: true, 
-        message: "Product deleted successfully" 
+
+      res.json({
+        success: true,
+        message: "Product deleted successfully"
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete product" });
@@ -827,11 +816,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid webhook signature" });
       }
 
-      const products = await storage.getAllProducts();
-      res.json({ 
-        success: true, 
+      const products = await storage.getProducts();
+      res.json({
+        success: true,
         products,
-        count: products.length 
+        count: products.length
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch products" });
@@ -848,10 +837,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { operation, products } = req.body;
-      
+
       if (!operation || !Array.isArray(products)) {
-        return res.status(400).json({ 
-          message: "Operation and products array are required" 
+        return res.status(400).json({
+          message: "Operation and products array are required"
         });
       }
 
@@ -915,8 +904,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
 
         default:
-          return res.status(400).json({ 
-            message: "Invalid operation. Use 'create', 'update', or 'delete'" 
+          return res.status(400).json({
+            message: "Invalid operation. Use 'create', 'update', or 'delete'"
           });
       }
 
@@ -931,7 +920,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Order Management Webhooks
-  
+
   // Get all orders via webhook
   app.get("/webhook/orders", async (req, res) => {
     try {
@@ -941,11 +930,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid webhook signature" });
       }
 
-      const orders = await storage.getAllOrders();
-      res.json({ 
-        success: true, 
+      const orders = await storage.getOrders();
+      res.json({
+        success: true,
         orders,
-        count: orders.length 
+        count: orders.length
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch orders" });
@@ -974,21 +963,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate status values
       const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
       if (!validStatuses.includes(status)) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "Invalid status. Must be one of: " + validStatuses.join(', ')
         });
       }
 
       const order = await storage.updateOrderStatus(id, status);
-      
+
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         message: "Order status updated successfully",
-        order 
+        order
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to update order status" });
@@ -1009,15 +998,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid order ID" });
       }
 
-      const order = await storage.getOrder(id);
-      
+      const order = await storage.getOrderById(id);
+
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
-      
-      res.json({ 
-        success: true, 
-        order 
+
+      res.json({
+        success: true,
+        order
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch order" });
@@ -1034,10 +1023,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { orders } = req.body;
-      
+
       if (!Array.isArray(orders)) {
-        return res.status(400).json({ 
-          message: "Orders array is required" 
+        return res.status(400).json({
+          message: "Orders array is required"
         });
       }
 
@@ -1050,17 +1039,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (let i = 0; i < orders.length; i++) {
         try {
           const { id, status } = orders[i];
-          
+
           if (!id) {
             results.errors.push(`Order ${i + 1}: ID is required`);
             continue;
           }
-          
+
           if (!status) {
             results.errors.push(`Order ${i + 1}: Status is required`);
             continue;
           }
-          
+
           if (!validStatuses.includes(status)) {
             results.errors.push(`Order ${i + 1}: Invalid status. Must be one of: ${validStatuses.join(', ')}`);
             continue;
@@ -1112,11 +1101,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const menuData = insertMenuItemSchema.parse(req.body);
       const menuItem = await storage.updateMenuItem(id, menuData);
-      
+
       if (!menuItem) {
         return res.status(404).json({ message: "Menu item not found" });
       }
-      
+
       res.json(menuItem);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1135,11 +1124,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const success = await storage.deleteMenuItem(id);
-      
+
       if (!success) {
         return res.status(404).json({ message: "Menu item not found" });
       }
-      
+
       res.json({ success: true, message: "Menu item deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete menu item" });
@@ -1151,7 +1140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const { newOrder } = req.body;
-      
+
       if (isNaN(id) || typeof newOrder !== 'number') {
         return res.status(400).json({ message: "Invalid data" });
       }
@@ -1169,7 +1158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const users = await storage.getAdminUsers();
       // Don't send password hashes to client
-      const safeUsers = users.map(({passwordHash, ...user}) => user);
+      const safeUsers = users.map(({ passwordHash, ...user }) => user);
       res.json(safeUsers);
     } catch (error) {
       console.error("Failed to fetch users:", error);
@@ -1283,11 +1272,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const webhookData = insertWebhookSchema.parse(req.body);
       const webhook = await storage.updateWebhook(id, webhookData);
-      
+
       if (!webhook) {
         return res.status(404).json({ message: "Webhook not found" });
       }
-      
+
       res.json(webhook);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1306,11 +1295,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const success = await storage.deleteWebhook(id);
-      
+
       if (!success) {
         return res.status(404).json({ message: "Webhook not found" });
       }
-      
+
       res.json({ message: "Webhook deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete webhook" });
@@ -1323,7 +1312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const webhooks = await storage.getWebhooks();
       const webhook = webhooks.find(w => w.id === id);
-      
+
       if (!webhook) {
         return res.status(404).json({ message: "Webhook not found" });
       }
@@ -1424,7 +1413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/orders/import", requireAdminAuth, async (req, res) => {
     try {
       const { orders } = req.body;
-      
+
       if (!Array.isArray(orders)) {
         return res.status(400).json({ message: "Orders array is required" });
       }
@@ -1437,11 +1426,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (let i = 0; i < orders.length; i++) {
         try {
           const orderData = orders[i];
-          
+
           // Validate required fields
-          if (!orderData.customerName || !orderData.customerEmail || !orderData.customerPhone || 
-              !orderData.shippingAddress || !orderData.city || !orderData.paymentMethod || 
-              !orderData.total || !Array.isArray(orderData.items)) {
+          if (!orderData.customerName || !orderData.customerEmail || !orderData.customerPhone ||
+            !orderData.shippingAddress || !orderData.city || !orderData.paymentMethod ||
+            !orderData.total || !Array.isArray(orderData.items)) {
             results.errors.push(`Order ${i + 1}: Missing required fields`);
             continue;
           }
@@ -1479,7 +1468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/orders/export", requireAdminAuth, async (req, res) => {
     try {
       const orders = await storage.getOrdersWithItems();
-      
+
       // Convert orders to CSV format
       const csvData = orders.map(order => ({
         orderNumber: order.orderNumber,
@@ -1494,7 +1483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         total: order.total,
         status: order.status,
         itemCount: order.items?.length || 0,
-        items: order.items?.map(item => 
+        items: order.items?.map(item =>
           `${item.product.name} (ID: ${item.productId}, Qty: ${item.quantity}, Price: ${item.price})`
         ).join('; ') || ''
       }));
@@ -1516,7 +1505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Starting AI analysis...");
       const products = await storage.getProducts();
       console.log("Found products:", products.length);
-      
+
       if (products.length === 0) {
         return res.status(400).json({ message: "No products available for analysis" });
       }
@@ -1552,7 +1541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("AI analysis failed, using fallback:", aiError instanceof Error ? aiError.message : String(aiError));
         analysis = fallbackAnalysis;
       }
-      
+
       res.json(analysis);
     } catch (error) {
       console.error("AI analysis error:", error);
@@ -1565,7 +1554,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { aiProvider = "openai" } = req.body;
       const products = await storage.getProducts();
-      
+
       if (products.length === 0) {
         return res.status(400).json({ message: "No products available for content generation" });
       }
@@ -1608,7 +1597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/ai-marketing/generate-dual", requireAdminAuth, async (req, res) => {
     try {
       const products = await storage.getProducts();
-      
+
       if (products.length === 0) {
         return res.status(400).json({ message: "No products available for content generation" });
       }
@@ -1678,7 +1667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid product ID" });
       }
 
-      const product = await storage.getProduct(id);
+      const product = await storage.getProductById(id);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
@@ -1695,7 +1684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/ai-marketing/apply-banner", requireAdminAuth, async (req, res) => {
     try {
       const { content } = req.body;
-      
+
       if (!content) {
         return res.status(400).json({ message: "No content provided" });
       }
@@ -1716,6 +1705,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Apply banner content error:", error);
       res.status(500).json({ message: "Failed to apply AI content to banner" });
+    }
+  });
+
+  // AI Provider Initialization
+  const { providerRegistry } = await import("./ai/provider-registry");
+  const { OpenAIProvider } = await import("./ai/openai-provider");
+  const { GeminiProvider } = await import("./ai/gemini-provider");
+  const { ElevenLabsProvider } = await import("./ai/elevenlabs-provider");
+
+  // Register providers
+  providerRegistry.registerConversationalProvider(new OpenAIProvider());
+  providerRegistry.registerConversationalProvider(new GeminiProvider());
+  providerRegistry.registerTTSProvider(new ElevenLabsProvider());
+
+  console.log("AI Providers initialized");
+
+  // TTS API Routes
+  app.post("/api/admin/ai-marketing/tts/generate", requireAdminAuth, async (req, res) => {
+    try {
+      const { text, voiceId, providerId } = req.body;
+
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+
+      const provider = providerRegistry.getTTSProvider(providerId);
+      const audioBuffer = await provider.generateSpeech(text, voiceId);
+
+      res.set({
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': audioBuffer.length
+      });
+
+      res.send(audioBuffer);
+    } catch (error) {
+      console.error("TTS generation error:", error);
+      res.status(500).json({ message: "Failed to generate speech" });
+    }
+  });
+
+  app.get("/api/admin/ai-marketing/tts/voices", requireAdminAuth, async (req, res) => {
+    try {
+      const { providerId } = req.query;
+      const provider = providerRegistry.getTTSProvider(providerId as string);
+      const voices = await provider.getVoices();
+      res.json(voices);
+    } catch (error) {
+      console.error("Fetch voices error:", error);
+      res.status(500).json({ message: "Failed to fetch voices" });
     }
   });
 
