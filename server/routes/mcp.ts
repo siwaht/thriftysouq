@@ -1,12 +1,14 @@
 import { Router } from "express";
 import { storage } from "../storage";
+import { insertProductSchema, insertHeroBannerSchema } from "@shared/schema";
+import { z } from "zod";
 
 const router = Router();
 
 router.get('/info', (req, res) => {
     res.json({
         name: "ThriftySouq MCP HTTP Server",
-        version: "1.0.0",
+        version: "1.1.0",
         description: "HTTP-based MCP server for ThriftySouq luxury e-commerce platform",
         capabilities: [
             "product_management",
@@ -16,9 +18,20 @@ router.get('/info', (req, res) => {
             "analytics_reporting"
         ],
         endpoints: {
-            products: "/mcp/products",
-            orders: "/mcp/orders",
-            marketing: "/mcp/marketing",
+            products: {
+                list: "GET /mcp/products",
+                create: "POST /mcp/products",
+                update: "PUT /mcp/products/:id",
+                delete: "DELETE /mcp/products/:id"
+            },
+            orders: {
+                list: "GET /mcp/orders",
+                updateStatus: "PATCH /mcp/orders/:id/status"
+            },
+            marketing: {
+                getBanner: "GET /mcp/marketing/hero-banner",
+                updateBanner: "POST /mcp/marketing/hero-banner"
+            },
             webhooks: "/mcp/webhooks",
             analytics: "/mcp/analytics"
         }
@@ -32,6 +45,8 @@ router.get('/health', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+
+// --- Product Management ---
 
 router.get('/products', async (req, res) => {
     try {
@@ -55,7 +70,8 @@ router.get('/products', async (req, res) => {
 
 router.post('/products', async (req, res) => {
     try {
-        const product = await storage.createProduct(req.body);
+        const productData = insertProductSchema.parse(req.body);
+        const product = await storage.createProduct(productData);
         res.status(201).json({
             success: true,
             data: product,
@@ -68,6 +84,56 @@ router.post('/products', async (req, res) => {
         });
     }
 });
+
+router.put('/products/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) throw new Error("Invalid product ID");
+
+        const productData = insertProductSchema.parse(req.body);
+        const product = await storage.updateProduct(id, productData);
+
+        if (!product) {
+            return res.status(404).json({ success: false, error: "Product not found" });
+        }
+
+        res.json({
+            success: true,
+            data: product,
+            message: 'Product updated successfully'
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+router.delete('/products/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) throw new Error("Invalid product ID");
+
+        const success = await storage.deleteProduct(id);
+
+        if (!success) {
+            return res.status(404).json({ success: false, error: "Product not found" });
+        }
+
+        res.json({
+            success: true,
+            message: 'Product deleted successfully'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+// --- Order Management ---
 
 router.get('/orders', async (req, res) => {
     try {
@@ -91,6 +157,35 @@ router.get('/orders', async (req, res) => {
     }
 });
 
+router.patch('/orders/:id/status', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const { status } = req.body;
+
+        if (isNaN(id)) throw new Error("Invalid order ID");
+        if (!status) throw new Error("Status is required");
+
+        const order = await storage.updateOrderStatus(id, status);
+
+        if (!order) {
+            return res.status(404).json({ success: false, error: "Order not found" });
+        }
+
+        res.json({
+            success: true,
+            data: order,
+            message: 'Order status updated successfully'
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+// --- Marketing Management ---
+
 router.get('/marketing/hero-banner', async (req, res) => {
     try {
         const heroBanner = await storage.getHeroBanner();
@@ -105,6 +200,25 @@ router.get('/marketing/hero-banner', async (req, res) => {
         });
     }
 });
+
+router.post('/marketing/hero-banner', async (req, res) => {
+    try {
+        const bannerData = insertHeroBannerSchema.parse(req.body);
+        const banner = await storage.updateHeroBanner(bannerData);
+        res.json({
+            success: true,
+            data: banner,
+            message: 'Hero banner updated successfully'
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
+// --- Analytics ---
 
 router.get('/analytics', async (req, res) => {
     try {

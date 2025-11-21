@@ -368,4 +368,70 @@ router.post("/orders/bulk-status", async (req, res) => {
     }
 });
 
+// User Management Webhooks
+
+// Get all users via webhook
+router.get("/users", async (req, res) => {
+    try {
+        // Validate webhook signature if secret is provided
+        const webhookSecret = req.headers['x-webhook-secret'];
+        if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+            return res.status(401).json({ message: "Invalid webhook signature" });
+        }
+
+        const users = await storage.getAdminUsers();
+        // Sanitize users (remove passwords)
+        const sanitizedUsers = users.map(user => {
+            const { password, ...rest } = user;
+            return rest;
+        });
+
+        res.json({
+            success: true,
+            users: sanitizedUsers,
+            count: users.length
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch users" });
+    }
+});
+
+// Update user status via webhook (e.g. ban/unban)
+router.put("/users/:id/status", async (req, res) => {
+    try {
+        // Validate webhook signature if secret is provided
+        const webhookSecret = req.headers['x-webhook-secret'];
+        if (process.env.WEBHOOK_SECRET && webhookSecret !== process.env.WEBHOOK_SECRET) {
+            return res.status(401).json({ message: "Invalid webhook signature" });
+        }
+
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).json({ message: "Invalid user ID" });
+        }
+
+        const { isActive } = req.body;
+        if (typeof isActive !== 'boolean') {
+            return res.status(400).json({ message: "isActive (boolean) is required" });
+        }
+
+        const user = await storage.getAdminUserById(id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const updatedUser = await storage.updateAdminUser(id, { isActive });
+
+        const { password, ...sanitizedUser } = updatedUser;
+
+        res.json({
+            success: true,
+            message: "User status updated successfully",
+            user: sanitizedUser
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to update user status" });
+    }
+});
+
 export default router;
