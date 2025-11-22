@@ -1,0 +1,300 @@
+501:     } 
+502:  
+503:  
+504: } ) ; 
+505:  
+506:  
+507:  
+508:  / /   H e r o   B a n n e r   M a n a g e m e n t 
+509:  
+510:  r o u t e r . p u t ( " / h e r o - b a n n e r " ,   r e q u i r e A d m i n A u t h ,   a s y n c   ( r e q ,   r e s )   = >   { 
+511:  
+512:          t r y   { 
+513:  
+514:                  c o n s t   b a n n e r D a t a   =   i n s e r t H e r o B a n n e r S c h e m a . p a r s e ( r e q . b o d y ) ; 
+515:  
+516:                  c o n s t   b a n n e r   =   a w a i t   s t o r a g e . u p d a t e H e r o B a n n e r ( b a n n e r D a t a ) ; 
+517:  
+518:                  r e s . j s o n ( b a n n e r ) ; 
+519:  
+520:          
+521:     }   c a t c h   ( e r r o r )   { 
+522:  
+523:                  i f   ( e r r o r   i n s t a n c e o f   z . Z o d E r r o r )   { 
+524:  
+525:                          r e t u r n   r e s . s t a t u s ( 4 0 0 ) . j s o n ( {   m e s s a g e :   " I n v a l i d   h e r o   b a n n e r   d a t a " ,   e r r o r s :   e r r o r . e r r o r s    } ) ; 
+526:  
+527:                  
+528:         } 
+529:  
+530:                  r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " F a i l e d   t o   u p d a t e   h e r o   b a n n e r "    } ) ; 
+531:  
+532:          
+533:     } 
+534:  
+535:  
+536: } ) ; 
+537:  
+538:  
+539:  
+540:  / /   P a y m e n t   C r e d e n t i a l s 
+541:  
+542:  r o u t e r . g e t ( " / p a y m e n t - c r e d e n t i a l s " ,   r e q u i r e A d m i n A u t h ,   a s y n c   ( r e q ,   r e s )   = >   { 
+543:  
+544:          t r y   { 
+545:  
+546:                  c o n s t   c r e d e n t i a l s   =   a w a i t   s t o r a g e . g e t P a y m e n t C r e d e n t i a l s ( ) ; 
+547:  
+548:                  r e s . j s o n ( c r e d e n t i a l s ) ; 
+549:  
+550:          
+551:     }   c a t c h   ( e r r o r )   { 
+552:  
+553:                  r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " F a i l e d   t o   f e t c h   p a y m e n t   c r e d e n t i a l s "    } ) ; 
+554:  
+555:          
+556:     } 
+557:  
+558:  
+559: } ) ; 
+560:  
+561:  
+562:  
+563:  r o u t e r . p o s t ( " / p a y m e n t - c r e d e n t i a l s " ,   r e q u i r e A d m i n A u t h ,   a s y n c   ( r e q ,   r e s )   = >   { 
+564:  
+565:          t r y   { 
+566:  
+567:                  c o n s t   c r e d e n t i a l D a t a   =   i n s e r t P a y m e n t C r e d e n t i a l S c h e m a . p a r s e ( r e q . b o d y ) ; 
+568:  
+569:                  c o n s t   c r e d e n t i a l   =   a w a i t   s t o r a g e . u p s e r t P a y m e n t C r e d e n t i a l ( c r e d e n t i a l D a t a ) ; 
+570:  
+571:                  r e s . j s o n ( c r e d e n t i a l ) ; 
+572:  
+573:          
+574:     }   c a t c h   ( e r r o r )   { 
+575:  
+576:                  i f   ( e r r o r   i n s t a n c e o f   z . Z o d E r r o r )   { 
+577:  
+578:                          r e t u r n   r e s . s t a t u s ( 4 0 0 ) . j s o n ( {   m e s s a g e :   " I n v a l i d   c r e d e n t i a l   d a t a " ,   e r r o r s :   e r r o r . e r r o r s    } ) ; 
+579:  
+580:                  
+581:         } 
+582:  
+583:                  r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " F a i l e d   t o   s a v e   p a y m e n t   c r e d e n t i a l "    } ) ; 
+584:  
+585:          
+586:     } 
+587:  
+588:  
+589: } ) ; 
+590:  
+591:  
+592:  
+593:  r o u t e r . d e l e t e ( " / p a y m e n t - c r e d e n t i a l s / : i d " ,   r e q u i r e A d m i n A u t h ,   a s y n c   ( r e q ,   r e s )   = >   { 
+594:  
+595:          t r y   { 
+596:  
+597:                  c o n s t   i d   =   p a r s e I n t ( r e q . p a r a m s . i d ) ; 
+598:  
+599:                  a w a i t   s t o r a g e . d e l e t e P a y m e n t C r e d e n t i a l ( i d ) ; 
+600:  
+601:                  r e s . j s o n ( {   s u c c e s s :   t r u e    } ) ; 
+602:  
+603:          
+604:     }   c a t c h   ( e r r o r )   { 
+605:  
+606:                  r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " F a i l e d   t o   d e l e t e   p a y m e n t   c r e d e n t i a l "    } ) ; 
+607:  
+608:          
+609:     } 
+610:  
+611:  
+612: } ) ; 
+613:  
+614:  
+615:  
+616:  / /   O r d e r   I m p o r t / E x p o r t 
+617:  
+618:  r o u t e r . p o s t ( " / o r d e r s / i m p o r t " ,   r e q u i r e A d m i n A u t h ,   a s y n c   ( r e q ,   r e s )   = >   { 
+619:  
+620:          t r y   { 
+621:  
+622:                  c o n s t   {   o r d e r s    }   =   r e q . b o d y ; 
+623:  
+624:  
+625:  
+626:                  i f   ( ! A r r a y . i s A r r a y ( o r d e r s ) )   { 
+627:  
+628:                          r e t u r n   r e s . s t a t u s ( 4 0 0 ) . j s o n ( {   m e s s a g e :   " O r d e r s   a r r a y   i s   r e q u i r e d "    } ) ; 
+629:  
+630:                  
+631:         } 
+632:  
+633:  
+634:  
+635:                  c o n s t   r e s u l t s   =   { 
+636:  
+637:                          s u c c e s s :   0 , 
+638:  
+639:                          e r r o r s :   [ ]   a s   s t r i n g [ ] 
+640:  
+641:                  
+642:         } ; 
+643:  
+644:  
+645:  
+646:                  f o r   ( l e t   i   =   0 ;   i   <   o r d e r s . l e n g t h ;   i + + )   { 
+647:  
+648:                          t r y   { 
+649:  
+650:                                  c o n s t   o r d e r D a t a   =   o r d e r s [ i ] ; 
+651:  
+652:  
+653:  
+654:                                  / /   V a l i d a t e   r e q u i r e d   f i e l d s 
+655:  
+656:                                  i f   ( ! o r d e r D a t a . c u s t o m e r N a m e   | |   ! o r d e r D a t a . c u s t o m e r E m a i l   | |   ! o r d e r D a t a . c u s t o m e r P h o n e   | | 
+657:  
+658:                                          ! o r d e r D a t a . s h i p p i n g A d d r e s s   | |   ! o r d e r D a t a . c i t y   | |   ! o r d e r D a t a . p a y m e n t M e t h o d   | | 
+659:  
+660:                                          ! o r d e r D a t a . t o t a l   | |   ! A r r a y . i s A r r a y ( o r d e r D a t a . i t e m s ) )   { 
+661:  
+662:                                          r e s u l t s . e r r o r s . p u s h ( ` O r d e r   $ { i   +   1 } :   M i s s i n g   r e q u i r e d   f i e l d s ` ) ; 
+663:  
+664:                                          c o n t i n u e ; 
+665:  
+666:                                  
+667:                 } 
+668:  
+669:  
+670:  
+671:                                  / /   C r e a t e   o r d e r   w i t h   i t e m s 
+672:  
+673:                                  c o n s t   {   o r d e r    }   =   a w a i t   s t o r a g e . c r e a t e O r d e r ( { 
+674:  
+675:                                          c u s t o m e r N a m e :   o r d e r D a t a . c u s t o m e r N a m e , 
+676:  
+677:                                          c u s t o m e r E m a i l :   o r d e r D a t a . c u s t o m e r E m a i l , 
+678:  
+679:                                          c u s t o m e r P h o n e :   o r d e r D a t a . c u s t o m e r P h o n e , 
+680:  
+681:                                          s h i p p i n g A d d r e s s :   o r d e r D a t a . s h i p p i n g A d d r e s s , 
+682:  
+683:                                          c i t y :   o r d e r D a t a . c i t y , 
+684:  
+685:                                          p o s t a l C o d e :   o r d e r D a t a . p o s t a l C o d e   | |   n u l l , 
+686:  
+687:                                          s p e c i a l I n s t r u c t i o n s :   o r d e r D a t a . s p e c i a l I n s t r u c t i o n s   | |   n u l l , 
+688:  
+689:                                          p a y m e n t M e t h o d :   o r d e r D a t a . p a y m e n t M e t h o d , 
+690:  
+691:                                          t o t a l :   o r d e r D a t a . t o t a l , 
+692:  
+693:                                          s t a t u s :   o r d e r D a t a . s t a t u s   | |   ' p e n d i n g ' 
+694:  
+695:                                  
+696:                 } ,   o r d e r D a t a . i t e m s ) ; 
+697:  
+698:  
+699:  
+700:                                  r e s u l t s . s u c c e s s + + ; 
+701:  
+702:                          
+703:             }   c a t c h   ( e r r o r )   { 
+704:  
+705:                                  r e s u l t s . e r r o r s . p u s h ( ` O r d e r   $ { i   +   1 } :   $ { e r r o r   i n s t a n c e o f   E r r o r   ?   e r r o r . m e s s a g e   :   ' F a i l e d   t o   c r e a t e ' } ` ) ; 
+706:  
+707:                          
+708:             } 
+709:  
+710:                  
+711:         } 
+712:  
+713:  
+714:  
+715:                  r e s . j s o n ( { 
+716:  
+717:                          s u c c e s s :   t r u e , 
+718:  
+719:                          m e s s a g e :   ` B u l k   i m p o r t   c o m p l e t e d ` , 
+720:  
+721:                          r e s u l t s 
+722:  
+723:                  
+724:         } ) ; 
+725:  
+726:          
+727:     }   c a t c h   ( e r r o r )   { 
+728:  
+729:                  r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " F a i l e d   t o   i m p o r t   o r d e r s "    } ) ; 
+730:  
+731:          
+732:     } 
+733:  
+734:  
+735: } ) ; 
+736:  
+737:  
+738:  
+739:  r o u t e r . g e t ( " / o r d e r s / e x p o r t " ,   r e q u i r e A d m i n A u t h ,   a s y n c   ( r e q ,   r e s )   = >   { 
+740:  
+741:          t r y   { 
+742:  
+743:                  c o n s t   o r d e r s   =   a w a i t   s t o r a g e . g e t O r d e r s W i t h I t e m s ( ) ; 
+744:  
+745:  
+746:  
+747:                  / /   C o n v e r t   o r d e r s   t o   C S V   f o r m a t 
+748:  
+749:                  c o n s t   c s v D a t a   =   o r d e r s . m a p ( o r d e r   = >   ( { 
+750:  
+751:                          o r d e r N u m b e r :   o r d e r . o r d e r N u m b e r , 
+752:  
+753:                          c u s t o m e r N a m e :   o r d e r . c u s t o m e r N a m e , 
+754:  
+755:                          c u s t o m e r E m a i l :   o r d e r . c u s t o m e r E m a i l , 
+756:  
+757:                          c u s t o m e r P h o n e :   o r d e r . c u s t o m e r P h o n e , 
+758:  
+759:                          s h i p p i n g A d d r e s s :   o r d e r . s h i p p i n g A d d r e s s , 
+760:  
+761:                          c i t y :   o r d e r . c i t y , 
+762:  
+763:                          p o s t a l C o d e :   o r d e r . p o s t a l C o d e   | |   ' ' , 
+764:  
+765:                          s p e c i a l I n s t r u c t i o n s :   o r d e r . s p e c i a l I n s t r u c t i o n s   | |   ' ' , 
+766:  
+767:                          p a y m e n t M e t h o d :   o r d e r . p a y m e n t M e t h o d , 
+768:  
+769:                          t o t a l :   o r d e r . t o t a l , 
+770:  
+771:                          s t a t u s :   o r d e r . s t a t u s , 
+772:  
+773:                          i t e m C o u n t :   o r d e r . i t e m s ? . l e n g t h   | |   0 , 
+774:  
+775:                          i t e m s :   o r d e r . i t e m s ? . m a p ( i t e m   = > 
+776:  
+777:                                  ` $ { i t e m . p r o d u c t . n a m e }   ( I D :   $ { i t e m . p r o d u c t I d } ,   Q t y :   $ { i t e m . q u a n t i t y } ,   P r i c e :   $ { i t e m . p r i c e } ) ` 
+778:  
+779:                          ) . j o i n ( ' ;   ' )   | |   ' ' 
+780:  
+781:                  
+782:         } ) ) ; 
+783:  
+784:  
+785:  
+786:                  r e s . j s o n ( { 
+787:  
+788:                          s u c c e s s :   t r u e , 
+789:  
+790:                          d a t a :   c s v D a t a , 
+791:  
+792:                          c o u n t :   c s v D a t a . l e n g t h 
+793:  
+794:                  
+795:         } ) ; 
+796:  
+797:          
+798:     }   c a t c h   ( e r r o r )   { 
+799:  
+800:                  r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " F a i l e d   t o   e x p o r t   o r d e r s "    } ) ; 

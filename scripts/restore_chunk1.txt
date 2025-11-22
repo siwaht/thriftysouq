@@ -1,0 +1,218 @@
+283:  r o u t e r . p o s t ( " / w e b h o o k s " ,   r e q u i r e A d m i n A u t h ,   a s y n c   ( r e q ,   r e s )   = >   { 
+284:  
+285:          t r y   { 
+286:  
+287:                  c o n s t   w e b h o o k D a t a   =   i n s e r t W e b h o o k S c h e m a . p a r s e ( r e q . b o d y ) ; 
+288:  
+289:                  c o n s t   w e b h o o k   =   a w a i t   s t o r a g e . c r e a t e W e b h o o k ( w e b h o o k D a t a ) ; 
+290:  
+291:                  r e s . j s o n ( w e b h o o k ) ; 
+292:  
+293:          
+294:     }   c a t c h   ( e r r o r )   { 
+295:  
+296:                  i f   ( e r r o r   i n s t a n c e o f   z . Z o d E r r o r )   { 
+297:  
+298:                          r e t u r n   r e s . s t a t u s ( 4 0 0 ) . j s o n ( {   m e s s a g e :   " I n v a l i d   w e b h o o k   d a t a " ,   e r r o r s :   e r r o r . e r r o r s    } ) ; 
+299:  
+300:                  
+301:         } 
+302:  
+303:                  r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " F a i l e d   t o   c r e a t e   w e b h o o k "    } ) ; 
+304:  
+305:          
+306:     } 
+307:  
+308:  
+309: } ) ; 
+310:  
+311:  
+312:  
+313:  r o u t e r . p u t ( " / w e b h o o k s / : i d " ,   r e q u i r e A d m i n A u t h ,   a s y n c   ( r e q ,   r e s )   = >   { 
+314:  
+315:          t r y   { 
+316:  
+317:                  c o n s t   i d   =   p a r s e I n t ( r e q . p a r a m s . i d ) ; 
+318:  
+319:                  i f   ( i s N a N ( i d ) )   { 
+320:  
+321:                          r e t u r n   r e s . s t a t u s ( 4 0 0 ) . j s o n ( {   m e s s a g e :   " I n v a l i d   w e b h o o k   I D "    } ) ; 
+322:  
+323:                  
+324:         } 
+325:  
+326:  
+327:  
+328:                  c o n s t   w e b h o o k D a t a   =   i n s e r t W e b h o o k S c h e m a . p a r s e ( r e q . b o d y ) ; 
+329:  
+330:                  c o n s t   w e b h o o k   =   a w a i t   s t o r a g e . u p d a t e W e b h o o k ( i d ,   w e b h o o k D a t a ) ; 
+331:  
+332:  
+333:  
+334:                  i f   ( ! w e b h o o k )   { 
+335:  
+336:                          r e t u r n   r e s . s t a t u s ( 4 0 4 ) . j s o n ( {   m e s s a g e :   " W e b h o o k   n o t   f o u n d "    } ) ; 
+337:  
+338:                  
+339:         } 
+340:  
+341:  
+342:  
+343:                  r e s . j s o n ( w e b h o o k ) ; 
+344:  
+345:          
+346:     }   c a t c h   ( e r r o r )   { 
+347:  
+348:                  i f   ( e r r o r   i n s t a n c e o f   z . Z o d E r r o r )   { 
+349:  
+350:                          r e t u r n   r e s . s t a t u s ( 4 0 0 ) . j s o n ( {   m e s s a g e :   " I n v a l i d   w e b h o o k   d a t a " ,   e r r o r s :   e r r o r . e r r o r s    } ) ; 
+351:  
+352:                  
+353:         } 
+354:  
+355:                  r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " F a i l e d   t o   u p d a t e   w e b h o o k "    } ) ; 
+356:  
+357:          
+358:     } 
+359:  
+360:  
+361: } ) ; 
+362:  
+363:  
+364:  
+365:  r o u t e r . d e l e t e ( " / w e b h o o k s / : i d " ,   r e q u i r e A d m i n A u t h ,   a s y n c   ( r e q ,   r e s )   = >   { 
+366:  
+367:          t r y   { 
+368:  
+369:                  c o n s t   i d   =   p a r s e I n t ( r e q . p a r a m s . i d ) ; 
+370:  
+371:                  i f   ( i s N a N ( i d ) )   { 
+372:  
+373:                          r e t u r n   r e s . s t a t u s ( 4 0 0 ) . j s o n ( {   m e s s a g e :   " I n v a l i d   w e b h o o k   I D "    } ) ; 
+374:  
+375:                  
+376:         } 
+377:  
+378:  
+379:  
+380:                  c o n s t   s u c c e s s   =   a w a i t   s t o r a g e . d e l e t e W e b h o o k ( i d ) ; 
+381:  
+382:  
+383:  
+384:                  i f   ( ! s u c c e s s )   { 
+385:  
+386:                          r e t u r n   r e s . s t a t u s ( 4 0 4 ) . j s o n ( {   m e s s a g e :   " W e b h o o k   n o t   f o u n d "    } ) ; 
+387:  
+388:                  
+389:         } 
+390:  
+391:  
+392:  
+393:                  r e s . j s o n ( {   m e s s a g e :   " W e b h o o k   d e l e t e d   s u c c e s s f u l l y "    } ) ; 
+394:  
+395:          
+396:     }   c a t c h   ( e r r o r )   { 
+397:  
+398:                  r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " F a i l e d   t o   d e l e t e   w e b h o o k "    } ) ; 
+399:  
+400:          
+401:     } 
+402:  
+403:  
+404: } ) ; 
+405:  
+406:  
+407:  
+408:  r o u t e r . p o s t ( " / w e b h o o k s / : i d / t e s t " ,   r e q u i r e A d m i n A u t h ,   a s y n c   ( r e q ,   r e s )   = >   { 
+409:  
+410:          t r y   { 
+411:  
+412:                  c o n s t   i d   =   p a r s e I n t ( r e q . p a r a m s . i d ) ; 
+413:  
+414:                  c o n s t   w e b h o o k s   =   a w a i t   s t o r a g e . g e t W e b h o o k s ( ) ; 
+415:  
+416:                  c o n s t   w e b h o o k   =   w e b h o o k s . f i n d ( w   = >   w . i d   = = =   i d ) ; 
+417:  
+418:  
+419:  
+420:                  i f   ( ! w e b h o o k )   { 
+421:  
+422:                          r e t u r n   r e s . s t a t u s ( 4 0 4 ) . j s o n ( {   m e s s a g e :   " W e b h o o k   n o t   f o u n d "    } ) ; 
+423:  
+424:                  
+425:         } 
+426:  
+427:  
+428:  
+429:                  / /   S e n d   t e s t   p a y l o a d 
+430:  
+431:                  c o n s t   t e s t P a y l o a d   =   { 
+432:  
+433:                          e v e n t :   ' w e b h o o k . t e s t ' , 
+434:  
+435:                          t i m e s t a m p :   n e w   D a t e ( ) . t o I S O S t r i n g ( ) , 
+436:  
+437:                          d a t a :   { 
+438:  
+439:                                  m e s s a g e :   ' T h i s   i s   a   t e s t   w e b h o o k   f r o m   T h r i f t y S o u q ' , 
+440:  
+441:                                  w e b h o o k _ i d :   w e b h o o k . i d , 
+442:  
+443:                                  w e b h o o k _ n a m e :   w e b h o o k . n a m e 
+444:  
+445:                          
+446:             } 
+447:  
+448:                  
+449:         } ; 
+450:  
+451:  
+452:  
+453:                  t r y   { 
+454:  
+455:                          c o n s t   r e s p o n s e   =   a w a i t   f e t c h ( w e b h o o k . u r l ,   { 
+456:  
+457:                                  m e t h o d :   ' P O S T ' , 
+458:  
+459:                                  h e a d e r s :   { 
+460:  
+461:                                          ' C o n t e n t - T y p e ' :   ' a p p l i c a t i o n / j s o n ' , 
+462:  
+463:                                          ' U s e r - A g e n t ' :   ' L u x D e a l - W e b h o o k / 1 . 0 ' 
+464:  
+465:                                  
+466:                 } , 
+467:  
+468:                                  b o d y :   J S O N . s t r i n g i f y ( t e s t P a y l o a d ) , 
+469:  
+470:                          
+471:             } ) ; 
+472:  
+473:  
+474:  
+475:                          i f   ( r e s p o n s e . o k )   { 
+476:  
+477:                                  r e s . j s o n ( {   m e s s a g e :   " T e s t   w e b h o o k   s e n t   s u c c e s s f u l l y " ,   s t a t u s :   r e s p o n s e . s t a t u s    } ) ; 
+478:  
+479:                          
+480:             }   e l s e   { 
+481:  
+482:                                  r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " W e b h o o k   e n d p o i n t   r e t u r n e d   e r r o r " ,   s t a t u s :   r e s p o n s e . s t a t u s    } ) ; 
+483:  
+484:                          
+485:             } 
+486:  
+487:                  
+488:         }   c a t c h   ( w e b h o o k E r r o r )   { 
+489:  
+490:                          r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " F a i l e d   t o   s e n d   t e s t   w e b h o o k " ,   e r r o r :   S t r i n g ( w e b h o o k E r r o r )    } ) ; 
+491:  
+492:                  
+493:         } 
+494:  
+495:          
+496:     }   c a t c h   ( e r r o r )   { 
+497:  
+498:                  r e s . s t a t u s ( 5 0 0 ) . j s o n ( {   m e s s a g e :   " F a i l e d   t o   t e s t   w e b h o o k "    } ) ; 
+499:  
+500:          

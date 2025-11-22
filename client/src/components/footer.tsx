@@ -27,18 +27,21 @@ export default function Footer() {
               <a href="#" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
                 Features
               </a>
-              <button 
+              <button
                 onClick={() => setPrivacyOpen(true)}
                 className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm text-left"
               >
                 Privacy Policy
               </button>
-              <button 
+              <button
                 onClick={() => setTermsOpen(true)}
                 className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm text-left"
               >
                 Terms of Service
               </button>
+              <a href="/admin" className="block text-slate-300 hover:text-emerald-400 transition-colors text-sm">
+                Admin Panel
+              </a>
             </div>
           </div>
 
@@ -69,7 +72,7 @@ export default function Footer() {
           </p>
         </div>
       </div>
-      
+
       <PrivacyModal open={privacyOpen} onOpenChange={setPrivacyOpen} />
       <TermsModal open={termsOpen} onOpenChange={setTermsOpen} />
     </footer>
